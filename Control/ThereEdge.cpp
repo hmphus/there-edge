@@ -29,6 +29,7 @@ void Log(const WCHAR *format, ...)
     if (fopen_s(&file, "C:\\Local\\Projects\\ThereEdge\\debug.txt", "a") == 0)
     {
         vfwprintf_s(file, format, args);
+        fflush(file);
         fclose(file);
     }
 
@@ -99,9 +100,9 @@ STDAPI DllInstall(BOOL bInstall, _In_opt_ LPCWSTR pszCmdLine)
 
 CThereEdgeModule::CThereEdgeModule():
     m_refCount(1),
+    m_flashEvents(nullptr),
     m_punkContext(nullptr),
     m_punkOuter(nullptr),
-    m_flashEvents(nullptr),
     m_qaContainer(),
     m_qaControl(),
     m_size()
@@ -110,6 +111,14 @@ CThereEdgeModule::CThereEdgeModule():
 
 CThereEdgeModule::~CThereEdgeModule()
 {
+    if (m_flashEvents)
+        m_flashEvents->Release();
+
+    if (m_punkContext)
+        m_punkContext->Release();
+
+    if (m_punkOuter)
+        m_punkOuter->Release();
 }
 
 HRESULT STDMETHODCALLTYPE CThereEdgeModule::QueryInterface(REFIID riid, void **object)
@@ -163,6 +172,13 @@ HRESULT STDMETHODCALLTYPE CThereEdgeModule::QueryInterface(REFIID riid, void **o
         return S_OK;
     }
 
+    if (IsEqualIID(riid, IID_IDispatch))
+    {
+        AddRef();
+        *object = static_cast<IDispatch*>(this);
+        return S_OK;
+    }
+
     if (IsEqualIID(riid, IID_IShockwaveFlash))
     {
         AddRef();
@@ -170,13 +186,12 @@ HRESULT STDMETHODCALLTYPE CThereEdgeModule::QueryInterface(REFIID riid, void **o
         return S_OK;
     }
 
-    Log(L"QueryInterface: %08lx-%04x-%04x-%02x%02x-%02x%02x%02x%02x%02x%02x\n",
-        riid.Data1, riid.Data2, riid.Data3, riid.Data4[0], riid.Data4[1],
-        riid.Data4[2], riid.Data4[3], riid.Data4[4],
-        riid.Data4[5], riid.Data4[6], riid.Data4[7]);
+    //Log(L"QueryInterface: %08lx-%04x-%04x-%02x%02x-%02x%02x%02x%02x%02x%02x\n",
+    //    riid.Data1, riid.Data2, riid.Data3, riid.Data4[0], riid.Data4[1],
+    //    riid.Data4[2], riid.Data4[3], riid.Data4[4],
+    //    riid.Data4[5], riid.Data4[6], riid.Data4[7]);
 
     *object = NULL;
-
     return E_NOINTERFACE;
 }
 
@@ -207,11 +222,6 @@ HRESULT STDMETHODCALLTYPE CThereEdgeModule::CreateInstance(IUnknown *pUnkOuter, 
         return S_OK;
     }
 
-    Log(L"CreateInstance: %08lx-%04x-%04x-%02x%02x-%02x%02x%02x%02x%02x%02x\n",
-        riid.Data1, riid.Data2, riid.Data3, riid.Data4[0], riid.Data4[1],
-        riid.Data4[2], riid.Data4[3], riid.Data4[4],
-        riid.Data4[5], riid.Data4[6], riid.Data4[7]);
-
     return E_NOINTERFACE;
 }
 
@@ -235,11 +245,6 @@ HRESULT STDMETHODCALLTYPE CThereEdgeModule::CreateInstanceWithContext(IUnknown *
         return S_OK;
     }
 
-    Log(L"CreateInstanceWithContext: %08lx-%04x-%04x-%02x%02x-%02x%02x%02x%02x%02x%02x\n",
-        riid.Data1, riid.Data2, riid.Data3, riid.Data4[0], riid.Data4[1],
-        riid.Data4[2], riid.Data4[3], riid.Data4[4],
-        riid.Data4[5], riid.Data4[6], riid.Data4[7]);
-
     return E_NOINTERFACE;
 }
 
@@ -257,28 +262,19 @@ HRESULT STDMETHODCALLTYPE CThereEdgeModule::QuickActivate(QACONTAINER *pQaContai
 {
     m_qaContainer = *pQaContainer;
     m_qaControl = *pQaControl;
-
     return S_OK;
 }
 
 HRESULT STDMETHODCALLTYPE CThereEdgeModule::SetContentExtent(LPSIZEL pSizel)
 {
-    Log(L"SetContentExtent %ld %ld\n", pSizel->cx, pSizel->cy);
     m_size = *pSizel;
-
     return S_OK;
 }
 
 HRESULT STDMETHODCALLTYPE CThereEdgeModule::GetContentExtent(LPSIZEL pSizel)
 {
     *pSizel = m_size;
-
     return S_OK;
-}
-
-HRESULT STDMETHODCALLTYPE CThereEdgeModule::EnumConnectionPoints(IEnumConnectionPoints **ppEnum)
-{
-    return E_NOTIMPL;
 }
 
 HRESULT STDMETHODCALLTYPE CThereEdgeModule::FindConnectionPoint(REFIID riid, IConnectionPoint **ppCP)
@@ -289,11 +285,6 @@ HRESULT STDMETHODCALLTYPE CThereEdgeModule::FindConnectionPoint(REFIID riid, ICo
         *ppCP = static_cast<IConnectionPoint*>(this);
         return S_OK;
     }
-
-    Log(L"FindConnectionPoint: %08lx-%04x-%04x-%02x%02x-%02x%02x%02x%02x%02x%02x\n",
-        riid.Data1, riid.Data2, riid.Data3, riid.Data4[0], riid.Data4[1],
-        riid.Data4[2], riid.Data4[3], riid.Data4[4],
-        riid.Data4[5], riid.Data4[6], riid.Data4[7]);
 
     return E_NOINTERFACE;
 }
@@ -335,148 +326,60 @@ HRESULT STDMETHODCALLTYPE CThereEdgeModule::Unadvise(DWORD dwCookie)
     return E_FAIL;
 }
 
-HRESULT STDMETHODCALLTYPE CThereEdgeModule::EnumConnections(IEnumConnections **ppEnum)
-{
-    return E_NOTIMPL;
-}
-
-HRESULT STDMETHODCALLTYPE CThereEdgeModule::SetClientSite(IOleClientSite *pClientSite)
-{
-    return E_NOTIMPL;
-}
-
-HRESULT STDMETHODCALLTYPE CThereEdgeModule::GetClientSite(IOleClientSite **ppClientSite)
-{
-    return E_NOTIMPL;
-}
-
-HRESULT STDMETHODCALLTYPE CThereEdgeModule::SetHostNames(LPCOLESTR szContainerApp, LPCOLESTR szContainerObj)
-{
-    return E_NOTIMPL;
-}
-
-HRESULT STDMETHODCALLTYPE CThereEdgeModule::Close(DWORD dwSaveOption)
-{
-    return E_NOTIMPL;
-}
-
-HRESULT STDMETHODCALLTYPE CThereEdgeModule::SetMoniker(DWORD dwWhichMoniker, IMoniker *pmk)
-{
-    return E_NOTIMPL;
-}
-
-HRESULT STDMETHODCALLTYPE CThereEdgeModule::GetMoniker(DWORD dwAssign, DWORD dwWhichMoniker, IMoniker **ppmk)
-{
-    return E_NOTIMPL;
-}
-
-HRESULT STDMETHODCALLTYPE CThereEdgeModule::InitFromData(IDataObject *pDataObject, BOOL fCreation, DWORD dwReserved)
-{
-    return E_NOTIMPL;
-}
-
-HRESULT STDMETHODCALLTYPE CThereEdgeModule::GetClipboardData(DWORD dwReserved, IDataObject **ppDataObject)
-{
-    return E_NOTIMPL;
-}
-
 HRESULT STDMETHODCALLTYPE CThereEdgeModule::DoVerb(LONG iVerb, LPMSG lpmsg, IOleClientSite *pActiveSite, LONG lindex, HWND hwndParent, LPCRECT lprcPosRect)
 {
-    return E_NOTIMPL;
-}
+    switch (iVerb)
+    {
+        case OLEIVERB_PRIMARY:
+            Log(L"DoVerb OLEIVERB_PRIMARY\n");
+            break;
+        case OLEIVERB_SHOW:
+            Log(L"DoVerb OLEIVERB_SHOW\n");
+            break;
+        case OLEIVERB_OPEN:
+            Log(L"DoVerb OLEIVERB_OPEN\n");
+            break;
+        case OLEIVERB_HIDE:
+            Log(L"DoVerb OLEIVERB_HIDE\n");
+            break;
+        case OLEIVERB_UIACTIVATE:
+            Log(L"DoVerb OLEIVERB_UIACTIVATE\n");
+            break;
+        case OLEIVERB_INPLACEACTIVATE:
+            Log(L"DoVerb OLEIVERB_INPLACEACTIVATE\n");
+            break;
+        case OLEIVERB_DISCARDUNDOSTATE:
+            Log(L"DoVerb OLEIVERB_DISCARDUNDOSTATE\n");
+            break;
+        default:
+            Log(L"DoVerb %ld\n", iVerb);
+            break;
+    }
 
-HRESULT STDMETHODCALLTYPE CThereEdgeModule::EnumVerbs( IEnumOLEVERB **ppEnumOleVerb)
-{
-    return E_NOTIMPL;
-}
-
-HRESULT STDMETHODCALLTYPE CThereEdgeModule::Update()
-{
-    return E_NOTIMPL;
-}
-
-HRESULT STDMETHODCALLTYPE CThereEdgeModule::IsUpToDate()
-{
-    return E_NOTIMPL;
-}
-
-HRESULT STDMETHODCALLTYPE CThereEdgeModule::GetUserClassID(CLSID *pClsid)
-{
-    return E_NOTIMPL;
-}
-
-HRESULT STDMETHODCALLTYPE CThereEdgeModule::GetUserType(DWORD dwFormOfType, LPOLESTR *pszUserType)
-{
-    return E_NOTIMPL;
-}
-
-HRESULT STDMETHODCALLTYPE CThereEdgeModule::SetExtent(DWORD dwDrawAspect, SIZEL *psizel)
-{
-    return E_NOTIMPL;
-}
-
-HRESULT STDMETHODCALLTYPE CThereEdgeModule::GetExtent(DWORD dwDrawAspect, SIZEL *psizel)
-{
-    return E_NOTIMPL;
-}
-
-HRESULT STDMETHODCALLTYPE CThereEdgeModule::Advise(IAdviseSink *pAdvSink, DWORD *pdwConnection)
-{
-    return E_NOTIMPL;
-}
-
-HRESULT STDMETHODCALLTYPE CThereEdgeModule::EnumAdvise(IEnumSTATDATA **ppenumAdvise)
-{
-    return E_NOTIMPL;
-}
-
-HRESULT STDMETHODCALLTYPE CThereEdgeModule::GetMiscStatus(DWORD dwAspect, DWORD *pdwStatus)
-{
-    return E_NOTIMPL;
-}
-
-HRESULT STDMETHODCALLTYPE CThereEdgeModule::SetColorScheme(LOGPALETTE *pLogpal)
-{
     return E_NOTIMPL;
 }
 
 HRESULT STDMETHODCALLTYPE CThereEdgeModule::GetWindow(HWND *phwnd)
 {
-    return E_NOTIMPL;
-}
-
-HRESULT STDMETHODCALLTYPE CThereEdgeModule::ContextSensitiveHelp(BOOL fEnterMode)
-{
+    Log(L"GetWindow\n");
     return E_NOTIMPL;
 }
 
 HRESULT STDMETHODCALLTYPE CThereEdgeModule::InPlaceDeactivate()
 {
+    Log(L"InPlaceDeactivate\n");
     return E_NOTIMPL;
 }
 
 HRESULT STDMETHODCALLTYPE CThereEdgeModule::UIDeactivate()
 {
-    return E_NOTIMPL;
-}
-
-HRESULT STDMETHODCALLTYPE CThereEdgeModule::SetObjectRects(LPCRECT lprcPosRect, LPCRECT lprcClipRect)
-{
-    return E_NOTIMPL;
-}
-
-HRESULT STDMETHODCALLTYPE CThereEdgeModule::ReactivateAndUndo()
-{
+    Log(L"UIDeactivate\n");
     return E_NOTIMPL;
 }
 
 HRESULT STDMETHODCALLTYPE CThereEdgeModule::OnWindowMessage(UINT msg, WPARAM wParam, LPARAM lParam, LRESULT *plResult)
 {
-    return E_NOTIMPL;
-}
-
-HRESULT STDMETHODCALLTYPE CThereEdgeModule::GetDropTarget(IDropTarget **ppDropTarget)
-{
+    Log(L"OnWindowMessage\n");
     return E_NOTIMPL;
 }
 
@@ -484,102 +387,66 @@ HRESULT STDMETHODCALLTYPE CThereEdgeModule::Draw(DWORD dwDrawAspect, LONG lindex
                                                  HDC hdcTargetDev, HDC hdcDraw, LPCRECTL lprcBounds, LPCRECTL lprcWBounds,
                                                  BOOL (STDMETHODCALLTYPE *pfnContinue)(ULONG_PTR dwContinue), ULONG_PTR dwContinue)
 {
-    return E_NOTIMPL;
-}
-
-HRESULT STDMETHODCALLTYPE CThereEdgeModule::GetColorSet(DWORD dwDrawAspect, LONG lindex, void *pvAspect, DVTARGETDEVICE *ptd, HDC hicTargetDev, LOGPALETTE **ppColorSet)
-{
+    Log(L"Draw\n");
     return E_NOTIMPL;
 }
 
 HRESULT STDMETHODCALLTYPE CThereEdgeModule::Freeze(DWORD dwDrawAspect, LONG lindex, void *pvAspect, DWORD *pdwFreeze)
 {
+    Log(L"Freeze\n");
     return E_NOTIMPL;
 }
 
 HRESULT STDMETHODCALLTYPE CThereEdgeModule::Unfreeze(DWORD dwFreeze)
 {
+    Log(L"Unfreeze\n");
     return E_NOTIMPL;
 }
-
-HRESULT STDMETHODCALLTYPE CThereEdgeModule::SetAdvise(DWORD aspects, DWORD advf, IAdviseSink *pAdvSink)
-{
-    return E_NOTIMPL;
-}
-
-HRESULT STDMETHODCALLTYPE CThereEdgeModule::GetAdvise(DWORD *pAspects, DWORD *pAdvf, IAdviseSink **ppAdvSink)
-{
-    return E_NOTIMPL;
-}    
 
 HRESULT STDMETHODCALLTYPE CThereEdgeModule::GetExtent(DWORD dwDrawAspect, LONG lindex, DVTARGETDEVICE *ptd, LPSIZEL lpsizel)
 {
+    Log(L"GetExtent\n");
     return E_NOTIMPL;
 }
 
 HRESULT STDMETHODCALLTYPE CThereEdgeModule::GetRect(DWORD dwAspect, LPRECTL pRect)
 {
+    Log(L"GetRect\n");
     return E_NOTIMPL;
 }
 
 HRESULT STDMETHODCALLTYPE CThereEdgeModule::GetViewStatus(DWORD *pdwStatus)
 {
+    Log(L"GetViewStatus\n");
     return E_NOTIMPL;
 }
 
 HRESULT STDMETHODCALLTYPE CThereEdgeModule::QueryHitPoint(DWORD dwAspect, LPCRECT pRectBounds, POINT ptlLoc, LONG lCloseHint, DWORD *pHitResult)
 {
+    Log(L"QueryHitPoint\n");
     return E_NOTIMPL;
 }
 
 HRESULT STDMETHODCALLTYPE CThereEdgeModule::QueryHitRect(DWORD dwAspect, LPCRECT pRectBounds, LPCRECT pRectLoc, LONG lCloseHint, DWORD *pHitResult)
 {
-    return E_NOTIMPL;
-}
-
-HRESULT STDMETHODCALLTYPE CThereEdgeModule::GetNaturalExtent(DWORD dwAspect, LONG lindex, DVTARGETDEVICE *ptd, HDC hicTargetDev, DVEXTENTINFO *pExtentInfo, LPSIZEL pSizel)
-{
-    return E_NOTIMPL;
-}
-
-HRESULT STDMETHODCALLTYPE CThereEdgeModule::GetTypeInfoCount(UINT *pctinfo)
-{
-    return E_NOTIMPL;
-}
-
-HRESULT STDMETHODCALLTYPE CThereEdgeModule::GetTypeInfo(UINT iTInfo, LCID lcid, ITypeInfo **ppTInfo)
-{
-    return E_NOTIMPL;
-}
-
-HRESULT STDMETHODCALLTYPE CThereEdgeModule::GetIDsOfNames(REFIID riid, LPOLESTR *rgszNames, UINT cNames, LCID lcid, DISPID *rgDispId)
-{
-    return E_NOTIMPL;
-}
-
-HRESULT STDMETHODCALLTYPE CThereEdgeModule::Invoke(DISPID dispIdMember, REFIID riid, LCID lcid, WORD wFlags, DISPPARAMS *pDispParams,
-                                                   VARIANT *pVarResult, EXCEPINFO *pExcepInfo, UINT *puArgErr)
-{
+    Log(L"QueryHitRect\n");
     return E_NOTIMPL;
 }
 
 HRESULT STDMETHODCALLTYPE CThereEdgeModule::put_Movie(BSTR pVal)
 {
-    Log(L"Movie %s\n", pVal);
-
-    return E_NOTIMPL;
+    Log(L"put_Movie %s\n", pVal);
+    return S_OK;
 }
 
 HRESULT STDMETHODCALLTYPE CThereEdgeModule::put_WMode(BSTR pVal)
 {
-    Log(L"WMode %s\n", pVal);
-
-    return E_NOTIMPL;
+    Log(L"put_WMode %s\n", pVal);
+    return S_OK;
 }
 
 HRESULT STDMETHODCALLTYPE CThereEdgeModule::SetVariable(BSTR name, BSTR value)
 {
     Log(L"SetVariable %s %s\n", name, value);
-
-    return E_NOTIMPL;
+    return S_OK;
 }

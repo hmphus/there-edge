@@ -8,6 +8,7 @@ class CThereEdgeModule: public ATL::CAtlDllModuleT<CThereEdgeModule>,
                         public IOleObject,
                         public IOleInPlaceObjectWindowless,
                         public IViewObjectEx,
+                        public ISupportErrorInfo,
 						public IShockwaveFlash
 {
 public:
@@ -26,68 +27,167 @@ public:
     virtual HRESULT STDMETHODCALLTYPE QuickActivate(QACONTAINER *pQaContainer, QACONTROL *pQaControl) override;
     virtual HRESULT STDMETHODCALLTYPE SetContentExtent(LPSIZEL pSizel) override;
     virtual HRESULT STDMETHODCALLTYPE GetContentExtent(LPSIZEL pSizel) override;
-    virtual HRESULT STDMETHODCALLTYPE EnumConnectionPoints(IEnumConnectionPoints **ppEnum) override;
+    virtual HRESULT STDMETHODCALLTYPE EnumConnectionPoints(IEnumConnectionPoints **ppEnum) override {return E_NOTIMPL;}
     virtual HRESULT STDMETHODCALLTYPE FindConnectionPoint(REFIID riid, IConnectionPoint **ppCP) override;
     virtual HRESULT STDMETHODCALLTYPE GetConnectionInterface(IID *pIID) override;
     virtual HRESULT STDMETHODCALLTYPE GetConnectionPointContainer(IConnectionPointContainer **ppCPC) override;
     virtual HRESULT STDMETHODCALLTYPE Advise(IUnknown *pUnkSink, DWORD *pdwCookie) override;
     virtual HRESULT STDMETHODCALLTYPE Unadvise(DWORD dwCookie) override;
-    virtual HRESULT STDMETHODCALLTYPE EnumConnections(IEnumConnections **ppEnum) override;
-    virtual HRESULT STDMETHODCALLTYPE SetClientSite(IOleClientSite *pClientSite) override;
-    virtual HRESULT STDMETHODCALLTYPE GetClientSite(IOleClientSite **ppClientSite) override;
-    virtual HRESULT STDMETHODCALLTYPE SetHostNames(LPCOLESTR szContainerApp, LPCOLESTR szContainerObj) override;
-    virtual HRESULT STDMETHODCALLTYPE Close(DWORD dwSaveOption) override;
-    virtual HRESULT STDMETHODCALLTYPE SetMoniker(DWORD dwWhichMoniker, IMoniker *pmk) override;
-    virtual HRESULT STDMETHODCALLTYPE GetMoniker(DWORD dwAssign, DWORD dwWhichMoniker, IMoniker **ppmk) override;
-    virtual HRESULT STDMETHODCALLTYPE InitFromData(IDataObject *pDataObject, BOOL fCreation, DWORD dwReserved) override;
-    virtual HRESULT STDMETHODCALLTYPE GetClipboardData(DWORD dwReserved, IDataObject **ppDataObject) override;
+    virtual HRESULT STDMETHODCALLTYPE EnumConnections(IEnumConnections **ppEnum) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE SetClientSite(IOleClientSite *pClientSite) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE GetClientSite(IOleClientSite **ppClientSite) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE SetHostNames(LPCOLESTR szContainerApp, LPCOLESTR szContainerObj) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE Close(DWORD dwSaveOption) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE SetMoniker(DWORD dwWhichMoniker, IMoniker *pmk) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE GetMoniker(DWORD dwAssign, DWORD dwWhichMoniker, IMoniker **ppmk) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE InitFromData(IDataObject *pDataObject, BOOL fCreation, DWORD dwReserved) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE GetClipboardData(DWORD dwReserved, IDataObject **ppDataObject) override {return E_NOTIMPL;}
     virtual HRESULT STDMETHODCALLTYPE DoVerb(LONG iVerb, LPMSG lpmsg, IOleClientSite *pActiveSite, LONG lindex, HWND hwndParent, LPCRECT lprcPosRect) override;
-    virtual HRESULT STDMETHODCALLTYPE EnumVerbs( IEnumOLEVERB **ppEnumOleVerb) override;
-    virtual HRESULT STDMETHODCALLTYPE Update() override;
-    virtual HRESULT STDMETHODCALLTYPE IsUpToDate() override;
-    virtual HRESULT STDMETHODCALLTYPE GetUserClassID(CLSID *pClsid) override;
-    virtual HRESULT STDMETHODCALLTYPE GetUserType(DWORD dwFormOfType, LPOLESTR *pszUserType) override;
-    virtual HRESULT STDMETHODCALLTYPE SetExtent(DWORD dwDrawAspect, SIZEL *psizel) override;
-    virtual HRESULT STDMETHODCALLTYPE GetExtent(DWORD dwDrawAspect, SIZEL *psizel) override;
-    virtual HRESULT STDMETHODCALLTYPE Advise(IAdviseSink *pAdvSink, DWORD *pdwConnection) override;
-    virtual HRESULT STDMETHODCALLTYPE EnumAdvise(IEnumSTATDATA **ppenumAdvise) override;
-    virtual HRESULT STDMETHODCALLTYPE GetMiscStatus(DWORD dwAspect, DWORD *pdwStatus) override;
-    virtual HRESULT STDMETHODCALLTYPE SetColorScheme(LOGPALETTE *pLogpal) override;
+    virtual HRESULT STDMETHODCALLTYPE EnumVerbs(IEnumOLEVERB **ppEnumOleVerb) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE Update() override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE IsUpToDate() override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE GetUserClassID(CLSID *pClsid) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE GetUserType(DWORD dwFormOfType, LPOLESTR *pszUserType) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE SetExtent(DWORD dwDrawAspect, SIZEL *psizel) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE GetExtent(DWORD dwDrawAspect, SIZEL *psizel) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE Advise(IAdviseSink *pAdvSink, DWORD *pdwConnection) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE EnumAdvise(IEnumSTATDATA **ppenumAdvise) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE GetMiscStatus(DWORD dwAspect, DWORD *pdwStatus) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE SetColorScheme(LOGPALETTE *pLogpal) override {return E_NOTIMPL;}
     virtual HRESULT STDMETHODCALLTYPE GetWindow(HWND *phwnd) override;
-    virtual HRESULT STDMETHODCALLTYPE ContextSensitiveHelp(BOOL fEnterMode) override;
+    virtual HRESULT STDMETHODCALLTYPE ContextSensitiveHelp(BOOL fEnterMode) override {return E_NOTIMPL;}
     virtual HRESULT STDMETHODCALLTYPE InPlaceDeactivate() override;
     virtual HRESULT STDMETHODCALLTYPE UIDeactivate() override;
-    virtual HRESULT STDMETHODCALLTYPE SetObjectRects(LPCRECT lprcPosRect, LPCRECT lprcClipRect) override;
-    virtual HRESULT STDMETHODCALLTYPE ReactivateAndUndo() override;
+    virtual HRESULT STDMETHODCALLTYPE SetObjectRects(LPCRECT lprcPosRect, LPCRECT lprcClipRect) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE ReactivateAndUndo() override {return E_NOTIMPL;}
     virtual HRESULT STDMETHODCALLTYPE OnWindowMessage(UINT msg, WPARAM wParam, LPARAM lParam, LRESULT *plResult) override;
-    virtual HRESULT STDMETHODCALLTYPE GetDropTarget(IDropTarget **ppDropTarget) override;
+    virtual HRESULT STDMETHODCALLTYPE GetDropTarget(IDropTarget **ppDropTarget) override {return E_NOTIMPL;}
     virtual HRESULT STDMETHODCALLTYPE Draw(DWORD dwDrawAspect, LONG lindex, void *pvAspect, DVTARGETDEVICE *ptd,
                                            HDC hdcTargetDev, HDC hdcDraw, LPCRECTL lprcBounds, LPCRECTL lprcWBounds,
                                            BOOL (STDMETHODCALLTYPE *pfnContinue)(ULONG_PTR dwContinue), ULONG_PTR dwContinue) override;
-    virtual HRESULT STDMETHODCALLTYPE GetColorSet(DWORD dwDrawAspect, LONG lindex, void *pvAspect, DVTARGETDEVICE *ptd, HDC hicTargetDev, LOGPALETTE **ppColorSet) override;
+    virtual HRESULT STDMETHODCALLTYPE GetColorSet(DWORD dwDrawAspect, LONG lindex, void *pvAspect, DVTARGETDEVICE *ptd,
+                                                  HDC hicTargetDev, LOGPALETTE **ppColorSet) override {return E_NOTIMPL;}
     virtual HRESULT STDMETHODCALLTYPE Freeze(DWORD dwDrawAspect, LONG lindex, void *pvAspect, DWORD *pdwFreeze) override;
     virtual HRESULT STDMETHODCALLTYPE Unfreeze(DWORD dwFreeze) override;
-    virtual HRESULT STDMETHODCALLTYPE SetAdvise(DWORD aspects, DWORD advf, IAdviseSink *pAdvSink) override;
-    virtual HRESULT STDMETHODCALLTYPE GetAdvise(DWORD *pAspects, DWORD *pAdvf, IAdviseSink **ppAdvSink) override;
+    virtual HRESULT STDMETHODCALLTYPE SetAdvise(DWORD aspects, DWORD advf, IAdviseSink *pAdvSink) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE GetAdvise(DWORD *pAspects, DWORD *pAdvf, IAdviseSink **ppAdvSink) override {return E_NOTIMPL;}
     virtual HRESULT STDMETHODCALLTYPE GetExtent(DWORD dwDrawAspect, LONG lindex, DVTARGETDEVICE *ptd, LPSIZEL lpsizel) override;
     virtual HRESULT STDMETHODCALLTYPE GetRect(DWORD dwAspect, LPRECTL pRect) override;
     virtual HRESULT STDMETHODCALLTYPE GetViewStatus(DWORD *pdwStatus) override;
     virtual HRESULT STDMETHODCALLTYPE QueryHitPoint(DWORD dwAspect, LPCRECT pRectBounds, POINT ptlLoc, LONG lCloseHint, DWORD *pHitResult) override;
     virtual HRESULT STDMETHODCALLTYPE QueryHitRect(DWORD dwAspect, LPCRECT pRectBounds, LPCRECT pRectLoc, LONG lCloseHint, DWORD *pHitResult) override;
-    virtual HRESULT STDMETHODCALLTYPE GetNaturalExtent(DWORD dwAspect, LONG lindex, DVTARGETDEVICE *ptd, HDC hicTargetDev, DVEXTENTINFO *pExtentInfo, LPSIZEL pSizel) override;
-    virtual HRESULT STDMETHODCALLTYPE GetTypeInfoCount(UINT *pctinfo) override;
-    virtual HRESULT STDMETHODCALLTYPE GetTypeInfo(UINT iTInfo, LCID lcid, ITypeInfo **ppTInfo) override;
-    virtual HRESULT STDMETHODCALLTYPE GetIDsOfNames(REFIID riid, LPOLESTR *rgszNames, UINT cNames, LCID lcid, DISPID *rgDispId) override;
+    virtual HRESULT STDMETHODCALLTYPE GetNaturalExtent(DWORD dwAspect, LONG lindex, DVTARGETDEVICE *ptd,
+                                                       HDC hicTargetDev, DVEXTENTINFO *pExtentInfo, LPSIZEL pSizel) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE InterfaceSupportsErrorInfo(REFIID riid) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE GetTypeInfoCount(UINT *pctinfo) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE GetTypeInfo(UINT iTInfo, LCID lcid, ITypeInfo **ppTInfo) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE GetIDsOfNames(REFIID riid, LPOLESTR *rgszNames, UINT cNames, LCID lcid, DISPID *rgDispId) override {return E_NOTIMPL;}
     virtual HRESULT STDMETHODCALLTYPE Invoke(DISPID dispIdMember, REFIID riid, LCID lcid, WORD wFlags, DISPPARAMS *pDispParams,
-                                             VARIANT *pVarResult, EXCEPINFO *pExcepInfo, UINT *puArgErr) override;
+                                             VARIANT *pVarResult, EXCEPINFO *pExcepInfo, UINT *puArgErr) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE get_ReadyState(long *pVal) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE get_TotalFrames(long *pVal) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE get_Playing(VARIANT_BOOL *pVal) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE put_Playing(VARIANT_BOOL pVal) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE get_Quality(int *pVal) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE put_Quality(int pVal) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE get_ScaleMode(int *pVal) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE put_ScaleMode(int pVal) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE get_AlignMode(int *pVal) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE put_AlignMode(int pVal) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE get_BackgroundColor(long *pVal) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE put_BackgroundColor(long pVal) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE get_Loop(VARIANT_BOOL *pVal) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE put_Loop(VARIANT_BOOL pVal) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE get_Movie(BSTR *pVal) override {return E_NOTIMPL;}
     virtual HRESULT STDMETHODCALLTYPE put_Movie(BSTR pVal) override;
+    virtual HRESULT STDMETHODCALLTYPE get_FrameNum(long *pVal) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE put_FrameNum(long pVal) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE SetZoomRect(long left, long top, long right, long bottom) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE Zoom(int factor) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE Pan(long x, long y, int mode) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE Play() override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE Stop() override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE Back() override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE Forward() override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE Rewind() override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE StopPlay() override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE GotoFrame(long FrameNum) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE CurrentFrame(long *FrameNum) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE IsPlaying(VARIANT_BOOL *Playing) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE PercentLoaded(long *percent) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE FrameLoaded(long FrameNum, VARIANT_BOOL *loaded) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE FlashVersion(long *version) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE get_WMode(BSTR *pVal) override {return E_NOTIMPL;}
     virtual HRESULT STDMETHODCALLTYPE put_WMode(BSTR pVal) override;
+    virtual HRESULT STDMETHODCALLTYPE get_SAlign(BSTR *pVal) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE put_SAlign(BSTR pVal) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE get_Menu(VARIANT_BOOL *pVal) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE put_Menu(VARIANT_BOOL pVal) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE get_Base(BSTR *pVal) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE put_Base(BSTR pVal) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE get_Scale(BSTR *pVal) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE put_Scale(BSTR pVal) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE get_DeviceFont(VARIANT_BOOL *pVal) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE put_DeviceFont(VARIANT_BOOL pVal) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE get_EmbedMovie(VARIANT_BOOL *pVal) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE put_EmbedMovie(VARIANT_BOOL pVal) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE get_BGColor(BSTR *pVal) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE put_BGColor(BSTR pVal) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE get_Quality2(BSTR *pVal) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE put_Quality2(BSTR pVal) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE LoadMovie(int layer, BSTR url) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE TGotoFrame(BSTR target, long FrameNum) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE TGotoLabel(BSTR target, BSTR label) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE TCurrentFrame(BSTR target, long *FrameNum) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE TCurrentLabel(BSTR target, BSTR *pVal) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE TPlay(BSTR target) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE TStopPlay(BSTR target) override {return E_NOTIMPL;}
     virtual HRESULT STDMETHODCALLTYPE SetVariable(BSTR name, BSTR value) override;
+    virtual HRESULT STDMETHODCALLTYPE GetVariable(BSTR name, BSTR *pVal) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE TSetProperty(BSTR target, int property, BSTR value) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE TGetProperty(BSTR target, int property, BSTR *pVal) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE TCallFrame(BSTR target, int FrameNum) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE TCallLabel(BSTR target, BSTR label) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE TSetPropertyNum(BSTR target, int property, double value) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE TGetPropertyNum(BSTR target, int property, double *pVal) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE TGetPropertyAsNumber(BSTR target, int property, double *pVal) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE get_SWRemote(BSTR *pVal) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE put_SWRemote(BSTR pVal) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE get_FlashVars(BSTR *pVal) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE put_FlashVars(BSTR pVal) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE get_AllowScriptAccess(BSTR *pVal) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE put_AllowScriptAccess(BSTR pVal) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE get_MovieData(BSTR *pVal) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE put_MovieData(BSTR pVal) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE get_InlineData(IUnknown **ppIUnknown) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE put_InlineData(IUnknown *ppIUnknown) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE get_SeamlessTabbing(VARIANT_BOOL *pVal) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE put_SeamlessTabbing(VARIANT_BOOL pVal) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE EnforceLocalSecurity() override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE get_Profile(VARIANT_BOOL *pVal) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE put_Profile(VARIANT_BOOL pVal) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE get_ProfileAddress(BSTR *pVal) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE put_ProfileAddress(BSTR pVal) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE get_ProfilePort(long *pVal) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE put_ProfilePort(long pVal) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE CallFunction(BSTR request, BSTR *response) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE SetReturnValue(BSTR returnValue) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE DisableLocalSecurity() override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE get_AllowNetworking(BSTR *pVal) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE put_AllowNetworking(BSTR pVal) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE get_AllowFullScreen(BSTR *pVal) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE put_AllowFullScreen(BSTR pVal) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE get_AllowFullScreenInteractive(BSTR *pVal) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE put_AllowFullScreenInteractive(BSTR pVal) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE get_IsDependent(VARIANT_BOOL *pVal) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE put_IsDependent(VARIANT_BOOL pVal) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE get_BrowserZoom(BSTR *pVal) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE put_BrowserZoom(BSTR pVal) override {return E_NOTIMPL;}
 
     ULONG m_refCount;
+    _IShockwaveFlashEvents *m_flashEvents;
     IUnknown *m_punkContext;
     IUnknown *m_punkOuter;
-    _IShockwaveFlashEvents *m_flashEvents;
     QACONTAINER m_qaContainer;
     QACONTROL m_qaControl;
     SIZEL m_size;
