@@ -1,0 +1,8 @@
+.vs/
+packages/
+Control/Debug/
+Control/Release/
+*.aps
+*.vcxproj.user
+*_i.c
+*_i.h

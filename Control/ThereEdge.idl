@@ -1,0 +1,51 @@
+import "oaidl.idl";
+import "ocidl.idl";
+
+[
+    uuid(D27CDB6B-AE6D-11CF-96B8-444553540000),
+    version(1.0),
+]
+library ThereEdgeLib
+{
+    importlib("stdole2.tlb");
+    interface IShockwaveFlash;
+    dispinterface _IShockwaveFlashEvents;
+
+    [
+       odl,
+       uuid(D27CDB6C-AE6D-11CF-96B8-444553540000),
+       helpstring("Shockwave Flash"),
+       dual,
+       oleautomation
+     ]
+     interface IShockwaveFlash : IDispatch {
+         [id(0x00000066), propput, helpstring("property Movie")]
+         HRESULT Movie([in] BSTR pVal);
+         [id(0x00000085), propput, helpstring("property WMode")]
+         HRESULT WMode([in] BSTR pVal);
+         [id(0x00000097), helpstring("method SetVariable")]
+         HRESULT SetVariable(
+                         [in] BSTR name, 
+                         [in] BSTR value);
+     };
+
+     [
+       uuid(D27CDB6D-AE6D-11CF-96B8-444553540000),
+       helpstring("Event interface for Shockwave Flash"),
+       hidden
+     ]
+     dispinterface _IShockwaveFlashEvents {
+         properties:
+         methods:
+             [id(0xfffffd9f)]
+             void OnReadyStateChange(long newState);
+             [id(0x000007a6)]
+             void OnProgress(long percentDone);
+             [id(0x00000096)]
+             void FSCommand(
+                             [in] BSTR command, 
+                             [in] BSTR args);
+             [id(0x000000c5)]
+             void FlashCall([in] BSTR request);
+     };
+ };
