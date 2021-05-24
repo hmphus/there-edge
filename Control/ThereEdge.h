@@ -1,5 +1,7 @@
 #pragma once
 
+using namespace ATL;
+
 class CThereEdgeModule: public ATL::CAtlDllModuleT<CThereEdgeModule>,
                         public IClassFactoryEx,
                         public IQuickActivate,
@@ -9,11 +11,17 @@ class CThereEdgeModule: public ATL::CAtlDllModuleT<CThereEdgeModule>,
                         public IOleInPlaceObjectWindowless,
                         public IViewObjectEx,
                         public ISupportErrorInfo,
-						public IShockwaveFlash
+                        public IShockwaveFlash,
+                        public ICoreWebView2CreateCoreWebView2EnvironmentCompletedHandler,
+                        public ICoreWebView2CreateCoreWebView2ControllerCompletedHandler,
+                        public ICoreWebView2WebMessageReceivedEventHandler,
+                        public ICoreWebView2WebResourceRequestedEventHandler,
+                        public ICoreWebView2NavigationCompletedEventHandler
+ 
 {
 public:
-	DECLARE_LIBID(LIBID_ThereEdgeLib)
-	DECLARE_REGISTRY_APPID_RESOURCEID(IDR_THEREEDGE, "{D27CDB6B-AE6D-11CF-96B8-444553540000}")
+    DECLARE_LIBID(LIBID_ThereEdgeLib)
+    DECLARE_REGISTRY_APPID_RESOURCEID(IDR_THEREEDGE, "{D27CDB6B-AE6D-11CF-96B8-444553540000}")
 
     CThereEdgeModule();
     virtual ~CThereEdgeModule();
@@ -21,6 +29,8 @@ public:
     virtual HRESULT STDMETHODCALLTYPE QueryInterface(REFIID riid, void **object) override;
     virtual ULONG STDMETHODCALLTYPE AddRef() override;
     virtual ULONG STDMETHODCALLTYPE Release() override;
+
+protected:
     virtual HRESULT STDMETHODCALLTYPE CreateInstance(IUnknown *pUnkOuter, REFIID riid, void **ppv) override;
     virtual HRESULT STDMETHODCALLTYPE CreateInstanceWithContext(IUnknown *punkContext, IUnknown *punkOuter, REFIID riid, void **ppv) override;
     virtual HRESULT STDMETHODCALLTYPE LockServer(BOOL fLock) override;
@@ -37,7 +47,7 @@ public:
     virtual HRESULT STDMETHODCALLTYPE SetClientSite(IOleClientSite *pClientSite) override {return E_NOTIMPL;}
     virtual HRESULT STDMETHODCALLTYPE GetClientSite(IOleClientSite **ppClientSite) override {return E_NOTIMPL;}
     virtual HRESULT STDMETHODCALLTYPE SetHostNames(LPCOLESTR szContainerApp, LPCOLESTR szContainerObj) override {return E_NOTIMPL;}
-    virtual HRESULT STDMETHODCALLTYPE Close(DWORD dwSaveOption) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE Close(DWORD dwSaveOption) override;
     virtual HRESULT STDMETHODCALLTYPE SetMoniker(DWORD dwWhichMoniker, IMoniker *pmk) override {return E_NOTIMPL;}
     virtual HRESULT STDMETHODCALLTYPE GetMoniker(DWORD dwAssign, DWORD dwWhichMoniker, IMoniker **ppmk) override {return E_NOTIMPL;}
     virtual HRESULT STDMETHODCALLTYPE InitFromData(IDataObject *pDataObject, BOOL fCreation, DWORD dwReserved) override {return E_NOTIMPL;}
@@ -58,7 +68,7 @@ public:
     virtual HRESULT STDMETHODCALLTYPE ContextSensitiveHelp(BOOL fEnterMode) override {return E_NOTIMPL;}
     virtual HRESULT STDMETHODCALLTYPE InPlaceDeactivate() override;
     virtual HRESULT STDMETHODCALLTYPE UIDeactivate() override;
-    virtual HRESULT STDMETHODCALLTYPE SetObjectRects(LPCRECT lprcPosRect, LPCRECT lprcClipRect) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE SetObjectRects(LPCRECT lprcPosRect, LPCRECT lprcClipRect) override;
     virtual HRESULT STDMETHODCALLTYPE ReactivateAndUndo() override {return E_NOTIMPL;}
     virtual HRESULT STDMETHODCALLTYPE OnWindowMessage(UINT msg, WPARAM wParam, LPARAM lParam, LRESULT *plResult) override;
     virtual HRESULT STDMETHODCALLTYPE GetDropTarget(IDropTarget **ppDropTarget) override {return E_NOTIMPL;}
@@ -67,23 +77,23 @@ public:
                                            BOOL (STDMETHODCALLTYPE *pfnContinue)(ULONG_PTR dwContinue), ULONG_PTR dwContinue) override;
     virtual HRESULT STDMETHODCALLTYPE GetColorSet(DWORD dwDrawAspect, LONG lindex, void *pvAspect, DVTARGETDEVICE *ptd,
                                                   HDC hicTargetDev, LOGPALETTE **ppColorSet) override {return E_NOTIMPL;}
-    virtual HRESULT STDMETHODCALLTYPE Freeze(DWORD dwDrawAspect, LONG lindex, void *pvAspect, DWORD *pdwFreeze) override;
-    virtual HRESULT STDMETHODCALLTYPE Unfreeze(DWORD dwFreeze) override;
+    virtual HRESULT STDMETHODCALLTYPE Freeze(DWORD dwDrawAspect, LONG lindex, void *pvAspect, DWORD *pdwFreeze) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE Unfreeze(DWORD dwFreeze) override {return E_NOTIMPL;}
     virtual HRESULT STDMETHODCALLTYPE SetAdvise(DWORD aspects, DWORD advf, IAdviseSink *pAdvSink) override {return E_NOTIMPL;}
     virtual HRESULT STDMETHODCALLTYPE GetAdvise(DWORD *pAspects, DWORD *pAdvf, IAdviseSink **ppAdvSink) override {return E_NOTIMPL;}
-    virtual HRESULT STDMETHODCALLTYPE GetExtent(DWORD dwDrawAspect, LONG lindex, DVTARGETDEVICE *ptd, LPSIZEL lpsizel) override;
-    virtual HRESULT STDMETHODCALLTYPE GetRect(DWORD dwAspect, LPRECTL pRect) override;
-    virtual HRESULT STDMETHODCALLTYPE GetViewStatus(DWORD *pdwStatus) override;
+    virtual HRESULT STDMETHODCALLTYPE GetExtent(DWORD dwDrawAspect, LONG lindex, DVTARGETDEVICE *ptd, LPSIZEL lpsizel) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE GetRect(DWORD dwAspect, LPRECTL pRect) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE GetViewStatus(DWORD *pdwStatus) override {return E_NOTIMPL;}
     virtual HRESULT STDMETHODCALLTYPE QueryHitPoint(DWORD dwAspect, LPCRECT pRectBounds, POINT ptlLoc, LONG lCloseHint, DWORD *pHitResult) override;
     virtual HRESULT STDMETHODCALLTYPE QueryHitRect(DWORD dwAspect, LPCRECT pRectBounds, LPCRECT pRectLoc, LONG lCloseHint, DWORD *pHitResult) override;
     virtual HRESULT STDMETHODCALLTYPE GetNaturalExtent(DWORD dwAspect, LONG lindex, DVTARGETDEVICE *ptd,
                                                        HDC hicTargetDev, DVEXTENTINFO *pExtentInfo, LPSIZEL pSizel) override {return E_NOTIMPL;}
     virtual HRESULT STDMETHODCALLTYPE InterfaceSupportsErrorInfo(REFIID riid) override {return E_NOTIMPL;}
-    virtual HRESULT STDMETHODCALLTYPE GetTypeInfoCount(UINT *pctinfo) override {return E_NOTIMPL;}
-    virtual HRESULT STDMETHODCALLTYPE GetTypeInfo(UINT iTInfo, LCID lcid, ITypeInfo **ppTInfo) override {return E_NOTIMPL;}
-    virtual HRESULT STDMETHODCALLTYPE GetIDsOfNames(REFIID riid, LPOLESTR *rgszNames, UINT cNames, LCID lcid, DISPID *rgDispId) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE GetTypeInfoCount(UINT *pctinfo) override;
+    virtual HRESULT STDMETHODCALLTYPE GetTypeInfo(UINT iTInfo, LCID lcid, ITypeInfo **ppTInfo) override;
+    virtual HRESULT STDMETHODCALLTYPE GetIDsOfNames(REFIID riid, LPOLESTR *rgszNames, UINT cNames, LCID lcid, DISPID *rgDispId) override;
     virtual HRESULT STDMETHODCALLTYPE Invoke(DISPID dispIdMember, REFIID riid, LCID lcid, WORD wFlags, DISPPARAMS *pDispParams,
-                                             VARIANT *pVarResult, EXCEPINFO *pExcepInfo, UINT *puArgErr) override {return E_NOTIMPL;}
+                                             VARIANT *pVarResult, EXCEPINFO *pExcepInfo, UINT *puArgErr) override;
     virtual HRESULT STDMETHODCALLTYPE get_ReadyState(long *pVal) override {return E_NOTIMPL;}
     virtual HRESULT STDMETHODCALLTYPE get_TotalFrames(long *pVal) override {return E_NOTIMPL;}
     virtual HRESULT STDMETHODCALLTYPE get_Playing(VARIANT_BOOL *pVal) override {return E_NOTIMPL;}
@@ -183,14 +193,25 @@ public:
     virtual HRESULT STDMETHODCALLTYPE put_IsDependent(VARIANT_BOOL pVal) override {return E_NOTIMPL;}
     virtual HRESULT STDMETHODCALLTYPE get_BrowserZoom(BSTR *pVal) override {return E_NOTIMPL;}
     virtual HRESULT STDMETHODCALLTYPE put_BrowserZoom(BSTR pVal) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE Invoke(HRESULT errorCode, ICoreWebView2Environment *environment) override;
+    virtual HRESULT STDMETHODCALLTYPE Invoke(HRESULT errorCode, ICoreWebView2Controller *controller) override;
+    virtual HRESULT STDMETHODCALLTYPE Invoke(ICoreWebView2 *sender, ICoreWebView2WebMessageReceivedEventArgs *args) override;
+    virtual HRESULT STDMETHODCALLTYPE Invoke(ICoreWebView2 *sender, ICoreWebView2WebResourceRequestedEventArgs *args) override;
+    virtual HRESULT STDMETHODCALLTYPE Invoke(ICoreWebView2 *sender, ICoreWebView2NavigationCompletedEventArgs *args) override;
 
-    ULONG m_refCount;
-    _IShockwaveFlashEvents *m_flashEvents;
-    IUnknown *m_punkContext;
-    IUnknown *m_punkOuter;
-    QACONTAINER m_qaContainer;
-    QACONTROL m_qaControl;
-    SIZEL m_size;
+protected:
+    ULONG                              m_refCount;
+    CComPtr<IShockwaveFlashEvents>     m_flashEvents;
+    CComPtr<IUnknown>                  m_punkContext;
+    CComPtr<IUnknown>                  m_punkOuter;
+    QACONTAINER                        m_qaContainer;
+    QACONTROL                          m_qaControl;
+    SIZEL                              m_size;
+    HWND                               m_wnd;
+    CComPtr<ICoreWebView2Environment>  m_environment;
+    CComPtr<ICoreWebView2Controller2>  m_controller;
+    CComPtr<ICoreWebView2>             m_view;
+    EventRegistrationToken             m_webMessageReceivedToken;
+    EventRegistrationToken             m_webResourceRequestedToken;
+    EventRegistrationToken             m_navigationCompletedToken;
 };
-
-extern class CThereEdgeModule _AtlModule;

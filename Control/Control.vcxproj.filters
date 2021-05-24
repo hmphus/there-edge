@@ -52,6 +52,9 @@
     <None Include="ThereEdge.def">
       <Filter>Source Files</Filter>
     </None>
+    <None Include="packages.config">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Midl Include="ThereEdge.idl">
