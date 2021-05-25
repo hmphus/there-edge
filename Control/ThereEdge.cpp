@@ -791,9 +791,9 @@ HRESULT CThereEdgeModule::InvokeFlashEvent(const WCHAR *cmd, BSTR arg1, BSTR arg
 {
     VARIANTARG vargs[2];
     vargs[0].vt = VT_BSTR;
-    vargs[0].bstrVal = arg1;
+    vargs[0].bstrVal = arg2;
     vargs[1].vt = VT_BSTR;
-    vargs[1].bstrVal = arg2;
+    vargs[1].bstrVal = arg1;
 
     DISPPARAMS params;
     params.rgvarg = vargs;
