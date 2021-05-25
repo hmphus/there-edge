@@ -8,9 +8,13 @@
 
 #include "platform.h"
 #include "resource.h"
+#include "shlwapi.h"
+#include "wininet.h"
 #include "atlbase.h"
 #include "atlcom.h"
 #include "atlctl.h"
+#include "atlstr.h"
+#include "atlsafe.h"
 #include "WebView2.h"
 #include "ThereEdge_i.h"
 #include "ThereEdge.h"
@@ -105,14 +109,19 @@ CThereEdgeModule::CThereEdgeModule():
     m_punkOuter(),
     m_qaContainer(),
     m_qaControl(),
+    m_pos(),
     m_size(),
     m_wnd(nullptr),
+    m_url(),
+    m_variables(),
     m_environment(),
     m_controller(),
     m_view(),
     m_webMessageReceivedToken(),
     m_webResourceRequestedToken(),
-    m_navigationCompletedToken()
+    m_navigationCompletedToken(),
+    m_ready(false),
+    m_visible(false)
 {
     WNDCLASSEX childClass = {0};
     childClass.cbSize = sizeof(WNDCLASSEX);
@@ -219,10 +228,10 @@ HRESULT STDMETHODCALLTYPE CThereEdgeModule::QueryInterface(REFIID riid, void **o
         return S_OK;
     }
 
-    Log(L"QueryInterface: %08lx-%04x-%04x-%02x%02x-%02x%02x%02x%02x%02x%02x\n",
-        riid.Data1, riid.Data2, riid.Data3, riid.Data4[0], riid.Data4[1],
-        riid.Data4[2], riid.Data4[3], riid.Data4[4],
-        riid.Data4[5], riid.Data4[6], riid.Data4[7]);
+    //Log(L"QueryInterface: %08lx-%04x-%04x-%02x%02x-%02x%02x%02x%02x%02x%02x\n",
+    //    riid.Data1, riid.Data2, riid.Data3, riid.Data4[0], riid.Data4[1],
+    //    riid.Data4[2], riid.Data4[3], riid.Data4[4],
+    //    riid.Data4[5], riid.Data4[6], riid.Data4[7]);
 
     *object = nullptr;
     return E_NOINTERFACE;
@@ -300,13 +309,17 @@ HRESULT STDMETHODCALLTYPE CThereEdgeModule::QuickActivate(QACONTAINER *pQaContai
 
 HRESULT STDMETHODCALLTYPE CThereEdgeModule::SetContentExtent(LPSIZEL pSizel)
 {
-    m_size = *pSizel;
+    if (pSizel != nullptr)
+        SetSize(*pSizel);
+
     return S_OK;
 }
 
 HRESULT STDMETHODCALLTYPE CThereEdgeModule::GetContentExtent(LPSIZEL pSizel)
 {
-    *pSizel = m_size;
+    if (pSizel != nullptr)
+        *pSizel = m_size;
+
     return S_OK;
 }
 
@@ -360,9 +373,7 @@ HRESULT STDMETHODCALLTYPE CThereEdgeModule::Unadvise(DWORD dwCookie)
 
 HRESULT STDMETHODCALLTYPE CThereEdgeModule::Close(DWORD dwSaveOption)
 {
-    Log(L"Close\n");
-    if (m_wnd != nullptr)
-        ShowWindow(m_wnd, SW_HIDE);
+    SetVisibility(false);
     return S_OK;
 }
 
@@ -370,26 +381,11 @@ HRESULT STDMETHODCALLTYPE CThereEdgeModule::DoVerb(LONG iVerb, LPMSG lpmsg, IOle
 {
     switch (iVerb)
     {
-        case OLEIVERB_PRIMARY:
-            Log(L"DoVerb OLEIVERB_PRIMARY\n");
-            break;
-        case OLEIVERB_SHOW:
-            Log(L"DoVerb OLEIVERB_SHOW\n");
-            break;
-        case OLEIVERB_OPEN:
-            Log(L"DoVerb OLEIVERB_OPEN\n");
-            break;
-        case OLEIVERB_HIDE:
-            Log(L"DoVerb OLEIVERB_HIDE\n");
-            break;
-        case OLEIVERB_UIACTIVATE:
-            Log(L"DoVerb OLEIVERB_UIACTIVATE\n");
-            break;
         case OLEIVERB_INPLACEACTIVATE:
         {
             if (m_wnd != nullptr)
             {
-                ShowWindow(m_wnd, SW_SHOWNA);
+                SetVisibility(true);
                 return S_OK;
             }
 
@@ -399,73 +395,47 @@ HRESULT STDMETHODCALLTYPE CThereEdgeModule::DoVerb(LONG iVerb, LPMSG lpmsg, IOle
             if (lprcPosRect == nullptr)
                 return E_INVALIDARG;
 
-            LONG width = lprcPosRect->right > lprcPosRect->left ? lprcPosRect->right - lprcPosRect->left : 1;
-            LONG height = lprcPosRect->bottom > lprcPosRect->top ? lprcPosRect->bottom - lprcPosRect->top : 1;
+            SetRect(*lprcPosRect);
 
-            m_wnd = CreateWindowEx(WS_EX_TRANSPARENT, L"ThereEdge", L"", WS_CHILD | WS_CLIPCHILDREN | WS_VISIBLE,
-                                   lprcPosRect->left, lprcPosRect->top, width, height,
+            m_wnd = CreateWindowEx(WS_EX_TRANSPARENT, L"ThereEdge", L"", WS_CHILD | WS_CLIPCHILDREN | WS_CLIPSIBLINGS,
+                                   m_pos.cx, m_pos.cy, m_size.cx, m_size.cy,
                                    hwndParent, nullptr, GetModuleHandle(nullptr), nullptr);
 
-            return CreateCoreWebView2Environment(this);
+            if (FAILED(CreateCoreWebView2Environment(this)))
+                return E_FAIL;
+
+            return S_OK;
         }
-        case OLEIVERB_DISCARDUNDOSTATE:
-            Log(L"DoVerb OLEIVERB_DISCARDUNDOSTATE\n");
-            break;
         default:
-            Log(L"DoVerb %ld\n", iVerb);
-            break;
+            return E_NOTIMPL;
     }
-
-    return E_NOTIMPL;
-}
-
-HRESULT STDMETHODCALLTYPE CThereEdgeModule::GetWindow(HWND *phwnd)
-{
-    Log(L"GetWindow\n");
-    return E_NOTIMPL;
-}
-
-HRESULT STDMETHODCALLTYPE CThereEdgeModule::InPlaceDeactivate()
-{
-    Log(L"InPlaceDeactivate\n");
-    return E_NOTIMPL;
-}
-
-HRESULT STDMETHODCALLTYPE CThereEdgeModule::UIDeactivate()
-{
-    Log(L"UIDeactivate\n");
-    return E_NOTIMPL;
 }
 
 HRESULT STDMETHODCALLTYPE CThereEdgeModule::SetObjectRects(LPCRECT lprcPosRect, LPCRECT lprcClipRect)
 {
-    // Log(L"SetObjectRects\n");
-    return S_OK;
-}
+    if (lprcClipRect != nullptr)
+        SetRect(*lprcClipRect);
 
-HRESULT STDMETHODCALLTYPE CThereEdgeModule::OnWindowMessage(UINT msg, WPARAM wParam, LPARAM lParam, LRESULT *plResult)
-{
-    Log(L"OnWindowMessage\n");
-    return E_NOTIMPL;
+    return S_OK;
 }
 
 HRESULT STDMETHODCALLTYPE CThereEdgeModule::Draw(DWORD dwDrawAspect, LONG lindex, void *pvAspect, DVTARGETDEVICE *ptd,
                                                  HDC hdcTargetDev, HDC hdcDraw, LPCRECTL lprcBounds, LPCRECTL lprcWBounds,
                                                  BOOL (STDMETHODCALLTYPE *pfnContinue)(ULONG_PTR dwContinue), ULONG_PTR dwContinue)
 {
-    // Log(L"Draw\n");
+    //Log(L"Draw\n");
     return S_OK;
 }
 
 HRESULT STDMETHODCALLTYPE CThereEdgeModule::QueryHitPoint(DWORD dwAspect, LPCRECT pRectBounds, POINT ptlLoc, LONG lCloseHint, DWORD *pHitResult)
 {
-    // Log(L"QueryHitPoint\n");
+    //Log(L"QueryHitPoint\n");
     return E_NOTIMPL;
 }
 
 HRESULT STDMETHODCALLTYPE CThereEdgeModule::QueryHitRect(DWORD dwAspect, LPCRECT pRectBounds, LPCRECT pRectLoc, LONG lCloseHint, DWORD *pHitResult)
 {
-    // Log(L"QueryHitRect\n");
+    //Log(L"QueryHitRect\n");
     return E_NOTIMPL;
 }
 
@@ -509,19 +479,56 @@ HRESULT STDMETHODCALLTYPE CThereEdgeModule::Invoke(DISPID dispIdMember, REFIID r
 
 HRESULT STDMETHODCALLTYPE CThereEdgeModule::put_Movie(BSTR pVal)
 {
-    Log(L"put_Movie %s\n", pVal);
+    if (m_url.Length() > 0)
+        return E_FAIL;
+
+    LONG length = (LONG)wcslen(pVal) - 4;
+    if (length < 0)
+        return E_FAIL;
+
+    if (wcscmp(pVal + length, L".swf") != 0)
+        return E_FAIL;
+
+    CComBSTR url;
+    if (FAILED(url.Append(pVal, length)) || FAILED(url.Append(L".html")))
+        return E_FAIL;
+
+    m_url = url;
+
+    if (FAILED(Navigate()))
+        return E_FAIL;
+
     return S_OK;
 }
 
 HRESULT STDMETHODCALLTYPE CThereEdgeModule::put_WMode(BSTR pVal)
 {
-    Log(L"put_WMode %s\n", pVal);
     return S_OK;
 }
 
 HRESULT STDMETHODCALLTYPE CThereEdgeModule::SetVariable(BSTR name, BSTR value)
 {
-    Log(L"SetVariable %s %s\n", name, value);
+    CComBSTR escName;
+    if (FAILED(Encode(name, escName)))
+        return E_FAIL;
+
+    CComBSTR escValue;
+    if (FAILED(Encode(value, escValue)))
+        return E_FAIL;
+
+    CComBSTR uri;
+    if (FAILED(uri.Append(L"setVariable?name=")) ||
+        FAILED(uri.Append(escName)) ||
+        FAILED(uri.Append(L"&value=")) ||
+        FAILED(uri.Append(escValue)))
+        return E_FAIL;
+
+    if (FAILED(m_variables.Add(uri)))
+        return E_FAIL;
+
+    if (FAILED(SendVariables()))
+        return E_FAIL;
+
     return S_OK;
 }
 
@@ -540,14 +547,14 @@ HRESULT STDMETHODCALLTYPE CThereEdgeModule::Invoke(HRESULT errorCode, ICoreWebVi
     if (controller == nullptr)
         return E_FAIL;
 
-    if (controller->QueryInterface(&m_controller) != S_OK || m_controller == nullptr)
+    if (FAILED(controller->QueryInterface(&m_controller)) || m_controller == nullptr)
         return E_FAIL;
 
-    if (m_controller->get_CoreWebView2(&m_view) != S_OK || m_view == nullptr)
+    if (FAILED(m_controller->get_CoreWebView2(&m_view)) || m_view == nullptr)
         return E_FAIL;
 
     ICoreWebView2Settings *settings = nullptr;
-    if (m_view->get_Settings(&settings) != S_OK || settings == nullptr)
+    if (FAILED(m_view->get_Settings(&settings)) || settings == nullptr)
         return E_FAIL;
 
     settings->put_AreDefaultContextMenusEnabled(false);
@@ -563,7 +570,6 @@ HRESULT STDMETHODCALLTYPE CThereEdgeModule::Invoke(HRESULT errorCode, ICoreWebVi
     RECT bounds;
     GetClientRect(m_wnd, &bounds);
     m_controller->put_Bounds(bounds);
-    Log(L"Bounds %lu %lu %lu %lu\n", bounds.right - bounds.left, bounds.bottom - bounds.top, m_size.cx, m_size.cy);
 
     COREWEBVIEW2_COLOR color = {0, 0, 0, 0};
     m_controller->put_DefaultBackgroundColor(color);
@@ -580,7 +586,7 @@ HRESULT STDMETHODCALLTYPE CThereEdgeModule::Invoke(HRESULT errorCode, ICoreWebVi
     m_view->add_WebResourceRequested(this, &m_webResourceRequestedToken);
     m_view->add_NavigationCompleted(this, &m_navigationCompletedToken);
 
-    if (m_view->Navigate(L"http://127.0.0.1:9999/resources/changeme/changeme_network.html")!= S_OK)
+    if (FAILED(Navigate()))
         return E_FAIL;
 
     return S_OK;
@@ -592,7 +598,7 @@ HRESULT STDMETHODCALLTYPE CThereEdgeModule::Invoke(ICoreWebView2 *sender, ICoreW
         return E_FAIL;
 
     WCHAR *command = nullptr;
-    if (args->TryGetWebMessageAsString(&command) != S_OK || command == nullptr)
+    if (FAILED(args->TryGetWebMessageAsString(&command)) || command == nullptr)
         return E_FAIL;
 
     WCHAR *params = wcsstr(command, L"?");
@@ -606,9 +612,12 @@ HRESULT STDMETHODCALLTYPE CThereEdgeModule::Invoke(ICoreWebView2 *sender, ICoreW
         params = command + wcslen(command);
     }
 
-    Log(L"FSCommand: %s %s\n", command, params);
-
+    CComBSTR arg1 = command;
+    CComBSTR arg2 = params;
     CoTaskMemFree(command);
+
+    if (FAILED(InvokeFlashEvent(L"FSCommand", arg1, arg2)))
+        return E_FAIL;
 
     return S_OK;
 }
@@ -619,11 +628,11 @@ HRESULT STDMETHODCALLTYPE CThereEdgeModule::Invoke(ICoreWebView2 *sender, ICoreW
         return E_FAIL;
 
     ICoreWebView2WebResourceRequest *request = nullptr;
-    if (args->get_Request(&request) != S_OK || request == nullptr)
+    if (FAILED(args->get_Request(&request)) || request == nullptr)
         return E_FAIL;
 
     WCHAR *uri = nullptr;
-    if (request->get_Uri(&uri) != S_OK || uri == nullptr)
+    if (FAILED(request->get_Uri(&uri)) || uri == nullptr)
         return E_FAIL;
 
     if (_wcsnicmp(uri, L"http://127.0.0.1:9999/", 22) == 0 || _wcsnicmp(uri, L"http://localhost:9999/", 22) == 0)
@@ -631,7 +640,7 @@ HRESULT STDMETHODCALLTYPE CThereEdgeModule::Invoke(ICoreWebView2 *sender, ICoreW
         uri += 22;
 
         ICoreWebView2Deferral *deferral;
-        if (args->GetDeferral(&deferral) != S_OK || deferral == nullptr)
+        if (FAILED(args->GetDeferral(&deferral)) || deferral == nullptr)
             return E_FAIL;
 
         args->AddRef();
@@ -692,7 +701,176 @@ HRESULT STDMETHODCALLTYPE CThereEdgeModule::Invoke(ICoreWebView2 *sender, ICoreW
     args->get_IsSuccess(&success);
 
     if (success)
-        m_view->PostWebMessageAsString(L"setVariable?name=Testing&value=123");
+    {
+        m_ready = true;
+        SendVariables();
+        InvokeFlashEvent(L"OnReadyStateChange", (LONG)3);
+        SetVisibility(true);
+    }
+
+    return S_OK;
+}
+
+HRESULT CThereEdgeModule::Encode(const BSTR in, CComBSTR &out)
+{
+    WCHAR buffer[INTERNET_MAX_URL_LENGTH];
+    DWORD size = INTERNET_MAX_URL_LENGTH;
+    if (SUCCEEDED(UrlEscape(in, buffer, &size, URL_ESCAPE_SEGMENT_ONLY | URL_ESCAPE_PERCENT)))
+    {
+        out = buffer;
+        return S_OK;
+    }
+
+    return E_FAIL;
+}
+
+HRESULT CThereEdgeModule::Navigate()
+{
+    if (m_url.Length() == 0)
+        return S_OK;
+
+    if (m_view == nullptr)
+        return S_OK;
+
+    if (FAILED(m_view->Navigate(m_url)))
+        return E_FAIL;
+
+    return S_OK;
+}
+
+HRESULT CThereEdgeModule::SendVariables()
+{
+    if (!m_ready)
+        return S_OK;
+
+    if (m_view == nullptr)
+        return S_OK;
+
+    for (LONG i = 0; i < (LONG)m_variables.GetCount(); ++i)
+    {
+        if (FAILED(m_view->PostWebMessageAsString(m_variables.GetAt(i))))
+            return E_FAIL;
+    }
+
+    if (FAILED(m_variables.Resize((ULONG)0)))
+        return E_FAIL;
+
+    return S_OK;
+}
+
+HRESULT CThereEdgeModule::InvokeFlashEvent(const WCHAR *cmd, DISPPARAMS &params, VARIANT *result)
+{
+    if (m_flashEvents == nullptr)
+        return E_FAIL;
+
+    DISPID id;
+    if (FAILED(m_flashEvents->GetIDsOfNames(DIID_IShockwaveFlashEvents, (LPOLESTR*)&cmd, 1, LOCALE_SYSTEM_DEFAULT, &id)))
+        return E_FAIL;
+
+    if (FAILED(m_flashEvents->Invoke(id, DIID_IShockwaveFlashEvents, LOCALE_SYSTEM_DEFAULT, DISPATCH_METHOD, &params, result, nullptr, nullptr)))
+       return E_FAIL;
+
+    return S_OK;
+}
+
+HRESULT CThereEdgeModule::InvokeFlashEvent(const WCHAR *cmd, LONG arg1)
+{
+    VARIANTARG vargs[1];
+    vargs[0].vt = VT_I4;
+    vargs[0].lVal = arg1;
+
+    DISPPARAMS params;
+    params.rgvarg = vargs;
+    params.cArgs = 1;
+    params.cNamedArgs = 0;
+
+    return InvokeFlashEvent(cmd, params);
+}
+
+HRESULT CThereEdgeModule::InvokeFlashEvent(const WCHAR *cmd, BSTR arg1, BSTR arg2)
+{
+    VARIANTARG vargs[2];
+    vargs[0].vt = VT_BSTR;
+    vargs[0].bstrVal = arg1;
+    vargs[1].vt = VT_BSTR;
+    vargs[1].bstrVal = arg2;
+
+    DISPPARAMS params;
+    params.rgvarg = vargs;
+    params.cArgs = 2;
+    params.cNamedArgs = 0;
+
+    return InvokeFlashEvent(cmd, params);
+}
+
+HRESULT CThereEdgeModule::SetSize(const SIZE &size)
+{
+    RECT rect;
+    rect.left = m_pos.cx;
+    rect.top = m_pos.cy;
+    rect.right = rect.left + size.cx;
+    rect.bottom = rect.top + size.cy;
+
+    return SetRect(rect);
+}
+
+HRESULT CThereEdgeModule::SetRect(const RECT &rect)
+{
+    UINT flags = 0;
+
+    if (rect.left == m_pos.cx && rect.top == m_pos.cy)
+        flags |= SWP_NOMOVE;
+
+    LONG width = rect.right > rect.left ? rect.right - rect.left : 1;
+    LONG height= rect.bottom > rect.top ? rect.bottom - rect.top : 1;
+
+    if (width == m_size.cx && height == m_size.cy)
+        flags |= SWP_NOSIZE;
+
+    if (flags == 0)
+        return S_OK;
+
+    m_pos.cx = rect.left;
+    m_pos.cy = rect.top;
+
+    m_size.cx = width;
+    m_size.cy = height;
+
+    if (m_wnd == nullptr)
+        return S_OK;
+
+    SetWindowPos(m_wnd, nullptr, m_pos.cx, m_pos.cy, m_size.cx, m_size.cy, flags | SWP_NOZORDER | SWP_NOACTIVATE);
+
+    if (m_controller != nullptr)
+    {
+        if ((flags & SWP_NOMOVE) == 0)
+            m_controller->NotifyParentWindowPositionChanged();
+
+        if ((flags & SWP_NOSIZE) == 0)
+        {
+            RECT bounds;
+            GetClientRect(m_wnd, &bounds);
+            m_controller->put_Bounds(bounds);
+        }
+    }
+
+    return S_OK;
+}
+
+HRESULT CThereEdgeModule::SetVisibility(BOOL visible)
+{
+    if (visible == m_visible)
+        return S_OK;
+
+    m_visible = visible;
+
+    if (m_wnd == nullptr)
+        return S_OK;
+
+    ShowWindow(m_wnd, visible ? SW_SHOWNA : SW_HIDE);
+
+    if (m_controller != NULL)
+        m_controller->put_IsVisible(visible);
 
     return S_OK;
 }

@@ -64,13 +64,13 @@ protected:
     virtual HRESULT STDMETHODCALLTYPE EnumAdvise(IEnumSTATDATA **ppenumAdvise) override {return E_NOTIMPL;}
     virtual HRESULT STDMETHODCALLTYPE GetMiscStatus(DWORD dwAspect, DWORD *pdwStatus) override {return E_NOTIMPL;}
     virtual HRESULT STDMETHODCALLTYPE SetColorScheme(LOGPALETTE *pLogpal) override {return E_NOTIMPL;}
-    virtual HRESULT STDMETHODCALLTYPE GetWindow(HWND *phwnd) override;
+    virtual HRESULT STDMETHODCALLTYPE GetWindow(HWND *phwnd) override {return E_NOTIMPL;}
     virtual HRESULT STDMETHODCALLTYPE ContextSensitiveHelp(BOOL fEnterMode) override {return E_NOTIMPL;}
-    virtual HRESULT STDMETHODCALLTYPE InPlaceDeactivate() override;
-    virtual HRESULT STDMETHODCALLTYPE UIDeactivate() override;
+    virtual HRESULT STDMETHODCALLTYPE InPlaceDeactivate() override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE UIDeactivate() override {return E_NOTIMPL;}
     virtual HRESULT STDMETHODCALLTYPE SetObjectRects(LPCRECT lprcPosRect, LPCRECT lprcClipRect) override;
     virtual HRESULT STDMETHODCALLTYPE ReactivateAndUndo() override {return E_NOTIMPL;}
-    virtual HRESULT STDMETHODCALLTYPE OnWindowMessage(UINT msg, WPARAM wParam, LPARAM lParam, LRESULT *plResult) override;
+    virtual HRESULT STDMETHODCALLTYPE OnWindowMessage(UINT msg, WPARAM wParam, LPARAM lParam, LRESULT *plResult) override {return E_NOTIMPL;}
     virtual HRESULT STDMETHODCALLTYPE GetDropTarget(IDropTarget **ppDropTarget) override {return E_NOTIMPL;}
     virtual HRESULT STDMETHODCALLTYPE Draw(DWORD dwDrawAspect, LONG lindex, void *pvAspect, DVTARGETDEVICE *ptd,
                                            HDC hdcTargetDev, HDC hdcDraw, LPCRECTL lprcBounds, LPCRECTL lprcWBounds,
@@ -200,18 +200,34 @@ protected:
     virtual HRESULT STDMETHODCALLTYPE Invoke(ICoreWebView2 *sender, ICoreWebView2NavigationCompletedEventArgs *args) override;
 
 protected:
+    HRESULT Encode(const BSTR in, CComBSTR &out);
+    HRESULT Navigate();
+    HRESULT SendVariables();
+    HRESULT InvokeFlashEvent(const WCHAR *cmd, DISPPARAMS &args, VARIANT *result = nullptr);
+    HRESULT InvokeFlashEvent(const WCHAR *cmd, LONG arg1);
+    HRESULT InvokeFlashEvent(const WCHAR *cmd, BSTR arg1, BSTR arg2);
+    HRESULT SetSize(const SIZE &size);
+    HRESULT SetRect(const RECT &rect);
+    HRESULT SetVisibility(BOOL visible);
+
+protected:
     ULONG                              m_refCount;
     CComPtr<IShockwaveFlashEvents>     m_flashEvents;
     CComPtr<IUnknown>                  m_punkContext;
     CComPtr<IUnknown>                  m_punkOuter;
     QACONTAINER                        m_qaContainer;
     QACONTROL                          m_qaControl;
-    SIZEL                              m_size;
+    SIZE                               m_pos;
+    SIZE                               m_size;
     HWND                               m_wnd;
+    CComBSTR                           m_url;
+    CComSafeArray<BSTR>                m_variables;
     CComPtr<ICoreWebView2Environment>  m_environment;
     CComPtr<ICoreWebView2Controller2>  m_controller;
     CComPtr<ICoreWebView2>             m_view;
     EventRegistrationToken             m_webMessageReceivedToken;
     EventRegistrationToken             m_webResourceRequestedToken;
     EventRegistrationToken             m_navigationCompletedToken;
+    BOOL                               m_ready;
+    BOOL                               m_visible;
 };
