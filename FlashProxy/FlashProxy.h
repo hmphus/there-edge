@@ -2,7 +2,7 @@
 
 using namespace ATL;
 
-class CThereEdgeModule: public ATL::CAtlDllModuleT<CThereEdgeModule>,
+class FlashProxyModule: public ATL::CAtlDllModuleT<FlashProxyModule>,
                         public IClassFactoryEx,
                         public IQuickActivate,
                         public IConnectionPointContainer,
@@ -20,11 +20,13 @@ class CThereEdgeModule: public ATL::CAtlDllModuleT<CThereEdgeModule>,
  
 {
 public:
-    DECLARE_LIBID(LIBID_ThereEdgeLib)
-    DECLARE_REGISTRY_APPID_RESOURCEID(IDR_THEREEDGE, "{D27CDB6B-AE6D-11CF-96B8-444553540000}")
+    DECLARE_LIBID(LIBID_FlashProxyLib)
+    DECLARE_REGISTRY_APPID_RESOURCEID(IDR_FLASHPROXY, "{D27CDB6B-AE6D-11CF-96B8-444553540000}")
 
-    CThereEdgeModule();
-    virtual ~CThereEdgeModule();
+    static WCHAR g_WindowClassName[];
+
+    FlashProxyModule();
+    virtual ~FlashProxyModule();
 
     virtual HRESULT STDMETHODCALLTYPE QueryInterface(REFIID riid, void **object) override;
     virtual ULONG STDMETHODCALLTYPE AddRef() override;
@@ -212,9 +214,6 @@ protected:
 
 protected:
     ULONG                              m_refCount;
-    CComPtr<IShockwaveFlashEvents>     m_flashEvents;
-    CComPtr<IUnknown>                  m_punkContext;
-    CComPtr<IUnknown>                  m_punkOuter;
     QACONTAINER                        m_qaContainer;
     QACONTROL                          m_qaControl;
     SIZE                               m_pos;
@@ -222,6 +221,10 @@ protected:
     HWND                               m_wnd;
     CComBSTR                           m_url;
     CComSafeArray<BSTR>                m_variables;
+    CComPtr<IShockwaveFlashEvents>     m_flashEvents;
+    CComPtr<IUnknown>                  m_unknownContext;
+    CComPtr<IUnknown>                  m_unknownOuter;
+    CComPtr<IServiceProvider>          m_serviceProvider;
     CComPtr<ICoreWebView2Environment>  m_environment;
     CComPtr<ICoreWebView2Controller2>  m_controller;
     CComPtr<ICoreWebView2>             m_view;

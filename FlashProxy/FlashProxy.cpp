@@ -16,10 +16,11 @@
 #include "atlstr.h"
 #include "atlsafe.h"
 #include "WebView2.h"
-#include "ThereEdge_i.h"
-#include "ThereEdge.h"
+#include "FlashProxy_i.h"
+#include "FlashProxy.h"
 
-CThereEdgeModule _AtlModule;
+FlashProxyModule g_AtlModule;
+WCHAR FlashProxyModule::g_WindowClassName[] = L"ThereEdgeFlashProxy";
 
 void Log(const WCHAR *format, ...)
 {
@@ -30,7 +31,7 @@ void Log(const WCHAR *format, ...)
     _vsnwprintf_s(buff, 1000, format, args);
 
     FILE *file = nullptr;
-    if (fopen_s(&file, "C:\\Local\\Projects\\ThereEdge\\debug.txt", "a") == 0)
+    if (fopen_s(&file, "debug.txt", "a") == 0)
     {
         vfwprintf_s(file, format, args);
         fflush(file);
@@ -42,57 +43,53 @@ void Log(const WCHAR *format, ...)
 
 extern "C" BOOL WINAPI DllMain(HINSTANCE hInstance, DWORD dwReason, LPVOID lpReserved)
 {
-    return _AtlModule.DllMain(dwReason, lpReserved);
+    return g_AtlModule.DllMain(dwReason, lpReserved);
 }
 
 __control_entrypoint(DllExport)
 STDAPI DllCanUnloadNow()
 {
-    return _AtlModule.DllCanUnloadNow();
+    return g_AtlModule.DllCanUnloadNow();
 }
 
 STDAPI DllGetClassObject(REFCLSID rclsid, REFIID riid, LPVOID *ppv)
 {
     if (IsEqualIID(riid, IID_IClassFactory))
     {
-        _AtlModule.AddRef();
-        *ppv = static_cast<IClassFactory*>(&_AtlModule);
+        g_AtlModule.AddRef();
+        *ppv = static_cast<IClassFactory*>(&g_AtlModule);
         return S_OK;
     }
 
-    return _AtlModule.DllGetClassObject(rclsid, riid, ppv);
+    return g_AtlModule.DllGetClassObject(rclsid, riid, ppv);
 }
 
 STDAPI DllRegisterServer()
 {
-    return _AtlModule.DllRegisterServer();
+    return g_AtlModule.DllRegisterServer();
 }
 
 STDAPI DllUnregisterServer()
 {
-    return _AtlModule.DllUnregisterServer();
+    return g_AtlModule.DllUnregisterServer();
 }
 
 STDAPI DllInstall(BOOL bInstall, _In_opt_ LPCWSTR pszCmdLine)
 {
     HRESULT hr = E_FAIL;
-    static const wchar_t szUserSwitch[] = L"user";
 
     if (pszCmdLine != nullptr)
     {
-        if (_wcsnicmp(pszCmdLine, szUserSwitch, _countof(szUserSwitch)) == 0)
-        {
+        static const WCHAR userSwitch[] = L"user";
+        if (_wcsnicmp(pszCmdLine, userSwitch, _countof(userSwitch)) == 0)
             ATL::AtlSetPerUserRegistration(true);
-        }
     }
 
     if (bInstall)
     {
         hr = DllRegisterServer();
         if (FAILED(hr))
-        {
             DllUnregisterServer();
-        }
     }
     else
     {
@@ -102,11 +99,8 @@ STDAPI DllInstall(BOOL bInstall, _In_opt_ LPCWSTR pszCmdLine)
     return hr;
 }
 
-CThereEdgeModule::CThereEdgeModule():
+FlashProxyModule::FlashProxyModule():
     m_refCount(1),
-    m_flashEvents(),
-    m_punkContext(),
-    m_punkOuter(),
     m_qaContainer(),
     m_qaControl(),
     m_pos(),
@@ -114,6 +108,10 @@ CThereEdgeModule::CThereEdgeModule():
     m_wnd(nullptr),
     m_url(),
     m_variables(),
+    m_flashEvents(),
+    m_unknownContext(),
+    m_unknownOuter(),
+    m_serviceProvider(),
     m_environment(),
     m_controller(),
     m_view(),
@@ -135,11 +133,11 @@ CThereEdgeModule::CThereEdgeModule():
     childClass.hCursor = LoadCursor(nullptr, IDC_ARROW);
     childClass.hbrBackground = nullptr;
     childClass.lpszMenuName = nullptr;
-    childClass.lpszClassName = L"ThereEdge";
+    childClass.lpszClassName = g_WindowClassName;
     RegisterClassEx(&childClass);
 }
 
-CThereEdgeModule::~CThereEdgeModule()
+FlashProxyModule::~FlashProxyModule()
 {
     if (m_view != nullptr)
     {
@@ -151,12 +149,13 @@ CThereEdgeModule::~CThereEdgeModule()
 
     m_controller.Release();
     m_environment.Release();
-    m_punkContext.Release();
-    m_punkOuter.Release();
+    m_serviceProvider.Release();
+    m_unknownContext.Release();
+    m_unknownOuter.Release();
     m_flashEvents.Release();
 }
 
-HRESULT STDMETHODCALLTYPE CThereEdgeModule::QueryInterface(REFIID riid, void **object)
+HRESULT STDMETHODCALLTYPE FlashProxyModule::QueryInterface(REFIID riid, void **object)
 {
     if (IsEqualIID(riid, IID_IClassFactory))
     {
@@ -237,12 +236,12 @@ HRESULT STDMETHODCALLTYPE CThereEdgeModule::QueryInterface(REFIID riid, void **o
     return E_NOINTERFACE;
 }
 
-ULONG STDMETHODCALLTYPE CThereEdgeModule::AddRef()
+ULONG STDMETHODCALLTYPE FlashProxyModule::AddRef()
 {
     return ++m_refCount;
 }
 
-ULONG STDMETHODCALLTYPE CThereEdgeModule::Release()
+ULONG STDMETHODCALLTYPE FlashProxyModule::Release()
 {
     ULONG refCount = m_refCount--;
 
@@ -252,11 +251,11 @@ ULONG STDMETHODCALLTYPE CThereEdgeModule::Release()
     return refCount;
 }
 
-HRESULT STDMETHODCALLTYPE CThereEdgeModule::CreateInstance(IUnknown *pUnkOuter, REFIID riid, void **ppv)
+HRESULT STDMETHODCALLTYPE FlashProxyModule::CreateInstance(IUnknown *pUnkOuter, REFIID riid, void **ppv)
 {
     if (IsEqualIID(riid, IID_IQuickActivate))
     {
-        auto module = new CThereEdgeModule();
+        auto module = new FlashProxyModule();
         if (module == nullptr)
             return E_FAIL;
 
@@ -267,21 +266,16 @@ HRESULT STDMETHODCALLTYPE CThereEdgeModule::CreateInstance(IUnknown *pUnkOuter, 
     return E_NOINTERFACE;
 }
 
-HRESULT STDMETHODCALLTYPE CThereEdgeModule::CreateInstanceWithContext(IUnknown *punkContext, IUnknown *punkOuter, REFIID riid, void **ppv)
+HRESULT STDMETHODCALLTYPE FlashProxyModule::CreateInstanceWithContext(IUnknown *punkContext, IUnknown *punkOuter, REFIID riid, void **ppv)
 {
     if (IsEqualIID(riid, IID_IUnknown))
     {
-        auto module = new CThereEdgeModule();
+        auto module = new FlashProxyModule();
         if (module == nullptr)
             return E_FAIL;
 
-        module->m_punkContext = punkContext;
-        if (punkContext != nullptr)
-            punkContext->AddRef();
-
-        module->m_punkOuter = punkOuter;
-        if (punkOuter != nullptr)
-            punkOuter->AddRef();
+        module->m_unknownContext = punkContext;
+        module->m_unknownOuter = punkOuter;
 
         *ppv = static_cast<IClassFactoryEx*>(module);
         return S_OK;
@@ -290,7 +284,7 @@ HRESULT STDMETHODCALLTYPE CThereEdgeModule::CreateInstanceWithContext(IUnknown *
     return E_NOINTERFACE;
 }
 
-HRESULT STDMETHODCALLTYPE CThereEdgeModule::LockServer(BOOL fLock)
+HRESULT STDMETHODCALLTYPE FlashProxyModule::LockServer(BOOL fLock)
 {
     if (fLock)
         m_nLockCnt++;
@@ -300,14 +294,14 @@ HRESULT STDMETHODCALLTYPE CThereEdgeModule::LockServer(BOOL fLock)
     return S_OK;
 }
 
-HRESULT STDMETHODCALLTYPE CThereEdgeModule::QuickActivate(QACONTAINER *pQaContainer, QACONTROL *pQaControl)
+HRESULT STDMETHODCALLTYPE FlashProxyModule::QuickActivate(QACONTAINER *pQaContainer, QACONTROL *pQaControl)
 {
     m_qaContainer = *pQaContainer;
     m_qaControl = *pQaControl;
     return S_OK;
 }
 
-HRESULT STDMETHODCALLTYPE CThereEdgeModule::SetContentExtent(LPSIZEL pSizel)
+HRESULT STDMETHODCALLTYPE FlashProxyModule::SetContentExtent(LPSIZEL pSizel)
 {
     if (pSizel != nullptr)
         SetSize(*pSizel);
@@ -315,7 +309,7 @@ HRESULT STDMETHODCALLTYPE CThereEdgeModule::SetContentExtent(LPSIZEL pSizel)
     return S_OK;
 }
 
-HRESULT STDMETHODCALLTYPE CThereEdgeModule::GetContentExtent(LPSIZEL pSizel)
+HRESULT STDMETHODCALLTYPE FlashProxyModule::GetContentExtent(LPSIZEL pSizel)
 {
     if (pSizel != nullptr)
         *pSizel = m_size;
@@ -323,7 +317,7 @@ HRESULT STDMETHODCALLTYPE CThereEdgeModule::GetContentExtent(LPSIZEL pSizel)
     return S_OK;
 }
 
-HRESULT STDMETHODCALLTYPE CThereEdgeModule::FindConnectionPoint(REFIID riid, IConnectionPoint **ppCP)
+HRESULT STDMETHODCALLTYPE FlashProxyModule::FindConnectionPoint(REFIID riid, IConnectionPoint **ppCP)
 {
     if (IsEqualIID(riid, DIID_IShockwaveFlashEvents))
     {
@@ -335,20 +329,20 @@ HRESULT STDMETHODCALLTYPE CThereEdgeModule::FindConnectionPoint(REFIID riid, ICo
     return E_NOINTERFACE;
 }
 
-HRESULT STDMETHODCALLTYPE CThereEdgeModule::GetConnectionInterface(IID *pIID)
+HRESULT STDMETHODCALLTYPE FlashProxyModule::GetConnectionInterface(IID *pIID)
 {
     *pIID = DIID_IShockwaveFlashEvents;
     return S_OK;
 }
 
-HRESULT STDMETHODCALLTYPE CThereEdgeModule::GetConnectionPointContainer(IConnectionPointContainer **ppCPC)
+HRESULT STDMETHODCALLTYPE FlashProxyModule::GetConnectionPointContainer(IConnectionPointContainer **ppCPC)
 {
     AddRef();
     *ppCPC = static_cast<IConnectionPointContainer*>(this);
     return S_OK;
 }
 
-HRESULT STDMETHODCALLTYPE CThereEdgeModule::Advise(IUnknown *pUnkSink, DWORD *pdwCookie)
+HRESULT STDMETHODCALLTYPE FlashProxyModule::Advise(IUnknown *pUnkSink, DWORD *pdwCookie)
 {
     if (SUCCEEDED(pUnkSink->QueryInterface(&m_flashEvents)))
     {
@@ -359,7 +353,7 @@ HRESULT STDMETHODCALLTYPE CThereEdgeModule::Advise(IUnknown *pUnkSink, DWORD *pd
     return E_FAIL;
 }
 
-HRESULT STDMETHODCALLTYPE CThereEdgeModule::Unadvise(DWORD dwCookie)
+HRESULT STDMETHODCALLTYPE FlashProxyModule::Unadvise(DWORD dwCookie)
 {
     if (dwCookie == (DWORD)&m_flashEvents && m_flashEvents != nullptr)
     {
@@ -371,13 +365,13 @@ HRESULT STDMETHODCALLTYPE CThereEdgeModule::Unadvise(DWORD dwCookie)
     return E_FAIL;
 }
 
-HRESULT STDMETHODCALLTYPE CThereEdgeModule::Close(DWORD dwSaveOption)
+HRESULT STDMETHODCALLTYPE FlashProxyModule::Close(DWORD dwSaveOption)
 {
     SetVisibility(false);
     return S_OK;
 }
 
-HRESULT STDMETHODCALLTYPE CThereEdgeModule::DoVerb(LONG iVerb, LPMSG lpmsg, IOleClientSite *pActiveSite, LONG lindex, HWND hwndParent, LPCRECT lprcPosRect)
+HRESULT STDMETHODCALLTYPE FlashProxyModule::DoVerb(LONG iVerb, LPMSG lpmsg, IOleClientSite *pActiveSite, LONG lindex, HWND hwndParent, LPCRECT lprcPosRect)
 {
     switch (iVerb)
     {
@@ -392,12 +386,19 @@ HRESULT STDMETHODCALLTYPE CThereEdgeModule::DoVerb(LONG iVerb, LPMSG lpmsg, IOle
             if (m_environment != nullptr)
                 return S_OK;
 
+            if (pActiveSite == nullptr)
+                return E_INVALIDARG;
+
+            if (FAILED(pActiveSite->QueryInterface(&m_serviceProvider)))
+                return E_FAIL;
+
             if (lprcPosRect == nullptr)
                 return E_INVALIDARG;
 
             SetRect(*lprcPosRect);
 
-            m_wnd = CreateWindowEx(WS_EX_TRANSPARENT, L"ThereEdge", L"", WS_CHILD | WS_CLIPCHILDREN | WS_CLIPSIBLINGS,
+            m_wnd = CreateWindowEx(WS_EX_TRANSPARENT, g_WindowClassName, L"",
+                                   WS_CHILD | WS_CLIPCHILDREN | WS_CLIPSIBLINGS,
                                    m_pos.cx, m_pos.cy, m_size.cx, m_size.cy,
                                    hwndParent, nullptr, GetModuleHandle(nullptr), nullptr);
 
@@ -411,7 +412,7 @@ HRESULT STDMETHODCALLTYPE CThereEdgeModule::DoVerb(LONG iVerb, LPMSG lpmsg, IOle
     }
 }
 
-HRESULT STDMETHODCALLTYPE CThereEdgeModule::SetObjectRects(LPCRECT lprcPosRect, LPCRECT lprcClipRect)
+HRESULT STDMETHODCALLTYPE FlashProxyModule::SetObjectRects(LPCRECT lprcPosRect, LPCRECT lprcClipRect)
 {
     if (lprcClipRect != nullptr)
         SetRect(*lprcClipRect);
@@ -419,7 +420,7 @@ HRESULT STDMETHODCALLTYPE CThereEdgeModule::SetObjectRects(LPCRECT lprcPosRect, 
     return S_OK;
 }
 
-HRESULT STDMETHODCALLTYPE CThereEdgeModule::Draw(DWORD dwDrawAspect, LONG lindex, void *pvAspect, DVTARGETDEVICE *ptd,
+HRESULT STDMETHODCALLTYPE FlashProxyModule::Draw(DWORD dwDrawAspect, LONG lindex, void *pvAspect, DVTARGETDEVICE *ptd,
                                                  HDC hdcTargetDev, HDC hdcDraw, LPCRECTL lprcBounds, LPCRECTL lprcWBounds,
                                                  BOOL (STDMETHODCALLTYPE *pfnContinue)(ULONG_PTR dwContinue), ULONG_PTR dwContinue)
 {
@@ -427,30 +428,30 @@ HRESULT STDMETHODCALLTYPE CThereEdgeModule::Draw(DWORD dwDrawAspect, LONG lindex
     return S_OK;
 }
 
-HRESULT STDMETHODCALLTYPE CThereEdgeModule::QueryHitPoint(DWORD dwAspect, LPCRECT pRectBounds, POINT ptlLoc, LONG lCloseHint, DWORD *pHitResult)
+HRESULT STDMETHODCALLTYPE FlashProxyModule::QueryHitPoint(DWORD dwAspect, LPCRECT pRectBounds, POINT ptlLoc, LONG lCloseHint, DWORD *pHitResult)
 {
     //Log(L"QueryHitPoint\n");
     return E_NOTIMPL;
 }
 
-HRESULT STDMETHODCALLTYPE CThereEdgeModule::QueryHitRect(DWORD dwAspect, LPCRECT pRectBounds, LPCRECT pRectLoc, LONG lCloseHint, DWORD *pHitResult)
+HRESULT STDMETHODCALLTYPE FlashProxyModule::QueryHitRect(DWORD dwAspect, LPCRECT pRectBounds, LPCRECT pRectLoc, LONG lCloseHint, DWORD *pHitResult)
 {
     //Log(L"QueryHitRect\n");
     return E_NOTIMPL;
 }
 
-HRESULT STDMETHODCALLTYPE CThereEdgeModule::GetTypeInfoCount(UINT *pctinfo)
+HRESULT STDMETHODCALLTYPE FlashProxyModule::GetTypeInfoCount(UINT *pctinfo)
 {
     *pctinfo = 0;
     return S_OK;
 }
 
-HRESULT STDMETHODCALLTYPE CThereEdgeModule::GetTypeInfo(UINT iTInfo, LCID lcid, ITypeInfo **ppTInfo)
+HRESULT STDMETHODCALLTYPE FlashProxyModule::GetTypeInfo(UINT iTInfo, LCID lcid, ITypeInfo **ppTInfo)
 {
     return E_NOTIMPL;
 }
 
-HRESULT STDMETHODCALLTYPE CThereEdgeModule::GetIDsOfNames(REFIID riid, LPOLESTR *rgszNames, UINT cNames, LCID lcid, DISPID *rgDispId)
+HRESULT STDMETHODCALLTYPE FlashProxyModule::GetIDsOfNames(REFIID riid, LPOLESTR *rgszNames, UINT cNames, LCID lcid, DISPID *rgDispId)
 {
     if (cNames == 1)
     {
@@ -464,7 +465,7 @@ HRESULT STDMETHODCALLTYPE CThereEdgeModule::GetIDsOfNames(REFIID riid, LPOLESTR 
     return DISP_E_UNKNOWNNAME;
 }
 
-HRESULT STDMETHODCALLTYPE CThereEdgeModule::Invoke(DISPID dispIdMember, REFIID riid, LCID lcid, WORD wFlags, DISPPARAMS *pDispParams,
+HRESULT STDMETHODCALLTYPE FlashProxyModule::Invoke(DISPID dispIdMember, REFIID riid, LCID lcid, WORD wFlags, DISPPARAMS *pDispParams,
                                                    VARIANT *pVarResult, EXCEPINFO *pExcepInfo, UINT *puArgErr)
 {
     if (dispIdMember == 1)
@@ -477,7 +478,7 @@ HRESULT STDMETHODCALLTYPE CThereEdgeModule::Invoke(DISPID dispIdMember, REFIID r
     return E_NOTIMPL;
 }
 
-HRESULT STDMETHODCALLTYPE CThereEdgeModule::put_Movie(BSTR pVal)
+HRESULT STDMETHODCALLTYPE FlashProxyModule::put_Movie(BSTR pVal)
 {
     if (m_url.Length() > 0)
         return E_FAIL;
@@ -501,12 +502,12 @@ HRESULT STDMETHODCALLTYPE CThereEdgeModule::put_Movie(BSTR pVal)
     return S_OK;
 }
 
-HRESULT STDMETHODCALLTYPE CThereEdgeModule::put_WMode(BSTR pVal)
+HRESULT STDMETHODCALLTYPE FlashProxyModule::put_WMode(BSTR pVal)
 {
     return S_OK;
 }
 
-HRESULT STDMETHODCALLTYPE CThereEdgeModule::SetVariable(BSTR name, BSTR value)
+HRESULT STDMETHODCALLTYPE FlashProxyModule::SetVariable(BSTR name, BSTR value)
 {
     CComBSTR escName;
     if (FAILED(Encode(name, escName)))
@@ -532,7 +533,7 @@ HRESULT STDMETHODCALLTYPE CThereEdgeModule::SetVariable(BSTR name, BSTR value)
     return S_OK;
 }
 
-HRESULT STDMETHODCALLTYPE CThereEdgeModule::Invoke(HRESULT errorCode, ICoreWebView2Environment *environment)
+HRESULT STDMETHODCALLTYPE FlashProxyModule::Invoke(HRESULT errorCode, ICoreWebView2Environment *environment)
 {
     if (environment == nullptr)
         return E_FAIL;
@@ -542,7 +543,7 @@ HRESULT STDMETHODCALLTYPE CThereEdgeModule::Invoke(HRESULT errorCode, ICoreWebVi
     return S_OK;
 }
 
-HRESULT STDMETHODCALLTYPE CThereEdgeModule::Invoke(HRESULT errorCode, ICoreWebView2Controller *controller)
+HRESULT STDMETHODCALLTYPE FlashProxyModule::Invoke(HRESULT errorCode, ICoreWebView2Controller *controller)
 {
     if (controller == nullptr)
         return E_FAIL;
@@ -592,7 +593,7 @@ HRESULT STDMETHODCALLTYPE CThereEdgeModule::Invoke(HRESULT errorCode, ICoreWebVi
     return S_OK;
 }
 
-HRESULT STDMETHODCALLTYPE CThereEdgeModule::Invoke(ICoreWebView2 *sender, ICoreWebView2WebMessageReceivedEventArgs *args)
+HRESULT STDMETHODCALLTYPE FlashProxyModule::Invoke(ICoreWebView2 *sender, ICoreWebView2WebMessageReceivedEventArgs *args)
 {
     if (args == nullptr)
         return E_FAIL;
@@ -622,7 +623,7 @@ HRESULT STDMETHODCALLTYPE CThereEdgeModule::Invoke(ICoreWebView2 *sender, ICoreW
     return S_OK;
 }
 
-HRESULT STDMETHODCALLTYPE CThereEdgeModule::Invoke(ICoreWebView2 *sender, ICoreWebView2WebResourceRequestedEventArgs *args)
+HRESULT STDMETHODCALLTYPE FlashProxyModule::Invoke(ICoreWebView2 *sender, ICoreWebView2WebResourceRequestedEventArgs *args)
 {
     if (args == nullptr)
         return E_FAIL;
@@ -692,7 +693,7 @@ HRESULT STDMETHODCALLTYPE CThereEdgeModule::Invoke(ICoreWebView2 *sender, ICoreW
     return S_OK;
 }
 
-HRESULT STDMETHODCALLTYPE CThereEdgeModule::Invoke(ICoreWebView2 *sender, ICoreWebView2NavigationCompletedEventArgs *args)
+HRESULT STDMETHODCALLTYPE FlashProxyModule::Invoke(ICoreWebView2 *sender, ICoreWebView2NavigationCompletedEventArgs *args)
 {
     if (args == nullptr)
         return E_FAIL;
@@ -711,7 +712,7 @@ HRESULT STDMETHODCALLTYPE CThereEdgeModule::Invoke(ICoreWebView2 *sender, ICoreW
     return S_OK;
 }
 
-HRESULT CThereEdgeModule::Encode(const BSTR in, CComBSTR &out)
+HRESULT FlashProxyModule::Encode(const BSTR in, CComBSTR &out)
 {
     WCHAR buffer[INTERNET_MAX_URL_LENGTH];
     DWORD size = INTERNET_MAX_URL_LENGTH;
@@ -724,7 +725,7 @@ HRESULT CThereEdgeModule::Encode(const BSTR in, CComBSTR &out)
     return E_FAIL;
 }
 
-HRESULT CThereEdgeModule::Navigate()
+HRESULT FlashProxyModule::Navigate()
 {
     if (m_url.Length() == 0)
         return S_OK;
@@ -738,7 +739,7 @@ HRESULT CThereEdgeModule::Navigate()
     return S_OK;
 }
 
-HRESULT CThereEdgeModule::SendVariables()
+HRESULT FlashProxyModule::SendVariables()
 {
     if (!m_ready)
         return S_OK;
@@ -758,7 +759,7 @@ HRESULT CThereEdgeModule::SendVariables()
     return S_OK;
 }
 
-HRESULT CThereEdgeModule::InvokeFlashEvent(const WCHAR *cmd, DISPPARAMS &params, VARIANT *result)
+HRESULT FlashProxyModule::InvokeFlashEvent(const WCHAR *cmd, DISPPARAMS &params, VARIANT *result)
 {
     if (m_flashEvents == nullptr)
         return E_FAIL;
@@ -773,7 +774,7 @@ HRESULT CThereEdgeModule::InvokeFlashEvent(const WCHAR *cmd, DISPPARAMS &params,
     return S_OK;
 }
 
-HRESULT CThereEdgeModule::InvokeFlashEvent(const WCHAR *cmd, LONG arg1)
+HRESULT FlashProxyModule::InvokeFlashEvent(const WCHAR *cmd, LONG arg1)
 {
     VARIANTARG vargs[1];
     vargs[0].vt = VT_I4;
@@ -787,7 +788,7 @@ HRESULT CThereEdgeModule::InvokeFlashEvent(const WCHAR *cmd, LONG arg1)
     return InvokeFlashEvent(cmd, params);
 }
 
-HRESULT CThereEdgeModule::InvokeFlashEvent(const WCHAR *cmd, BSTR arg1, BSTR arg2)
+HRESULT FlashProxyModule::InvokeFlashEvent(const WCHAR *cmd, BSTR arg1, BSTR arg2)
 {
     VARIANTARG vargs[2];
     vargs[0].vt = VT_BSTR;
@@ -803,7 +804,7 @@ HRESULT CThereEdgeModule::InvokeFlashEvent(const WCHAR *cmd, BSTR arg1, BSTR arg
     return InvokeFlashEvent(cmd, params);
 }
 
-HRESULT CThereEdgeModule::SetSize(const SIZE &size)
+HRESULT FlashProxyModule::SetSize(const SIZE &size)
 {
     RECT rect;
     rect.left = m_pos.cx;
@@ -814,7 +815,7 @@ HRESULT CThereEdgeModule::SetSize(const SIZE &size)
     return SetRect(rect);
 }
 
-HRESULT CThereEdgeModule::SetRect(const RECT &rect)
+HRESULT FlashProxyModule::SetRect(const RECT &rect)
 {
     UINT flags = 0;
 
@@ -857,7 +858,7 @@ HRESULT CThereEdgeModule::SetRect(const RECT &rect)
     return S_OK;
 }
 
-HRESULT CThereEdgeModule::SetVisibility(BOOL visible)
+HRESULT FlashProxyModule::SetVisibility(BOOL visible)
 {
     if (visible == m_visible)
         return S_OK;

@@ -1,10 +1,10 @@
 //{{NO_DEPENDENCIES}}
 // Microsoft Visual C++ generated include file.
-// Used by ThereEdge.rc
+// Used by FlashProxy.rc
 //
 
 #define IDS_PROJNAME                    100
-#define IDR_THEREEDGE      101
+#define IDR_FLASHPROXY                  101
 
 // Next default values for new objects
 //

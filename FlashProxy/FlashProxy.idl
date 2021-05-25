@@ -3,9 +3,9 @@ import "ocidl.idl";
 
 [
     uuid(D27CDB6B-AE6D-11CF-96B8-444553540000),
-    version(1.0),
+    version(10.0),
 ]
-library ThereEdgeLib
+library FlashProxyLib
 {
     importlib("stdole2.tlb");
     interface IShockwaveFlash;

@@ -44,14 +44,14 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <IgnoreImportLibrary>true</IgnoreImportLibrary>
     <LinkIncremental>true</LinkIncremental>
-    <TargetName>ThereEdge</TargetName>
-    <OutDir>$(SolutionDir)Control\$(Configuration)\</OutDir>
+    <TargetName>FlashProxy</TargetName>
+    <OutDir>$(SolutionDir)FlashProxy\$(Configuration)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <IgnoreImportLibrary>true</IgnoreImportLibrary>
     <LinkIncremental>false</LinkIncremental>
-    <TargetName>ThereEdge</TargetName>
-    <OutDir>$(SolutionDir)Control\$(Configuration)\</OutDir>
+    <TargetName>FlashProxy</TargetName>
+    <OutDir>$(SolutionDir)FlashProxy\$(Configuration)\</OutDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -67,11 +67,11 @@
       <MkTypLibCompatible>false</MkTypLibCompatible>
       <TargetEnvironment>Win32</TargetEnvironment>
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <HeaderFileName>ThereEdge_i.h</HeaderFileName>
-      <InterfaceIdentifierFileName>ThereEdge_i.c</InterfaceIdentifierFileName>
-      <ProxyFileName>ThereEdge_p.c</ProxyFileName>
+      <HeaderFileName>FlashProxy_i.h</HeaderFileName>
+      <InterfaceIdentifierFileName>FlashProxy_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>FlashProxy_p.c</ProxyFileName>
       <GenerateStublessProxies>true</GenerateStublessProxies>
-      <TypeLibraryName>$(IntDir)ThereEdge.tlb</TypeLibraryName>
+      <TypeLibraryName>$(IntDir)FlashProxy.tlb</TypeLibraryName>
       <DllDataFileName />
       <ValidateAllParameters>true</ValidateAllParameters>
     </Midl>
@@ -82,7 +82,7 @@
     </ResourceCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
-      <ModuleDefinitionFile>.\ThereEdge.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>.\FlashProxy.def</ModuleDefinitionFile>
       <RegisterOutput>false</RegisterOutput>
     </Link>
   </ItemDefinitionGroup>
@@ -100,11 +100,11 @@
       <MkTypLibCompatible>false</MkTypLibCompatible>
       <TargetEnvironment>Win32</TargetEnvironment>
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <HeaderFileName>ThereEdge_i.h</HeaderFileName>
-      <InterfaceIdentifierFileName>ThereEdge_i.c</InterfaceIdentifierFileName>
-      <ProxyFileName>ThereEdge_p.c</ProxyFileName>
+      <HeaderFileName>FlashProxy_i.h</HeaderFileName>
+      <InterfaceIdentifierFileName>FlashProxy_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>FlashProxy_p.c</ProxyFileName>
       <GenerateStublessProxies>true</GenerateStublessProxies>
-      <TypeLibraryName>$(IntDir)ThereEdge.tlb</TypeLibraryName>
+      <TypeLibraryName>$(IntDir)FlashProxy.tlb</TypeLibraryName>
       <DllDataFileName />
       <ValidateAllParameters>true</ValidateAllParameters>
     </Midl>
@@ -115,7 +115,7 @@
     </ResourceCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
-      <ModuleDefinitionFile>.\ThereEdge.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>.\FlashProxy.def</ModuleDefinitionFile>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <RegisterOutput>false</RegisterOutput>
@@ -124,12 +124,12 @@
   <ItemGroup>
     <ClInclude Include="platform.h" />
     <ClInclude Include="resource.h" />
-    <ClInclude Include="ThereEdge.h" />
-    <ClInclude Include="ThereEdge_i.h" />
+    <ClInclude Include="FlashProxy.h" />
+    <ClInclude Include="FlashProxy_i.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="ThereEdge.cpp" />
-    <ClCompile Include="ThereEdge_i.c">
+    <ClCompile Include="FlashProxy.cpp" />
+    <ClCompile Include="FlashProxy_i.c">
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</CompileAsManaged>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -139,15 +139,15 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="ThereEdge.rc" />
+    <ResourceCompile Include="FlashProxy.rc" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
-    <None Include="ThereEdge.def" />
-    <None Include="ThereEdge.rgs" />
+    <None Include="FlashProxy.def" />
+    <None Include="FlashProxy.rgs" />
   </ItemGroup>
   <ItemGroup>
-    <Midl Include="ThereEdge.idl" />
+    <Midl Include="FlashProxy.idl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
