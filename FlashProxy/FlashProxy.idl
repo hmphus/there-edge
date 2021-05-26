@@ -3,7 +3,7 @@ import "ocidl.idl";
 
 [
     uuid(D27CDB6B-AE6D-11CF-96B8-444553540000),
-    version(10.0),
+    version(1.0),
 ]
 library FlashProxyLib
 {

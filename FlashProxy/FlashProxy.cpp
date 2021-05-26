@@ -18,6 +18,7 @@
 #include "WebView2.h"
 #include "FlashProxy_i.h"
 #include "FlashProxy.h"
+#include "FlashRequest.h"
 
 FlashProxyModule g_AtlModule;
 WCHAR FlashProxyModule::g_WindowClassName[] = L"ThereEdgeFlashProxy";
@@ -28,10 +29,10 @@ void Log(const WCHAR *format, ...)
     va_start(args, format);
 
     WCHAR buff[1000];
-    _vsnwprintf_s(buff, 1000, format, args);
+    _vsnwprintf_s(buff, _countof(buff), format, args);
 
     FILE *file = nullptr;
-    if (fopen_s(&file, "debug.txt", "a") == 0)
+    if (fopen_s(&file, "debug.log", "a") == 0)
     {
         vfwprintf_s(file, format, args);
         fflush(file);
@@ -80,8 +81,7 @@ STDAPI DllInstall(BOOL bInstall, _In_opt_ LPCWSTR pszCmdLine)
 
     if (pszCmdLine != nullptr)
     {
-        static const WCHAR userSwitch[] = L"user";
-        if (_wcsnicmp(pszCmdLine, userSwitch, _countof(userSwitch)) == 0)
+        if (_wcsnicmp(pszCmdLine, L"user", 4) == 0)
             ATL::AtlSetPerUserRegistration(true);
     }
 
@@ -144,15 +144,7 @@ FlashProxyModule::~FlashProxyModule()
         m_view->remove_WebMessageReceived(m_webMessageReceivedToken);
         m_view->remove_WebResourceRequested(m_webResourceRequestedToken);
         m_view->remove_NavigationCompleted(m_navigationCompletedToken);
-        m_view.Release();
     }
-
-    m_controller.Release();
-    m_environment.Release();
-    m_serviceProvider.Release();
-    m_unknownContext.Release();
-    m_unknownOuter.Release();
-    m_flashEvents.Release();
 }
 
 HRESULT STDMETHODCALLTYPE FlashProxyModule::QueryInterface(REFIID riid, void **object)
@@ -226,11 +218,6 @@ HRESULT STDMETHODCALLTYPE FlashProxyModule::QueryInterface(REFIID riid, void **o
         *object = static_cast<IShockwaveFlash*>(this);
         return S_OK;
     }
-
-    //Log(L"QueryInterface: %08lx-%04x-%04x-%02x%02x-%02x%02x%02x%02x%02x%02x\n",
-    //    riid.Data1, riid.Data2, riid.Data3, riid.Data4[0], riid.Data4[1],
-    //    riid.Data4[2], riid.Data4[3], riid.Data4[4],
-    //    riid.Data4[5], riid.Data4[6], riid.Data4[7]);
 
     *object = nullptr;
     return E_NOINTERFACE;
@@ -536,7 +523,7 @@ HRESULT STDMETHODCALLTYPE FlashProxyModule::SetVariable(BSTR name, BSTR value)
 HRESULT STDMETHODCALLTYPE FlashProxyModule::Invoke(HRESULT errorCode, ICoreWebView2Environment *environment)
 {
     if (environment == nullptr)
-        return E_FAIL;
+        return E_INVALIDARG;
 
     m_environment = environment;
     m_environment->CreateCoreWebView2Controller(m_wnd, this);
@@ -546,7 +533,7 @@ HRESULT STDMETHODCALLTYPE FlashProxyModule::Invoke(HRESULT errorCode, ICoreWebVi
 HRESULT STDMETHODCALLTYPE FlashProxyModule::Invoke(HRESULT errorCode, ICoreWebView2Controller *controller)
 {
     if (controller == nullptr)
-        return E_FAIL;
+        return E_INVALIDARG;
 
     if (FAILED(controller->QueryInterface(&m_controller)) || m_controller == nullptr)
         return E_FAIL;
@@ -554,7 +541,7 @@ HRESULT STDMETHODCALLTYPE FlashProxyModule::Invoke(HRESULT errorCode, ICoreWebVi
     if (FAILED(m_controller->get_CoreWebView2(&m_view)) || m_view == nullptr)
         return E_FAIL;
 
-    ICoreWebView2Settings *settings = nullptr;
+    CComPtr<ICoreWebView2Settings> settings;
     if (FAILED(m_view->get_Settings(&settings)) || settings == nullptr)
         return E_FAIL;
 
@@ -596,7 +583,7 @@ HRESULT STDMETHODCALLTYPE FlashProxyModule::Invoke(HRESULT errorCode, ICoreWebVi
 HRESULT STDMETHODCALLTYPE FlashProxyModule::Invoke(ICoreWebView2 *sender, ICoreWebView2WebMessageReceivedEventArgs *args)
 {
     if (args == nullptr)
-        return E_FAIL;
+        return E_INVALIDARG;
 
     WCHAR *command = nullptr;
     if (FAILED(args->TryGetWebMessageAsString(&command)) || command == nullptr)
@@ -626,7 +613,7 @@ HRESULT STDMETHODCALLTYPE FlashProxyModule::Invoke(ICoreWebView2 *sender, ICoreW
 HRESULT STDMETHODCALLTYPE FlashProxyModule::Invoke(ICoreWebView2 *sender, ICoreWebView2WebResourceRequestedEventArgs *args)
 {
     if (args == nullptr)
-        return E_FAIL;
+        return E_INVALIDARG;
 
     ICoreWebView2WebResourceRequest *request = nullptr;
     if (FAILED(args->get_Request(&request)) || request == nullptr)
@@ -636,59 +623,15 @@ HRESULT STDMETHODCALLTYPE FlashProxyModule::Invoke(ICoreWebView2 *sender, ICoreW
     if (FAILED(request->get_Uri(&uri)) || uri == nullptr)
         return E_FAIL;
 
-    if (_wcsnicmp(uri, L"http://127.0.0.1:9999/", 22) == 0 || _wcsnicmp(uri, L"http://localhost:9999/", 22) == 0)
-    {
-        uri += 22;
+    if (_wcsnicmp(uri, L"http://127.0.0.1:9999/", 22) != 0 && _wcsnicmp(uri, L"http://localhost:9999/", 22) != 0)
+        return S_FALSE;
 
-        ICoreWebView2Deferral *deferral;
-        if (FAILED(args->GetDeferral(&deferral)) || deferral == nullptr)
-            return E_FAIL;
+    CComPtr<FlashRequest> flashRequest(new FlashRequest(m_environment, args));
+    if (flashRequest == nullptr)
+        return E_FAIL;
 
-        args->AddRef();
-
-        if (_wcsnicmp(uri, L"resources/", 10) == 0)
-        {
-            Log(L"TFS: %s\n", uri);
-
-            IStream *content = nullptr;
-            if (SUCCEEDED(SHCreateStreamOnFileEx(uri, STGM_READ | STGM_SHARE_DENY_NONE, FILE_ATTRIBUTE_NORMAL, false, nullptr, &content)))
-            {
-                ICoreWebView2WebResourceResponse *response = nullptr;
-                if (SUCCEEDED(m_environment->CreateWebResourceResponse(content, 200, L"OK", L"", &response)) && response != nullptr)
-                {
-                    args->put_Response(response);
-                    response->Release();
-                }
-
-                content->Release();
-            }
-            else
-            {
-                ICoreWebView2WebResourceResponse *response = nullptr;
-                if (SUCCEEDED(m_environment->CreateWebResourceResponse(nullptr, 404, L"Not Found", L"", &response)) && response != nullptr)
-                {
-                    args->put_Response(response);
-                    response->Release();
-                }
-            }
-        }
-        else
-        {
-            Log(L"Service: %s\n", uri);
-
-            ICoreWebView2WebResourceResponse *response = nullptr;
-            if (SUCCEEDED(m_environment->CreateWebResourceResponse(nullptr, 404, L"Not Found", L"", &response)) && response != nullptr)
-            {
-                args->put_Response(response);
-                response->Release();
-            }
-        }
-
-        args->Release();
-
-        deferral->Complete();
-        deferral->Release();
-    }
+    if (FAILED(flashRequest->Init(m_serviceProvider, uri)))
+        return E_FAIL;
 
     return S_OK;
 }
@@ -696,7 +639,7 @@ HRESULT STDMETHODCALLTYPE FlashProxyModule::Invoke(ICoreWebView2 *sender, ICoreW
 HRESULT STDMETHODCALLTYPE FlashProxyModule::Invoke(ICoreWebView2 *sender, ICoreWebView2NavigationCompletedEventArgs *args)
 {
     if (args == nullptr)
-        return E_FAIL;
+        return E_INVALIDARG;
 
     BOOL success = false;
     args->get_IsSuccess(&success);
