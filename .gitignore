@@ -6,3 +6,4 @@ packages/
 *.vcxproj.user
 *_i.c
 *_i.h
+/*.bat

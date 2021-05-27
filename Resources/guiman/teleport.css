@@ -1,0 +1,71 @@
+body {
+  margin:0px;
+  font-family:sans-serif;
+  font-size:16px;
+  color:#000;
+  user-select:none;
+  text-size-adjust:none;
+  overflow:hidden;
+}
+
+.teleport {
+  position:absolute;
+  left:0px;
+  top:0px;
+  width:200px;
+  height:354px;
+}
+
+.teleport svg.logo {
+  background-color:#000;
+}
+
+.teleport .text {
+  position:absolute;
+  left:340px;
+  top:268px;
+  width:114px;
+  height:24px;
+  background-image:url(teleport.png);
+}
+
+.teleport .text .dots {
+  position:absolute;
+  left:113px;
+  top:0px;
+  width:17px;
+  height:24px;
+  background-image:url(teleport.png);
+  background-position-x:-123px;
+  animation-name:dots;
+  animation-duration:2s;
+  animation-timing-function:steps(1);
+  animation-iteration-count:infinite;
+}
+
+@keyframes dots {
+  0% {
+    width:0px;
+  }
+  25% {
+    width:5px;
+  }
+  50% {
+    width:11px;
+  }
+  75% {
+    width:17px;
+  }
+}
+
+.teleport .hint {
+  position:absolute;
+  left:10px;
+  top:338px;
+  width:790px;
+  height:80px;
+  color:#ffa85c;
+  font-family:verdana;
+  font-size:18px;
+  text-align:center;
+}

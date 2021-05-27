@@ -384,6 +384,18 @@ HRESULT STDMETHODCALLTYPE FlashProxyModule::DoVerb(LONG iVerb, LPMSG lpmsg, IOle
 
             SetRect(*lprcPosRect);
 
+            if (hwndParent != nullptr)
+            {
+                RECT bounds;
+                GetClientRect(hwndParent, &bounds);
+
+                WCHAR value[25];
+                _ltow_s(bounds.right - bounds.left, value, _countof(value), 10);
+                SetVariable(L"There_WindowWidth", value);
+                _ltow_s(bounds.bottom - bounds.top, value, _countof(value), 10);
+                SetVariable(L"There_WindowHeight", value);
+            }
+
             m_wnd = CreateWindowEx(WS_EX_TRANSPARENT, g_WindowClassName, L"",
                                    WS_CHILD | WS_CLIPCHILDREN | WS_CLIPSIBLINGS,
                                    m_pos.cx, m_pos.cy, m_size.cx, m_size.cy,
