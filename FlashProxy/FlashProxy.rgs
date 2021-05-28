@@ -1,3 +1,18 @@
 HKCR
 {
+    NoRemove CLSID
+    {
+        ForceRemove {71E05279-CB7A-496A-8EE9-D700955CA40C} = s 'There Edge Flash Proxy'
+        {
+            ForceRemove Programmable
+            InprocServer32 = s '%MODULE%'
+            {
+                val ThreadingModel = s 'Apartment'
+            }
+            ProgID = s 'ThereEdge.FlashProxy.1'
+            VersionIndependentProgID = s 'ThereEdge.FlashProxy'
+            TypeLib = s '{682E7C31-6CE3-4FB3-9883-479ED34CB1B9}'
+            Version = s '1.0'
+        }
+    }
 }

@@ -2,7 +2,7 @@ import "oaidl.idl";
 import "ocidl.idl";
 
 [
-    uuid(D27CDB6B-AE6D-11CF-96B8-444553540000),
+    uuid(682E7C31-6CE3-4FB3-9883-479ED34CB1B9),
     version(1.0),
 ]
 library FlashProxyLib
@@ -13,8 +13,8 @@ library FlashProxyLib
 
     [
         odl,
-        uuid(D27CDB6C-AE6D-11CF-96B8-444553540000),
-        helpstring("Shockwave Flash"),
+        uuid(6B3DDCCB-B754-4D73-9E49-65B4AAD1EEAF),
+        helpstring("Flash Proxy"),
         dual,
         oleautomation
     ]
@@ -220,8 +220,8 @@ library FlashProxyLib
     };
 
     [
-        uuid(D27CDB6D-AE6D-11CF-96B8-444553540000),
-        helpstring("Event interface for Shockwave Flash"),
+        uuid(543E9E91-C412-43DD-A12A-3F5AA34758D1),
+        helpstring("Event interface for Flash Proxy"),
         hidden
     ]
     dispinterface IShockwaveFlashEvents {
@@ -235,5 +235,14 @@ library FlashProxyLib
             void FSCommand([in] BSTR command, [in] BSTR args);
             [id(0x000000c5)]
             void FlashCall([in] BSTR request);
+    };
+
+    [
+        uuid(71E05279-CB7A-496A-8EE9-D700955CA40C),
+        helpstring("There Edge Flash Proxy")
+    ]
+    coclass ShockwaveFlash {
+        [default] interface IShockwaveFlash;
+        [default, source] dispinterface IShockwaveFlashEvents;
     };
 };
