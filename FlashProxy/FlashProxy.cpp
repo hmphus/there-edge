@@ -32,7 +32,7 @@ void Log(const WCHAR *format, ...)
     _vsnwprintf_s(buff, _countof(buff), format, args);
 
     FILE *file = nullptr;
-    if (fopen_s(&file, "debug.log", "a") == 0)
+    if (fopen_s(&file, "Debug.log", "a") == 0)
     {
         vfwprintf_s(file, format, args);
         fflush(file);
@@ -354,7 +354,11 @@ HRESULT STDMETHODCALLTYPE FlashProxyModule::Unadvise(DWORD dwCookie)
 
 HRESULT STDMETHODCALLTYPE FlashProxyModule::Close(DWORD dwSaveOption)
 {
-    SetVisibility(false);
+    if (m_controller != nullptr)
+        m_controller->Close();
+
+    Release();
+
     return S_OK;
 }
 
