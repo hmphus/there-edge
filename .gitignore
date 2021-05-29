@@ -1,6 +1,7 @@
 .vs/
 packages/
 **/Debug/
+**/Develop/
 **/Release/
 *.aps
 *.vcxproj.user

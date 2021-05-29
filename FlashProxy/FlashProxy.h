@@ -2,6 +2,8 @@
 
 using namespace ATL;
 
+void Log(const WCHAR *format, ...);
+
 class FlashProxyModule: public ATL::CAtlDllModuleT<FlashProxyModule>,
                         public IClassFactoryEx,
                         public IQuickActivate,

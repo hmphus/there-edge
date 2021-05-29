@@ -25,6 +25,7 @@ WCHAR FlashProxyModule::g_WindowClassName[] = L"ThereEdgeFlashProxy";
 
 void Log(const WCHAR *format, ...)
 {
+#ifdef THERE_LOGGING
     va_list args;
     va_start(args, format);
 
@@ -40,6 +41,7 @@ void Log(const WCHAR *format, ...)
     }
 
     va_end(args);
+#endif
 }
 
 extern "C" BOOL WINAPI DllMain(HINSTANCE hInstance, DWORD dwReason, LPVOID lpReserved)
@@ -561,15 +563,17 @@ HRESULT STDMETHODCALLTYPE FlashProxyModule::Invoke(HRESULT errorCode, ICoreWebVi
     if (FAILED(m_view->get_Settings(&settings)) || settings == nullptr)
         return E_FAIL;
 
+#ifndef THERE_DEVTOOLS
+    settings->put_AreDevToolsEnabled(false);
+#endif
     settings->put_AreDefaultContextMenusEnabled(false);
     settings->put_AreDefaultScriptDialogsEnabled(false);
-    settings->put_AreDevToolsEnabled(false);
-    settings->put_AreHostObjectsAllowed(true);
-    settings->put_IsBuiltInErrorPageEnabled(true);
-    settings->put_IsScriptEnabled(true);
+    settings->put_IsBuiltInErrorPageEnabled(false);
     settings->put_IsStatusBarEnabled(false);
-    settings->put_IsWebMessageEnabled(true);
     settings->put_IsZoomControlEnabled(false);
+    settings->put_AreHostObjectsAllowed(true);
+    settings->put_IsScriptEnabled(true);
+    settings->put_IsWebMessageEnabled(true);
 
     RECT bounds;
     GetClientRect(m_wnd, &bounds);
