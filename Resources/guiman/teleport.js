@@ -15,13 +15,13 @@ $(document).ready(function() {
 
   There.onVariable = function(name, value) {
     if (name == 'There_Ready' && value == '1') {
-      $.ajax({
-        url: `http://${There.variables.There_ResourcesHost}/VersionedXmlSvc/veilHints?` + new URLSearchParams({
+      There.fetch({
+        path: '/VersionedXmlSvc/veilHints',
+        query: {
           Oid: There.variables.There_PilotDoid,
-        }).toString(),
-        dataType: 'text',
-        success: function(data) {
-          const xml = new DOMParser().parseFromString(data.slice(0, -1), 'text/xml');
+        },
+        dataType: 'xml',
+        success: function(xml) {
           const xmlAnswer = xml.getElementsByTagName('Answer')[0];
           const xmlAvatarHints = xmlAnswer.getElementsByTagName('AvatarHints')[0];
           const xmlHint = xmlAvatarHints.getElementsByTagName('Hint')[0];

@@ -22,6 +22,31 @@ There.log = function(level, message) {
   });
 };
 
+There.onDragMouseDown = function() {
+  if (chrome.webview != undefined) {
+    chrome.webview.hostObjects.sync.client.onDragMouseDown();
+  }
+};
+
+There.fetch = function(settings) {
+  const query = new URLSearchParams(settings.query).toString();
+  const dataType = settings.dataType != undefined ? settings.dataType : 'xml';
+  $.ajax({
+    url: `http://${There.variables.There_ResourcesHost}${settings.path}?${query}`,
+    dataType: dataType == 'xml' ? 'text' : dataType,
+    success: function(data) {
+      if (settings.success != undefined) {
+        if (dataType == 'xml') {
+          settings.success(new DOMParser().parseFromString(data.slice(0, -1), 'text/xml'));
+        } else {
+          settings.success(data);
+        }
+      }
+    },
+    error: settings.error,
+  });
+};
+
 $(document).ready(function() {
   $('body').on('contextmenu', function(event) {
     return false;

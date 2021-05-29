@@ -46,9 +46,7 @@ $(document).ready(function() {
   });
 
   $('.titlebar').on('mousedown', function(event) {
-    if (chrome.webview != undefined) {
-      chrome.webview.hostObjects.sync.client.onDragMouseDown();
-    }
+    There.onDragMouseDown();
     event.preventDefault();
     event.stopPropagation();
   });
