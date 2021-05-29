@@ -147,6 +147,12 @@ FlashProxyModule::~FlashProxyModule()
         m_view->remove_WebResourceRequested(m_webResourceRequestedToken);
         m_view->remove_NavigationCompleted(m_navigationCompletedToken);
     }
+
+    if (m_controller != nullptr)
+        m_controller->Close();
+
+    if (m_wnd != nullptr)
+        DestroyWindow(m_wnd);
 }
 
 HRESULT STDMETHODCALLTYPE FlashProxyModule::QueryInterface(REFIID riid, void **object)
