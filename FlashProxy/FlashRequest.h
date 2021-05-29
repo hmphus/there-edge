@@ -5,7 +5,8 @@ using namespace ATL;
 void Log(const WCHAR *format, ...);
 
 class FlashRequest: public IBindCtx,
-                    public IBindStatusCallback
+                    public IBindStatusCallback,
+                    public IStream
 {
 public:
     FlashRequest(ICoreWebView2Environment *environment, ICoreWebView2WebResourceRequestedEventArgs *args);
@@ -36,6 +37,17 @@ protected:
     virtual HRESULT STDMETHODCALLTYPE GetBindInfo(DWORD *grfBINDF, BINDINFO *pbindinfo) override;
     virtual HRESULT STDMETHODCALLTYPE OnDataAvailable(DWORD grfBSCF, DWORD dwSize, FORMATETC *pformatetc, STGMEDIUM *pstgmed) override;
     virtual HRESULT STDMETHODCALLTYPE OnObjectAvailable(REFIID riid, IUnknown *punk) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE Read(void *pv, ULONG cb, ULONG *pcbRead) override;
+    virtual HRESULT STDMETHODCALLTYPE Write(const void *pv, ULONG cb, ULONG *pcbWritten) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE Seek(LARGE_INTEGER dlibMove, DWORD dwOrigin, ULARGE_INTEGER *plibNewPosition) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE SetSize(ULARGE_INTEGER libNewSize) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE CopyTo(IStream *pstm, ULARGE_INTEGER cb, ULARGE_INTEGER *pcbRead, ULARGE_INTEGER *pcbWritten) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE Commit(DWORD grfCommitFlags) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE Revert() override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE LockRegion(ULARGE_INTEGER libOffset, ULARGE_INTEGER cb, DWORD dwLockType) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE UnlockRegion(ULARGE_INTEGER libOffset, ULARGE_INTEGER cb, DWORD dwLockType) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE Stat(STATSTG *pstatstg, DWORD grfStatFlag) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE Clone(IStream **ppstm) override {return E_NOTIMPL;}
 
 protected:
     ULONG                                                m_refCount;
@@ -45,4 +57,5 @@ protected:
     CComPtr<IStream>                                     m_stream;
     CComPtr<IBinding>                                    m_binding;
     CComBSTR                                             m_mimeType;
+    ULONG                                                m_size;
 };

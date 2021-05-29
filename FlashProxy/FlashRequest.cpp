@@ -24,7 +24,9 @@ FlashRequest::FlashRequest(ICoreWebView2Environment *environment, ICoreWebView2W
     m_args(args),
     m_deferral(),
     m_stream(),
-    m_binding()
+    m_binding(),
+    m_mimeType(),
+    m_size(0)
 {
 }
 
@@ -59,6 +61,20 @@ HRESULT STDMETHODCALLTYPE FlashRequest::QueryInterface(REFIID riid, void **objec
     {
         AddRef();
         *object = static_cast<IBindStatusCallback*>(this);
+        return S_OK;
+    }
+
+    if (IsEqualIID(riid, IID_IStream))
+    {
+        AddRef();
+        *object = static_cast<IStream*>(this);
+        return S_OK;
+    }
+
+    if (IsEqualIID(riid, IID_IUnknown))
+    {
+        AddRef();
+        *object = static_cast<IStream*>(this);
         return S_OK;
     }
 
@@ -177,8 +193,10 @@ HRESULT STDMETHODCALLTYPE FlashRequest::OnDataAvailable(DWORD grfBSCF, DWORD dwS
     if (m_environment == nullptr || m_args == nullptr || m_deferral == nullptr || m_stream == nullptr)
         return E_FAIL;
 
+    m_size = pformatetc->cfFormat == CF_TEXT ? dwSize - 1 : dwSize;
+
     CComPtr<ICoreWebView2WebResourceResponse> response;
-    if (FAILED(m_environment->CreateWebResourceResponse(m_stream, 200, L"OK", L"", &response)) || response == nullptr)
+    if (FAILED(m_environment->CreateWebResourceResponse(this, 200, L"OK", L"", &response)) || response == nullptr)
         return E_FAIL;
 
     CComPtr<ICoreWebView2HttpResponseHeaders> headers;
@@ -197,4 +215,21 @@ HRESULT STDMETHODCALLTYPE FlashRequest::OnDataAvailable(DWORD grfBSCF, DWORD dwS
     m_deferral.Release();
 
     return S_OK;
+}
+
+HRESULT STDMETHODCALLTYPE FlashRequest::Read(void *pv, ULONG cb, ULONG *pcbRead)
+{
+    if (pv == nullptr || pcbRead == nullptr || m_stream == nullptr)
+        return E_INVALIDARG;
+
+    HRESULT hr = m_stream->Read(pv, cb, pcbRead);
+    if (SUCCEEDED(hr))
+    {
+        if (*pcbRead > m_size)
+            *pcbRead = m_size;
+
+        m_size -= *pcbRead;
+    }
+
+    return hr;
 }

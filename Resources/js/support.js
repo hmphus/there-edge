@@ -30,19 +30,10 @@ There.onDragMouseDown = function() {
 
 There.fetch = function(settings) {
   const query = new URLSearchParams(settings.query).toString();
-  const dataType = settings.dataType != undefined ? settings.dataType : 'xml';
   $.ajax({
     url: `http://${There.variables.There_ResourcesHost}${settings.path}?${query}`,
-    dataType: dataType == 'xml' ? 'text' : dataType,
-    success: function(data) {
-      if (settings.success != undefined) {
-        if (dataType == 'xml') {
-          settings.success(new DOMParser().parseFromString(data.slice(0, -1), 'text/xml'));
-        } else {
-          settings.success(data);
-        }
-      }
-    },
+    dataType: settings.dataType != undefined ? settings.dataType : 'xml',
+    success: settings.success,
     error: settings.error,
   });
 };
