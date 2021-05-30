@@ -7,8 +7,13 @@ $(document).ready(function() {
 
   $('.compass .button[data-id="close"]').on('click', function() {
     There.fsCommand('closeWindow');
+  }).on('mouseover', function(event) {
+    There.playSound('control rollover');
   }).on('mousedown', function(event) {
+    There.playSound('control down');
     event.stopPropagation();
+  }).on('mouseup', function(event) {
+    There.playSound('control up');
   });
 
   There.fsCommand('setStageWidthHeight', {

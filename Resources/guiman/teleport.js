@@ -14,11 +14,11 @@ $(document).ready(function() {
   });
 
   There.onVariable = function(name, value) {
-    if (name == 'There_Ready' && value == '1') {
+    if (name == 'there_ready' && value == '1') {
       There.fetch({
         path: '/VersionedXmlSvc/veilHints',
         query: {
-          Oid: There.variables.There_PilotDoid,
+          Oid: There.variables.there_pilotdoid,
         },
         dataType: 'xml',
         success: function(xml) {
