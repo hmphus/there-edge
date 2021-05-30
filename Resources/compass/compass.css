@@ -1,0 +1,58 @@
+body {
+  margin:0px;
+  font-family:sans-serif;
+  font-size:16px;
+  color:#000;
+  user-select:none;
+  text-size-adjust:none;
+  overflow:hidden;
+}
+
+.compass {
+  position:absolute;
+  left:0px;
+  top:0px;
+  width:86px;
+  height:86px;
+  background-color:#ffffff40;
+  border-radius:5px;
+}
+
+.compass .face {
+  position:absolute;
+  left:3px;
+  top:3px;
+  width:80px;
+  height:80px;
+  background-image:url(compass.png);
+}
+
+.compass .arrow {
+  position:absolute;
+  left:33px;
+  top:29px;
+  width:20px;
+  height:26px;
+  background-image:url(compass.png);
+  background-position:-80px 0px;
+  transform:rotate(0deg);
+  transform-origin:10px 14px;
+}
+
+.compass .button[data-id="close"] {
+  position:absolute;
+  left:71px;
+  top:3px;
+  width:13px;
+  height:13px;
+  background-image:url(compass.png);
+  background-position:-86px -38px;
+}
+
+.compass .button[data-id="close"]:hover {
+  background-position-y:-52px;
+}
+
+.compass .button[data-id="close"]:hover:active {
+  background-position-y:-66px;
+}
