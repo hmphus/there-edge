@@ -199,15 +199,6 @@ HRESULT STDMETHODCALLTYPE FlashRequest::OnDataAvailable(DWORD grfBSCF, DWORD dwS
     if (FAILED(m_environment->CreateWebResourceResponse(this, 200, L"OK", L"", &response)) || response == nullptr)
         return E_FAIL;
 
-    CComPtr<ICoreWebView2HttpResponseHeaders> headers;
-    if (FAILED(response->get_Headers(&headers)) || headers == nullptr)
-        return E_FAIL;
-
-    /* FIXME: The returned content type isn't correct
-    if (FAILED(headers->AppendHeader(L"Content-Type", m_mimeType)))
-        return E_FAIL;
-    */
-
     if (FAILED(m_args->put_Response(response)))
         return E_FAIL;
 

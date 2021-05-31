@@ -647,6 +647,14 @@ HRESULT STDMETHODCALLTYPE FlashProxyModule::Invoke(ICoreWebView2 *sender, ICoreW
     CComBSTR arg2 = params;
     CoTaskMemFree(command);
 
+#ifdef THERE_DEVTOOLS
+    if (_wcsicmp(arg1, L"devtools") == 0 && sender != nullptr)
+    {
+        sender->OpenDevToolsWindow();
+        return S_OK;
+    }
+#endif
+
     if (FAILED(InvokeFlashEvent(L"FSCommand", arg1, arg2)))
         return E_FAIL;
 
@@ -668,6 +676,18 @@ HRESULT STDMETHODCALLTYPE FlashProxyModule::Invoke(ICoreWebView2 *sender, ICoreW
 
     if (_wcsnicmp(uri, L"http://127.0.0.1:9999/", 22) != 0 && _wcsnicmp(uri, L"http://localhost:9999/", 22) != 0)
         return S_FALSE;
+
+    if (wcscmp(uri + 22, L"favicon.ico") == 0)
+    {
+        CComPtr<ICoreWebView2WebResourceResponse> response;
+        if (FAILED(m_environment->CreateWebResourceResponse(nullptr, 404, L"Not Found", L"", &response)) || response == nullptr)
+            return E_FAIL;
+
+        if (FAILED(args->put_Response(response)))
+            return E_FAIL;
+
+        return S_OK;
+    }
 
     CComPtr<FlashRequest> flashRequest(new FlashRequest(m_environment, args));
     if (flashRequest == nullptr)
