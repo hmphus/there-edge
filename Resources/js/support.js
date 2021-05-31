@@ -16,6 +16,10 @@ There.fsCommand = function(command, query) {
   }
 };
 
+There.guiCommand = function(query) {
+  There.fsCommand('guiCommand', query);
+}
+
 There.log = function(message) {
   There.fsCommand('Log', {
     level: 4,
