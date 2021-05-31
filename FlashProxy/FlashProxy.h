@@ -13,13 +13,12 @@ class FlashProxyModule: public ATL::CAtlDllModuleT<FlashProxyModule>,
                         public IOleInPlaceObjectWindowless,
                         public IViewObjectEx,
                         public ISupportErrorInfo,
-                        public IShockwaveFlash,
+                        public IThereEdgeShockwaveFlash,
                         public ICoreWebView2CreateCoreWebView2EnvironmentCompletedHandler,
                         public ICoreWebView2CreateCoreWebView2ControllerCompletedHandler,
                         public ICoreWebView2WebMessageReceivedEventHandler,
                         public ICoreWebView2WebResourceRequestedEventHandler,
                         public ICoreWebView2NavigationCompletedEventHandler
- 
 {
 public:
     DECLARE_LIBID(LIBID_FlashProxyLib)
@@ -68,7 +67,7 @@ protected:
     virtual HRESULT STDMETHODCALLTYPE EnumAdvise(IEnumSTATDATA **ppenumAdvise) override {return E_NOTIMPL;}
     virtual HRESULT STDMETHODCALLTYPE GetMiscStatus(DWORD dwAspect, DWORD *pdwStatus) override {return E_NOTIMPL;}
     virtual HRESULT STDMETHODCALLTYPE SetColorScheme(LOGPALETTE *pLogpal) override {return E_NOTIMPL;}
-    virtual HRESULT STDMETHODCALLTYPE GetWindow(HWND *phwnd) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE GetWindow(HWND *phwnd) override;
     virtual HRESULT STDMETHODCALLTYPE ContextSensitiveHelp(BOOL fEnterMode) override {return E_NOTIMPL;}
     virtual HRESULT STDMETHODCALLTYPE InPlaceDeactivate() override {return E_NOTIMPL;}
     virtual HRESULT STDMETHODCALLTYPE UIDeactivate() override {return E_NOTIMPL;}
@@ -215,24 +214,24 @@ protected:
     HRESULT SetVisibility(BOOL visible);
 
 protected:
-    ULONG                              m_refCount;
-    QACONTAINER                        m_qaContainer;
-    QACONTROL                          m_qaControl;
-    SIZE                               m_pos;
-    SIZE                               m_size;
-    HWND                               m_wnd;
-    CComBSTR                           m_url;
-    CComSafeArray<BSTR>                m_variables;
-    CComPtr<IShockwaveFlashEvents>     m_flashEvents;
-    CComPtr<IUnknown>                  m_unknownContext;
-    CComPtr<IUnknown>                  m_unknownOuter;
-    CComPtr<IServiceProvider>          m_serviceProvider;
-    CComPtr<ICoreWebView2Environment>  m_environment;
-    CComPtr<ICoreWebView2Controller2>  m_controller;
-    CComPtr<ICoreWebView2>             m_view;
-    EventRegistrationToken             m_webMessageReceivedToken;
-    EventRegistrationToken             m_webResourceRequestedToken;
-    EventRegistrationToken             m_navigationCompletedToken;
-    BOOL                               m_ready;
-    BOOL                               m_visible;
+    ULONG                                    m_refCount;
+    QACONTAINER                              m_qaContainer;
+    QACONTROL                                m_qaControl;
+    SIZE                                     m_pos;
+    SIZE                                     m_size;
+    HWND                                     m_wnd;
+    CComBSTR                                 m_url;
+    CComSafeArray<BSTR>                      m_variables;
+    CComPtr<IThereEdgeShockwaveFlashEvents>  m_flashEvents;
+    CComPtr<IUnknown>                        m_unknownContext;
+    CComPtr<IUnknown>                        m_unknownOuter;
+    CComPtr<IServiceProvider>                m_serviceProvider;
+    CComPtr<ICoreWebView2Environment>        m_environment;
+    CComPtr<ICoreWebView2Controller2>        m_controller;
+    CComPtr<ICoreWebView2>                   m_view;
+    EventRegistrationToken                   m_webMessageReceivedToken;
+    EventRegistrationToken                   m_webResourceRequestedToken;
+    EventRegistrationToken                   m_navigationCompletedToken;
+    BOOL                                     m_ready;
+    BOOL                                     m_visible;
 };

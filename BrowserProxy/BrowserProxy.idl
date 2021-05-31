@@ -1,0 +1,343 @@
+import "ocidl.idl";
+import "docobj.idl";
+
+#include <olectl.h>
+#include "exdispid.h"
+
+[
+    uuid(E792F884-FF4C-4563-92FE-ADAEA759F2EA),
+    version(1.0),
+]
+library BrowserProxyLib
+{
+    importlib("stdole2.tlb");
+    interface IThereEdgeWebBrowser;
+    interface IThereEdgeWebBrowserApp;
+    interface IThereEdgeWebBrowser2;
+    dispinterface IThereEdgeWebBrowserEvents;
+    dispinterface IThereEdgeWebBrowserEvents2;
+
+    [
+        odl,
+        uuid(2170EFE4-F488-4F5C-A844-469080351EC4),
+        helpstring("Browser Proxy"),
+        dual,
+        oleautomation,
+        hidden
+    ]
+    interface IThereEdgeWebBrowser : IDispatch
+    {
+        [id(100)]
+        HRESULT GoBack();
+        [id(101)]
+        HRESULT GoForward();
+        [id(102)]
+        HRESULT GoHome();
+        [id(103)]
+        HRESULT GoSearch();
+        [id(104)]
+        HRESULT Navigate([in] BSTR URL,
+                         [in, optional, unique] VARIANT *Flags,
+                         [in, optional, unique] VARIANT *TargetFrameName,
+                         [in, optional, unique] VARIANT *PostData,
+                         [in, optional, unique] VARIANT *Headers);
+        [id(DISPID_REFRESH)]
+        HRESULT Refresh();
+        [id(105)]
+        HRESULT Refresh2([in, optional, unique] VARIANT *Level);
+        [id(106)]
+        HRESULT Stop();
+        [id(200), propget]
+        HRESULT Application([out,retval] IDispatch **ppDisp);
+        [id(201), propget]
+        HRESULT Parent([out,retval] IDispatch **ppDisp);
+        [id(202), propget]
+        HRESULT Container([out,retval] IDispatch **ppDisp);
+        [id(203), propget]
+        HRESULT Document([out,retval] IDispatch **ppDisp);
+        [id(204), propget]
+        HRESULT TopLevelContainer([out, retval] VARIANT_BOOL *pBool);
+        [id(205), propget]
+        HRESULT Type([out,retval] BSTR *Type);
+        [id(206), propget]
+        HRESULT Left([out, retval] long *pl);
+        [id(206), propput]
+        HRESULT Left([in] long Left);
+        [id(207), propget]
+        HRESULT Top([out, retval] long *pl);
+        [id(207), propput]
+        HRESULT Top([in] long Top);
+        [id(208), propget]
+        HRESULT Width([out, retval] long *pl);
+        [id(208), propput]
+        HRESULT Width([in] long Width);
+        [id(209), propget]
+        HRESULT Height([out, retval] long *pl);
+        [id(209), propput]
+        HRESULT Height([in] long Height);
+        [id(210), propget]
+        HRESULT LocationName([out,retval] BSTR *LocationName);
+        [id(211), propget]
+        HRESULT LocationURL([out,retval] BSTR *LocationURL);
+        [id(212), propget]
+        HRESULT Busy([out,retval] VARIANT_BOOL *pBool);
+    }
+
+    [
+        uuid(825FAF08-F4AF-46BE-8F65-4D6F73185E60),
+        helpstring("Browser Proxy"),
+        dual,
+        oleautomation,
+        hidden
+    ]
+    interface IThereEdgeWebBrowserApp : IThereEdgeWebBrowser
+    {
+        [id(300)]
+        HRESULT Quit();
+        [id(301)]
+        HRESULT ClientToWindow([in,out] int *pcx, [in,out] int *pcy);
+        [id(302)]
+        HRESULT PutProperty([in] BSTR Property, [in] VARIANT vtValue);
+        [id(303)]
+        HRESULT GetProperty([in] BSTR Property, [out, retval] VARIANT *pvtValue);
+        [id(0), propget]
+        HRESULT Name([out,retval] BSTR *Name);
+        [id(DISPID_HWND), propget]
+        HRESULT HWND([out,retval] SHANDLE_PTR *pHWND);
+        [id(400), propget]
+        HRESULT FullName([out,retval] BSTR *FullName);
+        [id(401), propget]
+        HRESULT Path([out,retval] BSTR *Path);
+        [id(402), propget]
+        HRESULT Visible([out, retval] VARIANT_BOOL *pBool);
+        [id(402), propput]
+        HRESULT Visible([in] VARIANT_BOOL Value);
+        [id(403), propget]
+        HRESULT StatusBar([out, retval] VARIANT_BOOL *pBool);
+        [id(403), propput]
+        HRESULT StatusBar([in] VARIANT_BOOL Value);
+        [id(404), propget]
+        HRESULT StatusText([out, retval] BSTR *StatusText);
+        [id(404), propput]
+        HRESULT StatusText([in] BSTR StatusText);
+        [id(405), propget]
+        HRESULT ToolBar([out, retval] int *Value);
+        [id(405), propput]
+        HRESULT ToolBar([in] int Value);
+        [id(406), propget]
+        HRESULT MenuBar([out, retval] VARIANT_BOOL *Value);
+        [id(406), propput]
+        HRESULT MenuBar([in] VARIANT_BOOL Value);
+        [id(407), propget]
+        HRESULT FullScreen([out, retval] VARIANT_BOOL *pbFullScreen);
+        [id(407), propput]
+        HRESULT FullScreen([in] VARIANT_BOOL bFullScreen);
+    }
+
+    [
+        uuid(65CD626F-FDC0-417C-BAAC-CC90E4FEBA16),
+        helpstring("Browser Proxy"),
+        dual,
+        oleautomation,
+        hidden
+    ]
+    interface IThereEdgeWebBrowser2 : IThereEdgeWebBrowserApp
+    {
+        [id(500)]
+        HRESULT Navigate2([in] VARIANT *URL,
+                          [in, optional, unique] VARIANT *Flags,
+                          [in, optional, unique] VARIANT *TargetFrameName,
+                          [in, optional, unique] VARIANT *PostData,
+                          [in, optional, unique] VARIANT *Headers);
+        [id(501)]
+        HRESULT QueryStatusWB([in] OLECMDID cmdID, [out, retval] OLECMDF *pcmdf);
+        [id(502)]
+        HRESULT ExecWB([in] OLECMDID cmdID, [in] OLECMDEXECOPT cmdexecopt, [in, optional, unique] VARIANT *pvaIn, [in, out, optional, unique] VARIANT *pvaOut);
+        [id(503)]
+        HRESULT ShowBrowserBar( [in] VARIANT *pvaClsid,
+                                [in, optional, unique] VARIANT *pvarShow,
+                                [in, optional, unique] VARIANT *pvarSize );
+        [id(DISPID_READYSTATE), propget, bindable]
+        HRESULT ReadyState([retval, out] READYSTATE *plReadyState);
+        [id(550), propget]
+        HRESULT Offline([out, retval] VARIANT_BOOL *pbOffline);
+        [id(550), propput]
+        HRESULT Offline([in] VARIANT_BOOL bOffline);
+        [id(551), propget]
+        HRESULT Silent([out, retval] VARIANT_BOOL *pbSilent);
+        [id(551), propput]
+        HRESULT Silent([in] VARIANT_BOOL bSilent);
+        [id(552), propget]
+        HRESULT RegisterAsBrowser([out, retval] VARIANT_BOOL *pbRegister);
+        [id(552), propput]
+        HRESULT RegisterAsBrowser([in] VARIANT_BOOL bRegister);
+        [id(553), propget]
+        HRESULT RegisterAsDropTarget([out, retval] VARIANT_BOOL *pbRegister);
+        [id(553), propput]
+        HRESULT RegisterAsDropTarget([in] VARIANT_BOOL bRegister);
+        [id(554), propget]
+        HRESULT TheaterMode([out, retval] VARIANT_BOOL *pbRegister);
+        [id(554), propput]
+        HRESULT TheaterMode([in] VARIANT_BOOL bRegister);
+        [id(555), propget]
+        HRESULT AddressBar([out, retval] VARIANT_BOOL *Value);
+        [id(555), propput]
+        HRESULT AddressBar([in] VARIANT_BOOL Value);
+        [id(556), propget]
+        HRESULT Resizable([out, retval] VARIANT_BOOL *Value);
+        [id(556), propput]
+        HRESULT Resizable([in] VARIANT_BOOL Value);
+    }
+
+    [
+        uuid(DD68CD11-4932-435D-AE85-554A61B4D6F5),
+        helpstring("Event interface for Browser Proxy"),
+        hidden
+    ]
+    dispinterface IThereEdgeWebBrowserEvents
+    {
+        properties:
+        methods:
+        [id(DISPID_BEFORENAVIGATE)]
+        void BeforeNavigate([in] BSTR URL, long Flags, BSTR TargetFrameName, VARIANT *PostData, BSTR Headers, [in, out]VARIANT_BOOL *Cancel);
+        [id(DISPID_NAVIGATECOMPLETE)]
+        void NavigateComplete([in] BSTR URL );
+        [id(DISPID_STATUSTEXTCHANGE)]
+        void StatusTextChange([in]BSTR Text);
+        [id(DISPID_PROGRESSCHANGE)]
+        void ProgressChange([in] long Progress, [in] long ProgressMax);
+        [id(DISPID_DOWNLOADCOMPLETE)]
+        void DownloadComplete();
+        [id(DISPID_COMMANDSTATECHANGE)]
+        void CommandStateChange([in] long Command, [in] VARIANT_BOOL Enable);
+        [id(DISPID_DOWNLOADBEGIN)]
+        void DownloadBegin();
+        [id(DISPID_NEWWINDOW)]
+        void NewWindow([in] BSTR URL, [in] long Flags, [in] BSTR TargetFrameName, [in] VARIANT *PostData, [in] BSTR Headers, [in,out] VARIANT_BOOL *Processed);
+        [id(DISPID_TITLECHANGE)]
+        void TitleChange([in]BSTR Text);
+        [id(DISPID_FRAMEBEFORENAVIGATE)]
+        void FrameBeforeNavigate([in] BSTR URL, long Flags, BSTR TargetFrameName, VARIANT *PostData, BSTR Headers, [in, out]VARIANT_BOOL *Cancel);
+        [id(DISPID_FRAMENAVIGATECOMPLETE)]
+        void FrameNavigateComplete([in] BSTR URL );
+        [id(DISPID_FRAMENEWWINDOW)]
+        void FrameNewWindow([in] BSTR URL, [in] long Flags, [in] BSTR TargetFrameName, [in] VARIANT *PostData, [in] BSTR Headers, [in,out] VARIANT_BOOL *Processed);
+        [id(DISPID_QUIT)]
+        void Quit([in, out] VARIANT_BOOL *Cancel);
+        [id(DISPID_WINDOWMOVE)]
+        void WindowMove();
+        [id(DISPID_WINDOWRESIZE)]
+        void WindowResize();
+        [id(DISPID_WINDOWACTIVATE)]
+        void WindowActivate();
+        [id(DISPID_PROPERTYCHANGE)]
+        void PropertyChange([in] BSTR Property);
+    }
+
+    [
+        uuid(A6601B01-4A9A-458A-A9D4-AA4207757056),
+        helpstring("Event interface for Browser Proxy"),
+        hidden
+    ]
+    dispinterface IThereEdgeWebBrowserEvents2
+    {
+        properties:
+        methods:
+        [id(DISPID_STATUSTEXTCHANGE)]
+        void StatusTextChange([in]BSTR Text);
+        [id(DISPID_PROGRESSCHANGE)]
+        void ProgressChange([in] long Progress, [in] long ProgressMax);
+        [id(DISPID_COMMANDSTATECHANGE)]
+        void CommandStateChange([in] long Command, [in] VARIANT_BOOL Enable);
+        [id(DISPID_DOWNLOADBEGIN)]
+        void DownloadBegin();
+        [id(DISPID_DOWNLOADCOMPLETE)]
+        void DownloadComplete();
+        [id(DISPID_TITLECHANGE)]
+        void TitleChange([in] BSTR Text);
+        [id(DISPID_PROPERTYCHANGE)]
+        void PropertyChange([in] BSTR szProperty);
+        [id(DISPID_BEFORENAVIGATE2)]
+        void BeforeNavigate2([in] IDispatch *pDisp,
+                             [in] VARIANT *URL, [in] VARIANT *Flags, [in] VARIANT *TargetFrameName, [in] VARIANT *PostData, [in] VARIANT *Headers,
+                             [in,out] VARIANT_BOOL *Cancel);
+        [id(DISPID_NEWWINDOW2)]
+        void NewWindow2([in, out] IDispatch **ppDisp, [in, out] VARIANT_BOOL *Cancel);
+        [id(DISPID_NAVIGATECOMPLETE2)]
+        void NavigateComplete2([in] IDispatch *pDisp, [in] VARIANT *URL );
+        [id(DISPID_DOCUMENTCOMPLETE)]
+        void DocumentComplete([in] IDispatch *pDisp, [in] VARIANT *URL );
+        [id(DISPID_ONQUIT)]
+        void OnQuit();
+        [id(DISPID_ONVISIBLE)]
+        void OnVisible([in] VARIANT_BOOL Visible);
+        [id(DISPID_ONTOOLBAR)]
+        void OnToolBar([in] VARIANT_BOOL ToolBar);
+        [id(DISPID_ONMENUBAR)]
+        void OnMenuBar([in] VARIANT_BOOL MenuBar);
+        [id(DISPID_ONSTATUSBAR)]
+        void OnStatusBar([in] VARIANT_BOOL StatusBar);
+        [id(DISPID_ONFULLSCREEN)]
+        void OnFullScreen([in] VARIANT_BOOL FullScreen);
+        [id(DISPID_ONTHEATERMODE)]
+        void OnTheaterMode([in] VARIANT_BOOL TheaterMode);
+        [id(DISPID_WINDOWSETRESIZABLE)]
+        void WindowSetResizable([in] VARIANT_BOOL Resizable);
+        [id(DISPID_WINDOWSETLEFT)]
+        void WindowSetLeft([in] long Left);
+        [id(DISPID_WINDOWSETTOP)]
+        void WindowSetTop([in] long Top);
+        [id(DISPID_WINDOWSETWIDTH)]
+        void WindowSetWidth([in] long Width);
+        [id(DISPID_WINDOWSETHEIGHT)]
+        void WindowSetHeight([in] long Height);
+        [id(DISPID_WINDOWCLOSING)]
+        void WindowClosing([in] VARIANT_BOOL IsChildWindow, [in, out] VARIANT_BOOL *Cancel);
+        [id(DISPID_CLIENTTOHOSTWINDOW)]
+        void ClientToHostWindow([in, out] long *CX, [in, out] long *CY);
+        [id(DISPID_SETSECURELOCKICON)]
+        void SetSecureLockIcon([in] long SecureLockIcon);
+        [id(DISPID_FILEDOWNLOAD)]
+        void FileDownload([in] VARIANT_BOOL ActiveDocument, [in, out] VARIANT_BOOL *Cancel);
+        [id(DISPID_NAVIGATEERROR)]
+        void NavigateError([in] IDispatch *pDisp, [in] VARIANT *URL, [in] VARIANT *Frame, [in] VARIANT *StatusCode, [in,out] VARIANT_BOOL *Cancel);
+        [id(DISPID_PRINTTEMPLATEINSTANTIATION)]
+        void PrintTemplateInstantiation([in] IDispatch *pDisp);
+        [id(DISPID_PRINTTEMPLATETEARDOWN)]
+        void PrintTemplateTeardown([in] IDispatch *pDisp);
+        [id(DISPID_UPDATEPAGESTATUS)]
+        void UpdatePageStatus([in] IDispatch *pDisp, [in] VARIANT *nPage, [in] VARIANT *fDone);
+        [id(DISPID_PRIVACYIMPACTEDSTATECHANGE)]
+        void PrivacyImpactedStateChange([in] VARIANT_BOOL bImpacted);
+        [id(DISPID_NEWWINDOW3)]
+        void NewWindow3([in, out] IDispatch **ppDisp, [in, out] VARIANT_BOOL *Cancel, [in] DWORD dwFlags, [in] BSTR bstrUrlContext, [in] BSTR bstrUrl);
+        [id(DISPID_SETPHISHINGFILTERSTATUS)]
+        void SetPhishingFilterStatus([in] long PhishingFilterStatus);
+        [id(DISPID_WINDOWSTATECHANGED)]
+        void WindowStateChanged([in] DWORD dwWindowStateFlags, [in] DWORD dwValidFlagsMask);
+        [id(DISPID_NEWPROCESS)]
+        void NewProcess([in] long lCauseFlag, [in] IDispatch *pWB2, [in, out] VARIANT_BOOL *Cancel);
+        [id(DISPID_THIRDPARTYURLBLOCKED)]
+        void ThirdPartyUrlBlocked([in] VARIANT *URL, [in] DWORD dwCount);
+        [id(DISPID_REDIRECTXDOMAINBLOCKED)]
+        void RedirectXDomainBlocked([in] IDispatch *pDisp, [in] VARIANT *StartURL, [in] VARIANT *RedirectURL, [in] VARIANT *Frame, [in] VARIANT *StatusCode);
+        [id(DISPID_BEFORESCRIPTEXECUTE)]
+        void BeforeScriptExecute([in] IDispatch *pDispWindow);
+        [id(DISPID_WEBWORKERSTARTED)]
+        void WebWorkerStarted([in] DWORD dwUniqueID, [in] BSTR bstrWorkerLabel);
+        [id(DISPID_WEBWORKERFINISHED)]
+        void WebWorkerFinsihed([in] DWORD dwUniqueID);
+    }
+
+    [
+        uuid(4D5AA1D8-B2D9-49D0-860E-8DAF2EC2CF0C),
+        helpstring("There Edge Browser Proxy")
+    ]
+    coclass ThereEdgeWebBrowser
+    {
+        [default]         interface     IThereEdgeWebBrowser2;
+                          interface     IThereEdgeWebBrowser;
+        [default, source] dispinterface IThereEdgeWebBrowserEvents2;
+        [source]          dispinterface IThereEdgeWebBrowserEvents;
+    }
+};

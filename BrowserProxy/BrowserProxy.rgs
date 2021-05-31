@@ -1,0 +1,18 @@
+HKCR
+{
+    NoRemove CLSID
+    {
+        ForceRemove {4D5AA1D8-B2D9-49D0-860E-8DAF2EC2CF0C} = s 'There Edge Browser Proxy'
+        {
+            ForceRemove Programmable
+            InprocServer32 = s '%MODULE%'
+            {
+                val ThreadingModel = s 'Apartment'
+            }
+            ProgID = s 'ThereEdge.BrowserProxy.1'
+            VersionIndependentProgID = s 'ThereEdge.BrowserProxy'
+            TypeLib = s '{E792F884-FF4C-4563-92FE-ADAEA759F2EA}'
+            Version = s '1.0'
+        }
+    }
+}

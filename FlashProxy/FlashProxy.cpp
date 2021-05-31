@@ -213,6 +213,13 @@ HRESULT STDMETHODCALLTYPE FlashProxyModule::QueryInterface(REFIID riid, void **o
         return S_OK;
     }
 
+    if (IsEqualIID(riid, IID_ISupportErrorInfo))
+    {
+        AddRef();
+        *object = static_cast<ISupportErrorInfo*>(this);
+        return S_OK;
+    }
+
     if (IsEqualIID(riid, IID_IDispatch))
     {
         AddRef();
@@ -220,10 +227,10 @@ HRESULT STDMETHODCALLTYPE FlashProxyModule::QueryInterface(REFIID riid, void **o
         return S_OK;
     }
 
-    if (IsEqualIID(riid, IID_IShockwaveFlash))
+    if (IsEqualIID(riid, IID_IThereEdgeShockwaveFlash))
     {
         AddRef();
-        *object = static_cast<IShockwaveFlash*>(this);
+        *object = static_cast<IThereEdgeShockwaveFlash*>(this);
         return S_OK;
     }
 
@@ -314,7 +321,7 @@ HRESULT STDMETHODCALLTYPE FlashProxyModule::GetContentExtent(LPSIZEL pSizel)
 
 HRESULT STDMETHODCALLTYPE FlashProxyModule::FindConnectionPoint(REFIID riid, IConnectionPoint **ppCP)
 {
-    if (IsEqualIID(riid, DIID_IShockwaveFlashEvents))
+    if (IsEqualIID(riid, DIID_IThereEdgeShockwaveFlashEvents))
     {
         AddRef();
         *ppCP = static_cast<IConnectionPoint*>(this);
@@ -326,7 +333,7 @@ HRESULT STDMETHODCALLTYPE FlashProxyModule::FindConnectionPoint(REFIID riid, ICo
 
 HRESULT STDMETHODCALLTYPE FlashProxyModule::GetConnectionInterface(IID *pIID)
 {
-    *pIID = DIID_IShockwaveFlashEvents;
+    *pIID = DIID_IThereEdgeShockwaveFlashEvents;
     return S_OK;
 }
 
@@ -339,6 +346,9 @@ HRESULT STDMETHODCALLTYPE FlashProxyModule::GetConnectionPointContainer(IConnect
 
 HRESULT STDMETHODCALLTYPE FlashProxyModule::Advise(IUnknown *pUnkSink, DWORD *pdwCookie)
 {
+    if (pUnkSink == nullptr || pdwCookie == nullptr)
+        return E_INVALIDARG;
+
     if (SUCCEEDED(pUnkSink->QueryInterface(&m_flashEvents)))
     {
         *pdwCookie = (DWORD)&m_flashEvents;
@@ -353,7 +363,6 @@ HRESULT STDMETHODCALLTYPE FlashProxyModule::Unadvise(DWORD dwCookie)
     if (dwCookie == (DWORD)&m_flashEvents && m_flashEvents != nullptr)
     {
         m_flashEvents.Release();
-        m_flashEvents = nullptr;
         return S_OK;
     }
 
@@ -366,7 +375,6 @@ HRESULT STDMETHODCALLTYPE FlashProxyModule::Close(DWORD dwSaveOption)
         m_controller->Close();
 
     Release();
-
     return S_OK;
 }
 
@@ -421,6 +429,15 @@ HRESULT STDMETHODCALLTYPE FlashProxyModule::DoVerb(LONG iVerb, LPMSG lpmsg, IOle
         default:
             return E_NOTIMPL;
     }
+}
+
+HRESULT STDMETHODCALLTYPE FlashProxyModule::GetWindow(HWND *phwnd)
+{
+    if (phwnd == nullptr)
+        return E_INVALIDARG;
+
+    *phwnd = m_wnd;
+    return S_OK;
 }
 
 HRESULT STDMETHODCALLTYPE FlashProxyModule::SetObjectRects(LPCRECT lprcPosRect, LPCRECT lprcClipRect)
@@ -734,10 +751,10 @@ HRESULT FlashProxyModule::InvokeFlashEvent(const WCHAR *cmd, DISPPARAMS &params,
         return E_FAIL;
 
     DISPID id;
-    if (FAILED(m_flashEvents->GetIDsOfNames(DIID_IShockwaveFlashEvents, (LPOLESTR*)&cmd, 1, LOCALE_SYSTEM_DEFAULT, &id)))
+    if (FAILED(m_flashEvents->GetIDsOfNames(DIID_IThereEdgeShockwaveFlashEvents, (LPOLESTR*)&cmd, 1, LOCALE_SYSTEM_DEFAULT, &id)))
         return E_FAIL;
 
-    if (FAILED(m_flashEvents->Invoke(id, DIID_IShockwaveFlashEvents, LOCALE_SYSTEM_DEFAULT, DISPATCH_METHOD, &params, result, nullptr, nullptr)))
+    if (FAILED(m_flashEvents->Invoke(id, DIID_IThereEdgeShockwaveFlashEvents, LOCALE_SYSTEM_DEFAULT, DISPATCH_METHOD, &params, result, nullptr, nullptr)))
        return E_FAIL;
 
     return S_OK;
@@ -797,7 +814,7 @@ HRESULT FlashProxyModule::SetRect(const RECT &rect)
     if (width == m_size.cx && height == m_size.cy)
         flags |= SWP_NOSIZE;
 
-    if (flags == 0)
+    if (flags == (SWP_NOMOVE | SWP_NOSIZE))
         return S_OK;
 
     m_pos.cx = rect.left;
