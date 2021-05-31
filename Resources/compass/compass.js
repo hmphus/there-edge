@@ -32,7 +32,7 @@ $(document).ready(function() {
 
   There.onVariable = function(name, value) {
     if (name == 'there_avheading') {
-      $('.compass .arrow').css('transform', `rotate(${value}deg)`);
+      $('.compass .face').css('transform', `rotate(${-value}deg)`);
     }
   };
 });

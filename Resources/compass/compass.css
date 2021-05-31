@@ -35,8 +35,6 @@ body {
   height:26px;
   background-image:url(compass.png);
   background-position:-80px 0px;
-  transform:rotate(0deg);
-  transform-origin:10px 14px;
 }
 
 .compass .button[data-id="close"] {

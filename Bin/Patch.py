@@ -26,7 +26,7 @@ if __name__ == '__main__':
         if data.find(uuid_pair[2].bytes_le) >= 0:
             print('The patch has already been applied.')
             sys.exit(1)
-    if not os.path.exists('There.old'):
+    if not os.path.exists('There-Original.exe'):
         with open('There.orig', 'wb') as file:
             file.write(data)
     for uuid_pair in uuid_pairs:

@@ -60,12 +60,14 @@ body {
 
 .teleport .hint {
   position:absolute;
-  left:10px;
-  top:338px;
-  width:790px;
+  left:0px;
+  top:400px;
+  width:780px;
   height:80px;
+  padding:0px 10px;
   color:#ffa85c;
   font-family:verdana;
   font-size:18px;
+  font-weight:bold;
   text-align:center;
 }
