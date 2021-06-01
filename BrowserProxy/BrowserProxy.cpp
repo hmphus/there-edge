@@ -16,6 +16,7 @@
 #include "atlstr.h"
 #include "atlsafe.h"
 #include "exdispid.h"
+#include "wrl.h"
 #include "WebView2.h"
 #include "BrowserProxy_i.h"
 #include "BrowserProxy.h"
@@ -113,6 +114,10 @@ BrowserProxyModule::BrowserProxyModule():
     m_view(),
     m_navigationStartingToken(),
     m_navigationCompletedToken(),
+    m_newWindowRequestedToken(),
+    m_sourceChangedToken(),
+    m_historyChangedToken(),
+    m_documentTitleChangedToken(),
     m_ready(false),
     m_visible(true)
 {
@@ -125,6 +130,10 @@ BrowserProxyModule::~BrowserProxyModule()
     {
         m_view->remove_NavigationStarting(m_navigationStartingToken);
         m_view->remove_NavigationCompleted(m_navigationCompletedToken);
+        m_view->remove_NewWindowRequested(m_newWindowRequestedToken);
+        m_view->remove_SourceChanged(m_sourceChangedToken);
+        m_view->remove_HistoryChanged(m_historyChangedToken);
+        m_view->remove_DocumentTitleChanged(m_documentTitleChangedToken);
     }
 
     if (m_controller != nullptr)
@@ -195,11 +204,6 @@ HRESULT STDMETHODCALLTYPE BrowserProxyModule::QueryInterface(REFIID riid, void *
         *object = static_cast<IThereEdgeWebBrowser2*>(this);
         return S_OK;
     }
-
-    Log(L"QueryInterface: %08lx-%04x-%04x-%02x%02x-%02x%02x%02x%02x%02x%02x\n",
-        riid.Data1, riid.Data2, riid.Data3, riid.Data4[0], riid.Data4[1],
-        riid.Data4[2], riid.Data4[3], riid.Data4[4],
-        riid.Data4[5], riid.Data4[6], riid.Data4[7]);
 
     *object = nullptr;
     return E_NOINTERFACE;
@@ -401,285 +405,104 @@ HRESULT STDMETHODCALLTYPE BrowserProxyModule::GetWindow(HWND *phwnd)
     return S_OK;
 }
 
-HRESULT STDMETHODCALLTYPE BrowserProxyModule::TranslateAccelerator(LPMSG lpmsg)
-{
-    Log(L"TranslateAccelerator\n");
-    return E_NOTIMPL;
-}
-
-HRESULT STDMETHODCALLTYPE BrowserProxyModule::OnFrameWindowActivate(BOOL fActivate)
-{
-    Log(L"OnFrameWindowActivate\n");
-    return E_NOTIMPL;
-}
-
-HRESULT STDMETHODCALLTYPE BrowserProxyModule::OnDocWindowActivate(BOOL fActivate)
-{
-    Log(L"OnDocWindowActivate\n");
-    return E_NOTIMPL;
-}
-
-HRESULT STDMETHODCALLTYPE BrowserProxyModule::ResizeBorder(LPCRECT prcBorder, IOleInPlaceUIWindow *pUIWindow, BOOL fFrameWindow)
-{
-    Log(L"ResizeBorder\n");
-    return E_NOTIMPL;
-}
-
-HRESULT STDMETHODCALLTYPE BrowserProxyModule::EnableModeless(BOOL fEnable)
-{
-    Log(L"EnableModeless\n");
-    return E_NOTIMPL;
-}
-
-HRESULT STDMETHODCALLTYPE BrowserProxyModule::Draw(DWORD dwDrawAspect, LONG lindex, void *pvAspect, DVTARGETDEVICE *ptd,
-                                                   HDC hdcTargetDev, HDC hdcDraw, LPCRECTL lprcBounds, LPCRECTL lprcWBounds,
-                                                   BOOL (STDMETHODCALLTYPE *pfnContinue)(ULONG_PTR dwContinue), ULONG_PTR dwContinue)
-{
-    Log(L"Draw\n");
-    return E_NOTIMPL;
-}
-
-HRESULT STDMETHODCALLTYPE BrowserProxyModule::GetColorSet(DWORD dwDrawAspect, LONG lindex, void *pvAspect, DVTARGETDEVICE *ptd,
-                                                          HDC hicTargetDev, LOGPALETTE **ppColorSet)
-{
-    Log(L"GetColorSet\n");
-    return E_NOTIMPL;
-}
-
-HRESULT STDMETHODCALLTYPE BrowserProxyModule::QueryHitPoint(DWORD dwAspect, LPCRECT pRectBounds, POINT ptlLoc, LONG lCloseHint, DWORD *pHitResult)
-{
-    Log(L"QueryHitPoint\n");
-    return E_NOTIMPL;
-}
-
-HRESULT STDMETHODCALLTYPE BrowserProxyModule::QueryHitRect(DWORD dwAspect, LPCRECT pRectBounds, LPCRECT pRectLoc, LONG lCloseHint, DWORD *pHitResult)
-{
-    Log(L"QueryHitRect\n");
-    return E_NOTIMPL;
-}
-
-HRESULT STDMETHODCALLTYPE BrowserProxyModule::GetTypeInfoCount(UINT *pctinfo)
-{
-    Log(L"GetTypeInfoCount\n");
-    *pctinfo = 0;
-    return S_OK;
-}
-
-HRESULT STDMETHODCALLTYPE BrowserProxyModule::GetTypeInfo(UINT iTInfo, LCID lcid, ITypeInfo **ppTInfo)
-{
-    Log(L"GetTypeInfo\n");
-    return E_NOTIMPL;
-}
-
-HRESULT STDMETHODCALLTYPE BrowserProxyModule::GetIDsOfNames(REFIID riid, LPOLESTR *rgszNames, UINT cNames, LCID lcid, DISPID *rgDispId)
-{
-    Log(L"GetIDsOfNames\n");
-    return DISP_E_UNKNOWNNAME;
-}
-
-HRESULT STDMETHODCALLTYPE BrowserProxyModule::Invoke(DISPID dispIdMember, REFIID riid, LCID lcid, WORD wFlags, DISPPARAMS *pDispParams,
-                                                     VARIANT *pVarResult, EXCEPINFO *pExcepInfo, UINT *puArgErr)
-{
-    Log(L"Invoke\n");
-    return E_NOTIMPL;
-}
-
 HRESULT STDMETHODCALLTYPE BrowserProxyModule::GoBack()
 {
-    Log(L"GoBack\n");
-    return E_NOTIMPL;
+    if (m_view == nullptr)
+        return E_NOT_VALID_STATE;
+
+    BOOL value = false;
+    if (FAILED(m_view->get_CanGoBack(&value)))
+        return E_FAIL;
+
+    if (value && FAILED(m_view->GoBack()))
+        return E_FAIL;
+
+    return S_OK;
 }
 
 HRESULT STDMETHODCALLTYPE BrowserProxyModule::GoForward()
 {
-    Log(L"GoForward\n");
-    return E_NOTIMPL;
+    if (m_view == nullptr)
+        return E_NOT_VALID_STATE;
+
+    BOOL value = false;
+    if (FAILED(m_view->get_CanGoForward(&value)))
+        return E_FAIL;
+
+    if (value && FAILED(m_view->GoForward()))
+        return E_FAIL;
+
+    return S_OK;
 }
 
 HRESULT STDMETHODCALLTYPE BrowserProxyModule::GoHome()
 {
-    Log(L"GoHome\n");
-    return E_NOTIMPL;
-}
+    if (m_view == nullptr)
+        return E_NOT_VALID_STATE;
 
-HRESULT STDMETHODCALLTYPE BrowserProxyModule::GoSearch()
-{
-    Log(L"GoSearch\n");
-    return E_NOTIMPL;
+    m_url = L"https://webapps.prod.there.com/therecentral/there_central.xml?fromClient=1";
+
+    if (FAILED(Navigate()))
+        return E_FAIL;
+
+    return S_OK;
 }
 
 HRESULT STDMETHODCALLTYPE BrowserProxyModule::Navigate(BSTR URL, VARIANT *Flags, VARIANT *TargetFrameName, VARIANT *PostData, VARIANT *Headers)
 {
-    Log(L"Navigate\n");
-    return E_NOTIMPL;
+    m_url = URL;
+
+    if (FAILED(Navigate()))
+        return E_FAIL;
+
+    return S_OK;
 }
 
 HRESULT STDMETHODCALLTYPE BrowserProxyModule::Refresh()
 {
-    Log(L"Refresh\n");
-    return E_NOTIMPL;
+    if (m_view == nullptr)
+        return E_NOT_VALID_STATE;
+
+    if (FAILED(m_view->Reload()))
+        return E_FAIL;
+
+    return S_OK;
 }
 
 HRESULT STDMETHODCALLTYPE BrowserProxyModule::Refresh2(VARIANT *Level)
 {
-    Log(L"Refresh2\n");
-    return E_NOTIMPL;
+    return Refresh();
 }
 
 HRESULT STDMETHODCALLTYPE BrowserProxyModule::Stop()
 {
-    Log(L"Stop\n");
-    return E_NOTIMPL;
-}
+    if (m_view == nullptr)
+        return E_NOT_VALID_STATE;
 
-HRESULT STDMETHODCALLTYPE BrowserProxyModule::get_Application(IDispatch **ppDisp)
-{
-    Log(L"get_Application\n");
-    return E_NOTIMPL;
-}
+    if (FAILED(m_view->Stop()))
+        return E_FAIL;
 
-HRESULT STDMETHODCALLTYPE BrowserProxyModule::get_Parent(IDispatch **ppDisp)
-{
-    Log(L"get_Parent\n");
-    return E_NOTIMPL;
-}
-
-HRESULT STDMETHODCALLTYPE BrowserProxyModule::get_Container(IDispatch **ppDisp)
-{
-    Log(L"get_Container\n");
-    return E_NOTIMPL;
-}
-
-HRESULT STDMETHODCALLTYPE BrowserProxyModule::get_Document(IDispatch **ppDisp)
-{
-    Log(L"get_Document\n");
-    return E_NOTIMPL;
-}
-
-HRESULT STDMETHODCALLTYPE BrowserProxyModule::get_TopLevelContainer(VARIANT_BOOL *pBool)
-{
-    Log(L"get_TopLevelContainer\n");
-    return E_NOTIMPL;
-}
-
-HRESULT STDMETHODCALLTYPE BrowserProxyModule::get_Type(BSTR *Type)
-{
-    Log(L"get_Type\n");
-    return E_NOTIMPL;
-}
-
-HRESULT STDMETHODCALLTYPE BrowserProxyModule::get_Left(long *pl)
-{
-    Log(L"get_Left\n");
-    return E_NOTIMPL;
-}
-
-HRESULT STDMETHODCALLTYPE BrowserProxyModule::put_Left(long Left)
-{
-    Log(L"put_Left\n");
-    return E_NOTIMPL;
-}
-
-HRESULT STDMETHODCALLTYPE BrowserProxyModule::get_Top(long *pl)
-{
-    Log(L"get_Top\n");
-    return E_NOTIMPL;
-}
-
-HRESULT STDMETHODCALLTYPE BrowserProxyModule::put_Top(long Top)
-{
-    Log(L"put_Top\n");
-    return E_NOTIMPL;
-}
-
-HRESULT STDMETHODCALLTYPE BrowserProxyModule::get_Width(long *pl)
-{
-    Log(L"get_Width\n");
-    return E_NOTIMPL;
-}
-
-HRESULT STDMETHODCALLTYPE BrowserProxyModule::put_Width(long Width)
-{
-    Log(L"put_Width\n");
-    return E_NOTIMPL;
-}
-
-HRESULT STDMETHODCALLTYPE BrowserProxyModule::get_Height(long *pl)
-{
-    Log(L"get_Height\n");
-    return E_NOTIMPL;
-}
-
-HRESULT STDMETHODCALLTYPE BrowserProxyModule::put_Height(long Height)
-{
-    Log(L"put_Height\n");
-    return E_NOTIMPL;
-}
-
-HRESULT STDMETHODCALLTYPE BrowserProxyModule::get_LocationName(BSTR *LocationName)
-{
-    Log(L"get_LocationName\n");
-    return E_NOTIMPL;
+    return S_OK;
 }
 
 HRESULT STDMETHODCALLTYPE BrowserProxyModule::get_LocationURL(BSTR *LocationURL)
 {
-    Log(L"get_LocationURL\n");
-    return E_NOTIMPL;
-}
+    if (LocationURL == nullptr)
+        return E_INVALIDARG;
 
-HRESULT STDMETHODCALLTYPE BrowserProxyModule::get_Busy(VARIANT_BOOL *pBool)
-{
-    Log(L"get_Busy\n");
-    return E_NOTIMPL;
-}
+    if (m_view == nullptr)
+        return E_NOT_VALID_STATE;
 
-HRESULT STDMETHODCALLTYPE BrowserProxyModule::Quit()
-{
-    Log(L"Quit\n");
-    return E_NOTIMPL;
-}
+    WCHAR *url = nullptr;
+    if (FAILED(m_view->get_Source(&url)) || url == nullptr)
+        return E_FAIL;
 
-HRESULT STDMETHODCALLTYPE BrowserProxyModule::ClientToWindow(int *pcx, int *pcy)
-{
-    Log(L"ClientToWindow\n");
-    return E_NOTIMPL;
-}
+    *LocationURL = SysAllocString(url);
+    CoTaskMemFree(url);
+    if (*LocationURL == nullptr)
+        return E_FAIL;
 
-HRESULT STDMETHODCALLTYPE BrowserProxyModule::PutProperty(BSTR Property, VARIANT vtValue)
-{
-    Log(L"PutProperty\n");
-    return E_NOTIMPL;
-}
-
-HRESULT STDMETHODCALLTYPE BrowserProxyModule::GetProperty(BSTR Property, VARIANT *pvtValue)
-{
-    Log(L"GetProperty\n");
-    return E_NOTIMPL;
-}
-
-HRESULT STDMETHODCALLTYPE BrowserProxyModule::get_Name(BSTR *Name)
-{
-    Log(L"get_Name\n");
-    return E_NOTIMPL;
-}
-
-HRESULT STDMETHODCALLTYPE BrowserProxyModule::get_HWND(SHANDLE_PTR *pHWND)
-{
-    Log(L"get_HWND\n");
-    return E_NOTIMPL;
-}
-
-HRESULT STDMETHODCALLTYPE BrowserProxyModule::get_FullName(BSTR *FullName)
-{
-    Log(L"get_FullName\n");
-    return E_NOTIMPL;
-}
-
-HRESULT STDMETHODCALLTYPE BrowserProxyModule::get_Path(BSTR *Path)
-{
-    Log(L"get_Path\n");
-    return E_NOTIMPL;
+    return S_OK;
 }
 
 HRESULT STDMETHODCALLTYPE BrowserProxyModule::get_Visible(VARIANT_BOOL *pBool)
@@ -699,66 +522,6 @@ HRESULT STDMETHODCALLTYPE BrowserProxyModule::put_Visible(VARIANT_BOOL Value)
     return S_OK;
 }
 
-HRESULT STDMETHODCALLTYPE BrowserProxyModule::get_StatusBar(VARIANT_BOOL *pBool)
-{
-    Log(L"get_StatusBar\n");
-    return E_NOTIMPL;
-}
-
-HRESULT STDMETHODCALLTYPE BrowserProxyModule::put_StatusBar(VARIANT_BOOL Value)
-{
-    Log(L"put_StatusBar\n");
-    return E_NOTIMPL;
-}
-
-HRESULT STDMETHODCALLTYPE BrowserProxyModule::get_StatusText(BSTR *StatusText)
-{
-    Log(L"get_StatusText\n");
-    return E_NOTIMPL;
-}
-
-HRESULT STDMETHODCALLTYPE BrowserProxyModule::put_StatusText(BSTR StatusText)
-{
-    Log(L"put_StatusText\n");
-    return E_NOTIMPL;
-}
-
-HRESULT STDMETHODCALLTYPE BrowserProxyModule::get_ToolBar(int *Value)
-{
-    Log(L"get_ToolBar\n");
-    return E_NOTIMPL;
-}
-
-HRESULT STDMETHODCALLTYPE BrowserProxyModule::put_ToolBar(int Value)
-{
-    Log(L"put_ToolBar\n");
-    return E_NOTIMPL;
-}
-
-HRESULT STDMETHODCALLTYPE BrowserProxyModule::get_MenuBar(VARIANT_BOOL *Value)
-{
-    Log(L"get_MenuBar\n");
-    return E_NOTIMPL;
-}
-
-HRESULT STDMETHODCALLTYPE BrowserProxyModule::put_MenuBar(VARIANT_BOOL Value)
-{
-    Log(L"put_MenuBar\n");
-    return E_NOTIMPL;
-}
-
-HRESULT STDMETHODCALLTYPE BrowserProxyModule::get_FullScreen(VARIANT_BOOL *pbFullScreen)
-{
-    Log(L"get_FullScreen\n");
-    return E_NOTIMPL;
-}
-
-HRESULT STDMETHODCALLTYPE BrowserProxyModule::put_FullScreen(VARIANT_BOOL bFullScreen)
-{
-    Log(L"put_FullScreen\n");
-    return E_NOTIMPL;
-}
-
 HRESULT STDMETHODCALLTYPE BrowserProxyModule::Navigate2(VARIANT *URL, VARIANT *Flags, VARIANT *TargetFrameName, VARIANT *PostData, VARIANT *Headers)
 {
     if (URL == nullptr || URL->vt != VT_BSTR)
@@ -772,111 +535,19 @@ HRESULT STDMETHODCALLTYPE BrowserProxyModule::Navigate2(VARIANT *URL, VARIANT *F
     return S_OK;
 }
 
-HRESULT STDMETHODCALLTYPE BrowserProxyModule::QueryStatusWB(OLECMDID cmdID, OLECMDF *pcmdf)
-{
-    Log(L"QueryStatusWB\n");
-    return E_NOTIMPL;
-}
-
-HRESULT STDMETHODCALLTYPE BrowserProxyModule::ExecWB(OLECMDID cmdID, OLECMDEXECOPT cmdexecopt, VARIANT *pvaIn, VARIANT *pvaOut)
-{
-    Log(L"ExecWB\n");
-    return E_NOTIMPL;
-}
-
-HRESULT STDMETHODCALLTYPE BrowserProxyModule::ShowBrowserBar(VARIANT *pvaClsid, VARIANT *pvarShow, VARIANT *pvarSize)
-{
-    Log(L"ShowBrowserBar\n");
-    return E_NOTIMPL;
-}
-
-HRESULT STDMETHODCALLTYPE BrowserProxyModule::get_ReadyState(READYSTATE *plReadyState)
-{
-    Log(L"get_ReadyState\n");
-    return E_NOTIMPL;
-}
-
-HRESULT STDMETHODCALLTYPE BrowserProxyModule::get_Offline(VARIANT_BOOL *pbOffline)
-{
-    Log(L"get_Offline\n");
-    return E_NOTIMPL;
-}
-
-HRESULT STDMETHODCALLTYPE BrowserProxyModule::put_Offline(VARIANT_BOOL bOffline)
-{
-    Log(L"put_Offline\n");
-    return E_NOTIMPL;
-}
-
-HRESULT STDMETHODCALLTYPE BrowserProxyModule::get_Silent(VARIANT_BOOL *pbSilent)
-{
-    Log(L"get_Silent\n");
-    return E_NOTIMPL;
-}
-
-HRESULT STDMETHODCALLTYPE BrowserProxyModule::put_Silent(VARIANT_BOOL bSilent)
-{
-    Log(L"put_Silent\n");
-    return E_NOTIMPL;
-}
-
 HRESULT STDMETHODCALLTYPE BrowserProxyModule::get_RegisterAsBrowser(VARIANT_BOOL *pbRegister)
 {
-    Log(L"get_RegisterAsBrowser\n");
-    return E_NOTIMPL;
+    if (pbRegister == nullptr)
+        return E_INVALIDARG;
+
+    *pbRegister = VARIANT_TRUE;
+    return S_OK;
+
 }
 
 HRESULT STDMETHODCALLTYPE BrowserProxyModule::put_RegisterAsBrowser(VARIANT_BOOL bRegister)
 {
     return S_OK;
-}
-
-HRESULT STDMETHODCALLTYPE BrowserProxyModule::get_RegisterAsDropTarget(VARIANT_BOOL *pbRegister)
-{
-    Log(L"get_RegisterAsDropTarget\n");
-    return E_NOTIMPL;
-}
-
-HRESULT STDMETHODCALLTYPE BrowserProxyModule::put_RegisterAsDropTarget(VARIANT_BOOL bRegister)
-{
-    Log(L"put_RegisterAsDropTarget\n");
-    return E_NOTIMPL;
-}
-
-HRESULT STDMETHODCALLTYPE BrowserProxyModule::get_TheaterMode(VARIANT_BOOL *pbRegister)
-{
-    Log(L"get_TheaterMode\n");
-    return E_NOTIMPL;
-}
-
-HRESULT STDMETHODCALLTYPE BrowserProxyModule::put_TheaterMode(VARIANT_BOOL bRegister)
-{
-    Log(L"put_TheaterMode\n");
-    return E_NOTIMPL;
-}
-
-HRESULT STDMETHODCALLTYPE BrowserProxyModule::get_AddressBar(VARIANT_BOOL *Value)
-{
-    Log(L"get_AddressBar\n");
-    return E_NOTIMPL;
-}
-
-HRESULT STDMETHODCALLTYPE BrowserProxyModule::put_AddressBar(VARIANT_BOOL Value)
-{
-    Log(L"put_AddressBar\n");
-    return E_NOTIMPL;
-}
-
-HRESULT STDMETHODCALLTYPE BrowserProxyModule::get_Resizable(VARIANT_BOOL *Value)
-{
-    Log(L"get_Resizable\n");
-    return E_NOTIMPL;
-}
-
-HRESULT STDMETHODCALLTYPE BrowserProxyModule::put_Resizable(VARIANT_BOOL Value)
-{
-    Log(L"put_Resizable\n");
-    return E_NOTIMPL;
 }
 
 HRESULT STDMETHODCALLTYPE BrowserProxyModule::Invoke(HRESULT errorCode, ICoreWebView2Environment *environment)
@@ -920,8 +591,41 @@ HRESULT STDMETHODCALLTYPE BrowserProxyModule::Invoke(HRESULT errorCode, ICoreWeb
 
     m_controller->put_IsVisible(m_visible);
 
-    m_view->add_NavigationStarting(this, &m_navigationStartingToken);
-    m_view->add_NavigationCompleted(this, &m_navigationCompletedToken);
+    m_view->add_NavigationStarting(Callback<ICoreWebView2NavigationStartingEventHandler>(
+        [this](ICoreWebView2 *sender, ICoreWebView2NavigationStartingEventArgs *args) -> HRESULT {
+            return OnNavigationStarting(sender, args);
+        }
+    ).Get(), &m_navigationStartingToken);
+
+    m_view->add_NavigationCompleted(Callback<ICoreWebView2NavigationCompletedEventHandler>(
+        [this](ICoreWebView2 *sender, ICoreWebView2NavigationCompletedEventArgs *args) -> HRESULT {
+            return OnNavigationCompleted(sender, args);
+        }
+    ).Get(), &m_navigationCompletedToken);
+
+    m_view->add_NewWindowRequested(Callback<ICoreWebView2NewWindowRequestedEventHandler>(
+        [this](ICoreWebView2 *sender, ICoreWebView2NewWindowRequestedEventArgs *args) -> HRESULT {
+            return OnNewWindowRequested(sender, args);
+        }
+    ).Get(), &m_newWindowRequestedToken);
+
+    m_view->add_SourceChanged(Callback<ICoreWebView2SourceChangedEventHandler>(
+        [this](ICoreWebView2 *sender, ICoreWebView2SourceChangedEventArgs *args) -> HRESULT {
+            return OnSourceChanged(sender, args);
+        }
+    ).Get(), &m_sourceChangedToken);
+
+    m_view->add_HistoryChanged(Callback<ICoreWebView2HistoryChangedEventHandler>(
+        [this](ICoreWebView2 *sender, IUnknown *args) -> HRESULT {
+            return OnHistoryChanged(sender);
+        }
+    ).Get(), &m_historyChangedToken);
+
+    m_view->add_DocumentTitleChanged(Callback<ICoreWebView2DocumentTitleChangedEventHandler>(
+        [this](ICoreWebView2 *sender, IUnknown *args) -> HRESULT {
+            return OnDocumentTitleChanged(sender);
+        }
+    ).Get(), &m_documentTitleChangedToken);
 
     if (FAILED(Navigate()))
         return E_FAIL;
@@ -929,17 +633,51 @@ HRESULT STDMETHODCALLTYPE BrowserProxyModule::Invoke(HRESULT errorCode, ICoreWeb
     return S_OK;
 }
 
-HRESULT STDMETHODCALLTYPE BrowserProxyModule::Invoke(ICoreWebView2 *sender,  ICoreWebView2NavigationStartingEventArgs *args)
+HRESULT BrowserProxyModule::OnNavigationStarting(ICoreWebView2 *sender,  ICoreWebView2NavigationStartingEventArgs *args)
 {
-    if (args == nullptr)
+    if (sender == nullptr || args == nullptr)
         return E_INVALIDARG;
+
+    CComVariant vurl = m_url;
+    CComVariant vflags = (LONG)0;
+    CComVariant vframe = L"";
+    CComVariant vpost = L"";
+    CComVariant vheaders = L"";
+    VARIANT_BOOL vcancel = VARIANT_FALSE;
+
+    VARIANTARG vargs[7];
+    vargs[0].vt = VT_BOOL | VT_BYREF;
+    vargs[0].pboolVal = &vcancel;
+    vargs[1].vt = VT_VARIANT | VT_BYREF;
+    vargs[1].pvarVal = &vheaders;
+    vargs[2].vt = VT_VARIANT | VT_BYREF;
+    vargs[2].pvarVal = &vpost;
+    vargs[3].vt = VT_VARIANT | VT_BYREF;
+    vargs[3].pvarVal = &vframe;
+    vargs[4].vt = VT_VARIANT | VT_BYREF;
+    vargs[4].pvarVal = &vflags;
+    vargs[5].vt = VT_VARIANT | VT_BYREF;
+    vargs[5].pvarVal = &vurl;
+    vargs[6].vt = VT_DISPATCH;
+    vargs[6].pdispVal = static_cast<IDispatch*>(this);
+
+    DISPPARAMS params;
+    params.rgvarg = vargs;
+    params.cArgs = _countof(vargs);
+    params.cNamedArgs = 0;
+
+    if (FAILED(InvokeBrowserEvent(DISPID_BEFORENAVIGATE2, params)))
+        return E_FAIL;
+
+    if (vcancel != VARIANT_FALSE)
+        args->put_Cancel(true);
 
     return S_OK;
 }
 
-HRESULT STDMETHODCALLTYPE BrowserProxyModule::Invoke(ICoreWebView2 *sender, ICoreWebView2NavigationCompletedEventArgs *args)
+HRESULT BrowserProxyModule::OnNavigationCompleted(ICoreWebView2 *sender, ICoreWebView2NavigationCompletedEventArgs *args)
 {
-    if (args == nullptr)
+    if (sender == nullptr || args == nullptr)
         return E_INVALIDARG;
 
     BOOL success = false;
@@ -949,9 +687,7 @@ HRESULT STDMETHODCALLTYPE BrowserProxyModule::Invoke(ICoreWebView2 *sender, ICor
     {
         m_ready = true;
 
-        VARIANT vurl;
-        vurl.vt = VT_BSTR;
-        vurl.bstrVal = m_url;
+        CComVariant vurl = m_url;
 
         VARIANTARG vargs[2];
         vargs[0].vt = VT_VARIANT | VT_BYREF;
@@ -961,10 +697,137 @@ HRESULT STDMETHODCALLTYPE BrowserProxyModule::Invoke(ICoreWebView2 *sender, ICor
 
         DISPPARAMS params;
         params.rgvarg = vargs;
-        params.cArgs = 2;
+        params.cArgs = _countof(vargs);
         params.cNamedArgs = 0;
 
-        if (FAILED(InvokeBrowserEvent(DISPID_NAVIGATECOMPLETE2, params)))
+        if (FAILED(InvokeBrowserEvent(DISPID_DOCUMENTCOMPLETE, params)))
+            return E_FAIL;
+    }
+
+    return S_OK;
+}
+
+HRESULT BrowserProxyModule::OnNewWindowRequested(ICoreWebView2 *sender, ICoreWebView2NewWindowRequestedEventArgs *args)
+{
+    if (sender == nullptr || args == nullptr)
+        return E_INVALIDARG;
+
+    IDispatch *vdispatch = static_cast<IDispatch*>(this);
+    VARIANT_BOOL vcancel = VARIANT_FALSE;
+
+    VARIANTARG vargs[2];
+    vargs[0].vt = VT_BOOL | VT_BYREF;
+    vargs[0].pboolVal = &vcancel;
+    vargs[1].vt = VT_DISPATCH | VT_BYREF;
+    vargs[1].ppdispVal = &vdispatch;
+
+    DISPPARAMS params;
+    params.rgvarg = vargs;
+    params.cArgs = _countof(vargs);
+    params.cNamedArgs = 0;
+
+    if (FAILED(InvokeBrowserEvent(DISPID_NEWWINDOW2, params)))
+        return E_FAIL;
+
+    return S_OK;
+}
+
+HRESULT BrowserProxyModule::OnSourceChanged(ICoreWebView2 *sender, ICoreWebView2SourceChangedEventArgs *args)
+{
+    if (sender == nullptr || args == nullptr)
+        return E_INVALIDARG;
+
+    WCHAR *url = nullptr;
+    if (FAILED(sender->get_Source(&url)) || url == nullptr)
+        return E_FAIL;
+
+    m_url = url;
+    CoTaskMemFree(url);
+
+    CComVariant vurl = m_url;
+
+    VARIANTARG vargs[2];
+    vargs[0].vt = VT_VARIANT | VT_BYREF;
+    vargs[0].pvarVal = &vurl;
+    vargs[1].vt = VT_DISPATCH;
+    vargs[1].pdispVal = static_cast<IDispatch*>(this);
+
+    DISPPARAMS params;
+    params.rgvarg = vargs;
+    params.cArgs = _countof(vargs);
+    params.cNamedArgs = 0;
+
+    if (FAILED(InvokeBrowserEvent(DISPID_NAVIGATECOMPLETE2, params)))
+        return E_FAIL;
+
+    return S_OK;
+}
+
+HRESULT BrowserProxyModule::OnHistoryChanged(ICoreWebView2 *sender)
+{
+    if (sender == nullptr)
+        return E_INVALIDARG;
+
+    BOOL value;
+
+    if (SUCCEEDED(sender->get_CanGoBack(&value)))
+    {
+        VARIANTARG vargs[2];
+        vargs[0].vt = VT_BOOL;
+        vargs[0].boolVal = value ? VARIANT_TRUE : VARIANT_FALSE;
+        vargs[1].vt = VT_I4;
+        vargs[1].lVal = CSC_NAVIGATEBACK;
+
+        DISPPARAMS params;
+        params.rgvarg = vargs;
+        params.cArgs = _countof(vargs);
+        params.cNamedArgs = 0;
+
+        if (FAILED(InvokeBrowserEvent(DISPID_COMMANDSTATECHANGE, params)))
+            return E_FAIL;
+    }
+
+    if (SUCCEEDED(sender->get_CanGoForward(&value)))
+    {
+        VARIANTARG vargs[2];
+        vargs[0].vt = VT_BOOL;
+        vargs[0].boolVal = value ? VARIANT_TRUE : VARIANT_FALSE;
+        vargs[1].vt = VT_I4;
+        vargs[1].lVal = CSC_NAVIGATEFORWARD;
+
+        DISPPARAMS params;
+        params.rgvarg = vargs;
+        params.cArgs = _countof(vargs);
+        params.cNamedArgs = 0;
+
+        if (FAILED(InvokeBrowserEvent(DISPID_COMMANDSTATECHANGE, params)))
+            return E_FAIL;
+    }
+
+    return S_OK;
+}
+
+HRESULT BrowserProxyModule::OnDocumentTitleChanged(ICoreWebView2 *sender)
+{
+    if (sender == nullptr)
+        return E_INVALIDARG;
+
+    WCHAR *title = nullptr;
+    if (SUCCEEDED(sender->get_DocumentTitle(&title)) && title != nullptr)
+    {
+        CComBSTR btitle = title;
+        CoTaskMemFree(title);
+
+        VARIANTARG vargs[1];
+        vargs[0].vt = VT_BSTR;
+        vargs[0].bstrVal = btitle;
+
+        DISPPARAMS params;
+        params.rgvarg = vargs;
+        params.cArgs = _countof(vargs);
+        params.cNamedArgs = 0;
+
+        if (FAILED(InvokeBrowserEvent(DISPID_TITLECHANGE, params)))
             return E_FAIL;
     }
 
@@ -980,7 +843,19 @@ HRESULT BrowserProxyModule::Navigate()
         return S_OK;
 
     if (FAILED(m_view->Navigate(m_url)))
-        return E_FAIL;
+    {
+        if (wcsncmp(m_url, L"http://", 7) == 0 || wcsncmp(m_url, L"https://", 8) == 0)
+            return E_FAIL;
+
+        CComBSTR url = L"http://";
+        if (FAILED(url.Append(m_url)))
+            return E_FAIL;
+
+        m_url = url;
+
+        if (FAILED(m_view->Navigate(m_url)))
+            return E_FAIL;
+    }
 
     return S_OK;
 }

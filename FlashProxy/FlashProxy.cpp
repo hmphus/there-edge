@@ -15,6 +15,7 @@
 #include "atlctl.h"
 #include "atlstr.h"
 #include "atlsafe.h"
+#include "wrl.h"
 #include "WebView2.h"
 #include "FlashProxy_i.h"
 #include "FlashProxy.h"
@@ -607,15 +608,29 @@ HRESULT STDMETHODCALLTYPE FlashProxyModule::Invoke(HRESULT errorCode, ICoreWebVi
 
     VARIANT hostObject = {};
     hostObject.vt = VT_DISPATCH;
-    hostObject.pdispVal = this;
+    hostObject.pdispVal = static_cast<IDispatch*>(this);
     m_view->AddHostObjectToScript(L"client", &hostObject);
 
     m_view->AddWebResourceRequestedFilter(L"http://127.0.0.1:9999/*", COREWEBVIEW2_WEB_RESOURCE_CONTEXT_ALL);
     m_view->AddWebResourceRequestedFilter(L"http://localhost:9999/*", COREWEBVIEW2_WEB_RESOURCE_CONTEXT_ALL);
 
-    m_view->add_WebMessageReceived(this, &m_webMessageReceivedToken);
-    m_view->add_WebResourceRequested(this, &m_webResourceRequestedToken);
-    m_view->add_NavigationCompleted(this, &m_navigationCompletedToken);
+    m_view->add_WebMessageReceived(Callback<ICoreWebView2WebMessageReceivedEventHandler>(
+        [this](ICoreWebView2 *sender, ICoreWebView2WebMessageReceivedEventArgs *args) -> HRESULT {
+            return OnWebMessageReceivedEventArgs(sender, args);
+        }
+    ).Get(), &m_webMessageReceivedToken);
+
+    m_view->add_WebResourceRequested(Callback<ICoreWebView2WebResourceRequestedEventHandler>(
+        [this](ICoreWebView2 *sender, ICoreWebView2WebResourceRequestedEventArgs *args) -> HRESULT {
+            return OnWebResourceRequestedEventArgs(sender, args);
+        }
+    ).Get(), &m_webResourceRequestedToken);
+
+    m_view->add_NavigationCompleted(Callback<ICoreWebView2NavigationCompletedEventHandler>(
+        [this](ICoreWebView2 *sender, ICoreWebView2NavigationCompletedEventArgs *args) -> HRESULT {
+            return OnNavigationCompletedEventArgs(sender, args);
+        }
+    ).Get(), &m_navigationCompletedToken);
 
     if (FAILED(Navigate()))
         return E_FAIL;
@@ -623,7 +638,7 @@ HRESULT STDMETHODCALLTYPE FlashProxyModule::Invoke(HRESULT errorCode, ICoreWebVi
     return S_OK;
 }
 
-HRESULT STDMETHODCALLTYPE FlashProxyModule::Invoke(ICoreWebView2 *sender, ICoreWebView2WebMessageReceivedEventArgs *args)
+HRESULT FlashProxyModule::OnWebMessageReceivedEventArgs(ICoreWebView2 *sender, ICoreWebView2WebMessageReceivedEventArgs *args)
 {
     if (args == nullptr)
         return E_INVALIDARG;
@@ -632,36 +647,47 @@ HRESULT STDMETHODCALLTYPE FlashProxyModule::Invoke(ICoreWebView2 *sender, ICoreW
     if (FAILED(args->TryGetWebMessageAsString(&command)) || command == nullptr)
         return E_FAIL;
 
-    WCHAR *params = wcsstr(command, L"?");
-    if (params != nullptr)
+    WCHAR *query = wcsstr(command, L"?");
+    if (query != nullptr)
     {
-        *params = 0;
-         params++;
+        *query = 0;
+         query++;
     }
     else
     {
-        params = command + wcslen(command);
+        query = command + wcslen(command);
     }
 
-    CComBSTR arg1 = command;
-    CComBSTR arg2 = params;
+    CComBSTR bcommand = command;
+    CComBSTR bquery = query;
     CoTaskMemFree(command);
 
 #ifdef THERE_DEVTOOLS
-    if (_wcsicmp(arg1, L"devtools") == 0 && sender != nullptr)
+    if (_wcsicmp(bcommand, L"devtools") == 0 && sender != nullptr)
     {
         sender->OpenDevToolsWindow();
         return S_OK;
     }
 #endif
 
-    if (FAILED(InvokeFlashEvent(L"FSCommand", arg1, arg2)))
+    VARIANTARG vargs[2];
+    vargs[0].vt = VT_BSTR;
+    vargs[0].bstrVal = bquery;
+    vargs[1].vt = VT_BSTR;
+    vargs[1].bstrVal = bcommand;
+
+    DISPPARAMS params;
+    params.rgvarg = vargs;
+    params.cArgs = _countof(vargs);
+    params.cNamedArgs = 0;
+
+    if (FAILED(InvokeFlashEvent(L"FSCommand", params)))
         return E_FAIL;
 
     return S_OK;
 }
 
-HRESULT STDMETHODCALLTYPE FlashProxyModule::Invoke(ICoreWebView2 *sender, ICoreWebView2WebResourceRequestedEventArgs *args)
+HRESULT FlashProxyModule::OnWebResourceRequestedEventArgs(ICoreWebView2 *sender, ICoreWebView2WebResourceRequestedEventArgs *args)
 {
     if (args == nullptr)
         return E_INVALIDARG;
@@ -699,7 +725,7 @@ HRESULT STDMETHODCALLTYPE FlashProxyModule::Invoke(ICoreWebView2 *sender, ICoreW
     return S_OK;
 }
 
-HRESULT STDMETHODCALLTYPE FlashProxyModule::Invoke(ICoreWebView2 *sender, ICoreWebView2NavigationCompletedEventArgs *args)
+HRESULT FlashProxyModule::OnNavigationCompletedEventArgs(ICoreWebView2 *sender, ICoreWebView2NavigationCompletedEventArgs *args)
 {
     if (args == nullptr)
         return E_INVALIDARG;
@@ -711,8 +737,18 @@ HRESULT STDMETHODCALLTYPE FlashProxyModule::Invoke(ICoreWebView2 *sender, ICoreW
     {
         m_ready = true;
         SendVariables();
-        InvokeFlashEvent(L"OnReadyStateChange", (LONG)3);
         SetVisibility(true);
+
+        VARIANTARG vargs[1];
+        vargs[0].vt = VT_I4;
+        vargs[0].lVal = 3;
+
+        DISPPARAMS params;
+        params.rgvarg = vargs;
+        params.cArgs = _countof(vargs);
+        params.cNamedArgs = 0;
+
+        InvokeFlashEvent(L"OnReadyStateChange", params);
     }
 
     return S_OK;
@@ -778,36 +814,6 @@ HRESULT FlashProxyModule::InvokeFlashEvent(const WCHAR *cmd, DISPPARAMS &params,
        return E_FAIL;
 
     return S_OK;
-}
-
-HRESULT FlashProxyModule::InvokeFlashEvent(const WCHAR *cmd, LONG arg1)
-{
-    VARIANTARG vargs[1];
-    vargs[0].vt = VT_I4;
-    vargs[0].lVal = arg1;
-
-    DISPPARAMS params;
-    params.rgvarg = vargs;
-    params.cArgs = 1;
-    params.cNamedArgs = 0;
-
-    return InvokeFlashEvent(cmd, params);
-}
-
-HRESULT FlashProxyModule::InvokeFlashEvent(const WCHAR *cmd, BSTR arg1, BSTR arg2)
-{
-    VARIANTARG vargs[2];
-    vargs[0].vt = VT_BSTR;
-    vargs[0].bstrVal = arg2;
-    vargs[1].vt = VT_BSTR;
-    vargs[1].bstrVal = arg1;
-
-    DISPPARAMS params;
-    params.rgvarg = vargs;
-    params.cArgs = 2;
-    params.cNamedArgs = 0;
-
-    return InvokeFlashEvent(cmd, params);
 }
 
 HRESULT FlashProxyModule::SetSize(const SIZE &size)

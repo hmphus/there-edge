@@ -1,6 +1,7 @@
 #pragma once
 
 using namespace ATL;
+using namespace Microsoft::WRL;
 
 void Log(const WCHAR *format, ...);
 
@@ -15,10 +16,7 @@ class FlashProxyModule: public ATL::CAtlDllModuleT<FlashProxyModule>,
                         public ISupportErrorInfo,
                         public IThereEdgeShockwaveFlash,
                         public ICoreWebView2CreateCoreWebView2EnvironmentCompletedHandler,
-                        public ICoreWebView2CreateCoreWebView2ControllerCompletedHandler,
-                        public ICoreWebView2WebMessageReceivedEventHandler,
-                        public ICoreWebView2WebResourceRequestedEventHandler,
-                        public ICoreWebView2NavigationCompletedEventHandler
+                        public ICoreWebView2CreateCoreWebView2ControllerCompletedHandler
 {
 public:
     DECLARE_LIBID(LIBID_FlashProxyLib)
@@ -198,17 +196,15 @@ protected:
     virtual HRESULT STDMETHODCALLTYPE put_BrowserZoom(BSTR pVal) override {return E_NOTIMPL;}
     virtual HRESULT STDMETHODCALLTYPE Invoke(HRESULT errorCode, ICoreWebView2Environment *environment) override;
     virtual HRESULT STDMETHODCALLTYPE Invoke(HRESULT errorCode, ICoreWebView2Controller *controller) override;
-    virtual HRESULT STDMETHODCALLTYPE Invoke(ICoreWebView2 *sender, ICoreWebView2WebMessageReceivedEventArgs *args) override;
-    virtual HRESULT STDMETHODCALLTYPE Invoke(ICoreWebView2 *sender, ICoreWebView2WebResourceRequestedEventArgs *args) override;
-    virtual HRESULT STDMETHODCALLTYPE Invoke(ICoreWebView2 *sender, ICoreWebView2NavigationCompletedEventArgs *args) override;
 
 protected:
+    HRESULT OnWebMessageReceivedEventArgs(ICoreWebView2 *sender, ICoreWebView2WebMessageReceivedEventArgs *args);
+    HRESULT OnWebResourceRequestedEventArgs(ICoreWebView2 *sender, ICoreWebView2WebResourceRequestedEventArgs *args);
+    HRESULT OnNavigationCompletedEventArgs(ICoreWebView2 *sender, ICoreWebView2NavigationCompletedEventArgs *args);
     HRESULT Encode(const BSTR in, CComBSTR &out);
     HRESULT Navigate();
     HRESULT SendVariables();
     HRESULT InvokeFlashEvent(const WCHAR *cmd, DISPPARAMS &args, VARIANT *result = nullptr);
-    HRESULT InvokeFlashEvent(const WCHAR *cmd, LONG arg1);
-    HRESULT InvokeFlashEvent(const WCHAR *cmd, BSTR arg1, BSTR arg2);
     HRESULT SetSize(const SIZE &size);
     HRESULT SetRect(const RECT &rect);
     HRESULT SetVisibility(BOOL visible);
