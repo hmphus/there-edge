@@ -1,4 +1,8 @@
 $(document).ready(function() {
-  There.guiCommand({action: 'settings'});
-  There.fsCommand('closeWindow');
+  There.init({
+    onReady: function() {
+      There.guiCommand('settings');
+      There.fsCommand('closeWindow');
+    },
+  });
 });

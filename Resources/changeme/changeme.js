@@ -51,17 +51,21 @@ $(document).ready(function() {
     event.stopPropagation();
   });
 
-  There.fsCommand('setStageWidthHeight', {
-    width: 200,
-    height: 354,
-  });
+  There.init({
+    onReady: function() {
+      There.fsCommand('setStageWidthHeight', {
+        width: 200,
+        height: 354,
+      });
 
-  There.fsCommand('setWidthHeight', {
-    width: 200,
-    height: 354,
-  });
+      There.fsCommand('setWidthHeight', {
+        width: 200,
+        height: 354,
+      });
 
-  There.fsCommand('setTextureBitDepth', {
-    depth: 32,
+      There.fsCommand('setTextureBitDepth', {
+        depth: 32,
+      });
+    },
   });
 });

@@ -198,9 +198,9 @@ protected:
     virtual HRESULT STDMETHODCALLTYPE Invoke(HRESULT errorCode, ICoreWebView2Controller *controller) override;
 
 protected:
-    HRESULT OnWebMessageReceivedEventArgs(ICoreWebView2 *sender, ICoreWebView2WebMessageReceivedEventArgs *args);
-    HRESULT OnWebResourceRequestedEventArgs(ICoreWebView2 *sender, ICoreWebView2WebResourceRequestedEventArgs *args);
-    HRESULT OnNavigationCompletedEventArgs(ICoreWebView2 *sender, ICoreWebView2NavigationCompletedEventArgs *args);
+    HRESULT OnWebMessageReceived(ICoreWebView2 *sender, ICoreWebView2WebMessageReceivedEventArgs *args);
+    HRESULT OnWebResourceRequested(ICoreWebView2 *sender, ICoreWebView2WebResourceRequestedEventArgs *args);
+    HRESULT OnNavigationCompleted(ICoreWebView2 *sender, ICoreWebView2NavigationCompletedEventArgs *args);
     HRESULT Encode(const BSTR in, CComBSTR &out);
     HRESULT Navigate();
     HRESULT SendVariables();

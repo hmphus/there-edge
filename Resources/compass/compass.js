@@ -16,23 +16,27 @@ $(document).ready(function() {
     There.playSound('control up');
   });
 
-  There.fsCommand('setStageWidthHeight', {
-    width: 86,
-    height: 86,
-  });
+  There.init({
+    onReady: function() {
+      There.fsCommand('setStageWidthHeight', {
+        width: 86,
+        height: 86,
+      });
 
-  There.fsCommand('setWidthHeight', {
-    width: 86,
-    height: 86,
-  });
+      There.fsCommand('setWidthHeight', {
+        width: 86,
+        height: 86,
+      });
 
-  There.fsCommand('setTextureBitDepth', {
-    depth: 32,
-  });
+      There.fsCommand('setTextureBitDepth', {
+        depth: 32,
+      });
+    },
 
-  There.onVariable = function(name, value) {
-    if (name == 'there_avheading') {
-      $('.compass .face').css('transform', `rotate(${-value}deg)`);
-    }
-  };
+    onVariable: function(name, value) {
+      if (name == 'there_avheading') {
+        $('.compass .face').css('transform', `rotate(${-value}deg)`);
+      }
+    },
+  });
 });

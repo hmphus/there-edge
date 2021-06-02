@@ -1,7 +1,33 @@
 let There = {
   variables: {},
+  onReady: function() {},
   onVariable: function(name, value) {},
   isCaseSensitive: false,
+};
+
+There.init = function(settings) {
+  $('body').on('contextmenu', function(event) {
+    return false;
+  });
+  if (settings != undefined) {
+    Object.assign(There, settings);
+  }
+  if (chrome.webview != undefined) {
+    window.chrome.webview.addEventListener('message', function(event) {
+      const url = new URL(event.data, 'http://host/');
+      if (url.pathname == '/setVariable') {
+        const name = url.searchParams.get('name');
+        const value = url.searchParams.get('value');
+        There.variables[name.toLowerCase()] = value;
+        if (There.isCaseSensitive) {
+          There.onVariable(name, value);
+        } else {
+          There.onVariable(name.toLowerCase(), value);
+        }
+      }
+    });
+  }
+  There.onReady();
 };
 
 There.fsCommand = function(command, query) {
@@ -17,8 +43,11 @@ There.fsCommand = function(command, query) {
 };
 
 There.guiCommand = function(query) {
+  if (query.constructor.name == 'String') {
+    query = {action: query};
+  }
   There.fsCommand('guiCommand', query);
-}
+};
 
 There.log = function(message) {
   There.fsCommand('Log', {
@@ -72,25 +101,3 @@ There.playSound = function(name) {
     });
   }
 };
-
-$(document).ready(function() {
-  $('body').on('contextmenu', function(event) {
-    return false;
-  });
-
-  if (chrome.webview != undefined) {
-    window.chrome.webview.addEventListener('message', function(event) {
-      const url = new URL(event.data, 'http://host/');
-      if (url.pathname == '/setVariable') {
-        const name = url.searchParams.get('name');
-        const value = url.searchParams.get('value');
-        There.variables[name.toLowerCase()] = value;
-        if (There.isCaseSensitive) {
-          There.onVariable(name, value);
-        } else {
-          There.onVariable(name.toLowerCase(), value);
-        }
-      }
-    });
-  }
-});

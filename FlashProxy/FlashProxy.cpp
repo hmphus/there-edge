@@ -616,19 +616,19 @@ HRESULT STDMETHODCALLTYPE FlashProxyModule::Invoke(HRESULT errorCode, ICoreWebVi
 
     m_view->add_WebMessageReceived(Callback<ICoreWebView2WebMessageReceivedEventHandler>(
         [this](ICoreWebView2 *sender, ICoreWebView2WebMessageReceivedEventArgs *args) -> HRESULT {
-            return OnWebMessageReceivedEventArgs(sender, args);
+            return OnWebMessageReceived(sender, args);
         }
     ).Get(), &m_webMessageReceivedToken);
 
     m_view->add_WebResourceRequested(Callback<ICoreWebView2WebResourceRequestedEventHandler>(
         [this](ICoreWebView2 *sender, ICoreWebView2WebResourceRequestedEventArgs *args) -> HRESULT {
-            return OnWebResourceRequestedEventArgs(sender, args);
+            return OnWebResourceRequested(sender, args);
         }
     ).Get(), &m_webResourceRequestedToken);
 
     m_view->add_NavigationCompleted(Callback<ICoreWebView2NavigationCompletedEventHandler>(
         [this](ICoreWebView2 *sender, ICoreWebView2NavigationCompletedEventArgs *args) -> HRESULT {
-            return OnNavigationCompletedEventArgs(sender, args);
+            return OnNavigationCompleted(sender, args);
         }
     ).Get(), &m_navigationCompletedToken);
 
@@ -638,7 +638,7 @@ HRESULT STDMETHODCALLTYPE FlashProxyModule::Invoke(HRESULT errorCode, ICoreWebVi
     return S_OK;
 }
 
-HRESULT FlashProxyModule::OnWebMessageReceivedEventArgs(ICoreWebView2 *sender, ICoreWebView2WebMessageReceivedEventArgs *args)
+HRESULT FlashProxyModule::OnWebMessageReceived(ICoreWebView2 *sender, ICoreWebView2WebMessageReceivedEventArgs *args)
 {
     if (args == nullptr)
         return E_INVALIDARG;
@@ -687,7 +687,7 @@ HRESULT FlashProxyModule::OnWebMessageReceivedEventArgs(ICoreWebView2 *sender, I
     return S_OK;
 }
 
-HRESULT FlashProxyModule::OnWebResourceRequestedEventArgs(ICoreWebView2 *sender, ICoreWebView2WebResourceRequestedEventArgs *args)
+HRESULT FlashProxyModule::OnWebResourceRequested(ICoreWebView2 *sender, ICoreWebView2WebResourceRequestedEventArgs *args)
 {
     if (args == nullptr)
         return E_INVALIDARG;
@@ -725,7 +725,7 @@ HRESULT FlashProxyModule::OnWebResourceRequestedEventArgs(ICoreWebView2 *sender,
     return S_OK;
 }
 
-HRESULT FlashProxyModule::OnNavigationCompletedEventArgs(ICoreWebView2 *sender, ICoreWebView2NavigationCompletedEventArgs *args)
+HRESULT FlashProxyModule::OnNavigationCompleted(ICoreWebView2 *sender, ICoreWebView2NavigationCompletedEventArgs *args)
 {
     if (args == nullptr)
         return E_INVALIDARG;
@@ -736,6 +736,7 @@ HRESULT FlashProxyModule::OnNavigationCompletedEventArgs(ICoreWebView2 *sender, 
     if (success)
     {
         m_ready = true;
+
         SendVariables();
         SetVisibility(true);
 
