@@ -165,11 +165,16 @@ protected:
     HRESULT OnSourceChanged(ICoreWebView2 *sender, ICoreWebView2SourceChangedEventArgs *args);
     HRESULT OnHistoryChanged(ICoreWebView2 *sender);
     HRESULT OnDocumentTitleChanged(ICoreWebView2 *sender);
+    HRESULT OnWebResourceRequested(ICoreWebView2 *sender, ICoreWebView2WebResourceRequestedEventArgs *args);
+    HRESULT OnWindowCloseRequested(ICoreWebView2 *sender);
+    HRESULT OnDOMContentLoaded(ICoreWebView2 *sender, ICoreWebView2DOMContentLoadedEventArgs *args);
     HRESULT Navigate();
     HRESULT InvokeBrowserEvent(DISPID id, DISPPARAMS &args, VARIANT *result = nullptr);
     HRESULT SetSize(const SIZE &size);
     HRESULT SetRect(const RECT &rect);
     HRESULT SetVisibility(BOOL visible);
+    HRESULT ForwardCookie(ICoreWebView2CookieManager *cookieManager, const WCHAR *url,
+                          const WCHAR *name, const WCHAR *domain, const WCHAR *path);
 
 protected:
     ULONG                                 m_refCount;
@@ -181,13 +186,16 @@ protected:
     CComPtr<IOleClientSite>               m_clientSite;
     CComPtr<ICoreWebView2Environment>     m_environment;
     CComPtr<ICoreWebView2Controller2>     m_controller;
-    CComPtr<ICoreWebView2>                m_view;
+    CComPtr<ICoreWebView2_2>              m_view;
     EventRegistrationToken                m_navigationStartingToken;
     EventRegistrationToken                m_navigationCompletedToken;
     EventRegistrationToken                m_newWindowRequestedToken;
     EventRegistrationToken                m_sourceChangedToken;
     EventRegistrationToken                m_historyChangedToken;
     EventRegistrationToken                m_documentTitleChangedToken;
+    EventRegistrationToken                m_webResourceRequestedToken;
+    EventRegistrationToken                m_windowCloseRequestedToken;
+    EventRegistrationToken                m_domContentLoadedToken;
     BOOL                                  m_ready;
     BOOL                                  m_visible;
 };

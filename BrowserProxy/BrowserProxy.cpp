@@ -118,6 +118,9 @@ BrowserProxyModule::BrowserProxyModule():
     m_sourceChangedToken(),
     m_historyChangedToken(),
     m_documentTitleChangedToken(),
+    m_webResourceRequestedToken(),
+    m_windowCloseRequestedToken(),
+    m_domContentLoadedToken(),
     m_ready(false),
     m_visible(true)
 {
@@ -134,6 +137,9 @@ BrowserProxyModule::~BrowserProxyModule()
         m_view->remove_SourceChanged(m_sourceChangedToken);
         m_view->remove_HistoryChanged(m_historyChangedToken);
         m_view->remove_DocumentTitleChanged(m_documentTitleChangedToken);
+        m_view->remove_WebResourceRequested(m_webResourceRequestedToken);
+        m_view->remove_WindowCloseRequested(m_windowCloseRequestedToken);
+        m_view->remove_DOMContentLoaded(m_domContentLoadedToken);
     }
 
     if (m_controller != nullptr)
@@ -499,6 +505,7 @@ HRESULT STDMETHODCALLTYPE BrowserProxyModule::get_LocationURL(BSTR *LocationURL)
 
     *LocationURL = SysAllocString(url);
     CoTaskMemFree(url);
+
     if (*LocationURL == nullptr)
         return E_FAIL;
 
@@ -568,7 +575,11 @@ HRESULT STDMETHODCALLTYPE BrowserProxyModule::Invoke(HRESULT errorCode, ICoreWeb
     if (FAILED(controller->QueryInterface(&m_controller)) || m_controller == nullptr)
         return E_FAIL;
 
-    if (FAILED(m_controller->get_CoreWebView2(&m_view)) || m_view == nullptr)
+    CComPtr<ICoreWebView2> view;
+    if (FAILED(m_controller->get_CoreWebView2(&view)) || view == nullptr)
+        return E_FAIL;
+
+    if (FAILED(view->QueryInterface(&m_view)) || m_view == nullptr)
         return E_FAIL;
 
     CComPtr<ICoreWebView2Settings> settings;
@@ -590,6 +601,8 @@ HRESULT STDMETHODCALLTYPE BrowserProxyModule::Invoke(HRESULT errorCode, ICoreWeb
     m_controller->put_Bounds(bounds);
 
     m_controller->put_IsVisible(m_visible);
+
+    m_view->AddWebResourceRequestedFilter(L"https://webapps.prod.there.com/*", COREWEBVIEW2_WEB_RESOURCE_CONTEXT_DOCUMENT);
 
     m_view->add_NavigationStarting(Callback<ICoreWebView2NavigationStartingEventHandler>(
         [this](ICoreWebView2 *sender, ICoreWebView2NavigationStartingEventArgs *args) -> HRESULT {
@@ -626,6 +639,24 @@ HRESULT STDMETHODCALLTYPE BrowserProxyModule::Invoke(HRESULT errorCode, ICoreWeb
             return OnDocumentTitleChanged(sender);
         }
     ).Get(), &m_documentTitleChangedToken);
+
+    m_view->add_WebResourceRequested(Callback<ICoreWebView2WebResourceRequestedEventHandler>(
+        [this](ICoreWebView2 *sender, ICoreWebView2WebResourceRequestedEventArgs *args) -> HRESULT {
+            return OnWebResourceRequested(sender, args);
+        }
+    ).Get(), &m_webResourceRequestedToken);
+
+    m_view->add_WindowCloseRequested(Callback<ICoreWebView2WindowCloseRequestedEventHandler>(
+        [this](ICoreWebView2 *sender, IUnknown *args) -> HRESULT {
+            return OnWindowCloseRequested(sender);
+        }
+    ).Get(), &m_windowCloseRequestedToken);
+
+    m_view->add_DOMContentLoaded(Callback<ICoreWebView2DOMContentLoadedEventHandler>(
+        [this](ICoreWebView2 *sender, ICoreWebView2DOMContentLoadedEventArgs *args) -> HRESULT {
+            return OnDOMContentLoaded(sender, args);
+        }
+    ).Get(), &m_domContentLoadedToken);
 
     if (FAILED(Navigate()))
         return E_FAIL;
@@ -737,12 +768,14 @@ HRESULT BrowserProxyModule::OnSourceChanged(ICoreWebView2 *sender, ICoreWebView2
     if (sender == nullptr || args == nullptr)
         return E_INVALIDARG;
 
-    WCHAR *url = nullptr;
-    if (FAILED(sender->get_Source(&url)) || url == nullptr)
-        return E_FAIL;
+    {
+        WCHAR *url = nullptr;
+        if (FAILED(sender->get_Source(&url)) || url == nullptr)
+            return E_FAIL;
 
-    m_url = url;
-    CoTaskMemFree(url);
+        m_url = url;
+        CoTaskMemFree(url);
+    }
 
     CComVariant vurl = m_url;
 
@@ -812,23 +845,98 @@ HRESULT BrowserProxyModule::OnDocumentTitleChanged(ICoreWebView2 *sender)
     if (sender == nullptr)
         return E_INVALIDARG;
 
-    WCHAR *title = nullptr;
-    if (SUCCEEDED(sender->get_DocumentTitle(&title)) && title != nullptr)
+    CComBSTR btitle;
     {
-        CComBSTR btitle = title;
-        CoTaskMemFree(title);
-
-        VARIANTARG vargs[1];
-        vargs[0].vt = VT_BSTR;
-        vargs[0].bstrVal = btitle;
-
-        DISPPARAMS params;
-        params.rgvarg = vargs;
-        params.cArgs = _countof(vargs);
-        params.cNamedArgs = 0;
-
-        if (FAILED(InvokeBrowserEvent(DISPID_TITLECHANGE, params)))
+        WCHAR *title = nullptr;
+        if (FAILED(sender->get_DocumentTitle(&title)) || title == nullptr)
             return E_FAIL;
+
+        btitle = title;
+        CoTaskMemFree(title);
+    }
+
+    VARIANTARG vargs[1];
+    vargs[0].vt = VT_BSTR;
+    vargs[0].bstrVal = btitle;
+
+    DISPPARAMS params;
+    params.rgvarg = vargs;
+    params.cArgs = _countof(vargs);
+    params.cNamedArgs = 0;
+
+    if (FAILED(InvokeBrowserEvent(DISPID_TITLECHANGE, params)))
+        return E_FAIL;
+
+    return S_OK;
+}
+
+HRESULT BrowserProxyModule::OnWebResourceRequested(ICoreWebView2 *sender, ICoreWebView2WebResourceRequestedEventArgs *args)
+{
+    if (sender == nullptr || args == nullptr)
+        return E_INVALIDARG;
+
+    ICoreWebView2WebResourceRequest *request = nullptr;
+    if (FAILED(args->get_Request(&request)) || request == nullptr)
+        return E_FAIL;
+
+    CComBSTR burl;
+    {
+        WCHAR *url = nullptr;
+        if (FAILED(request->get_Uri(&url)) || url == nullptr)
+            return E_FAIL;
+
+        burl = url;
+        CoTaskMemFree(url);
+    }
+
+    WCHAR host[40];
+    URL_COMPONENTS components;
+    ZeroMemory(&components, sizeof(components));
+    components.dwStructSize = sizeof(components);
+    components.lpszHostName = host;
+    components.dwHostNameLength = _countof(host);
+
+    if (InternetCrackUrl(burl, 0, ICU_DECODE, &components))
+    {
+        if (wcscmp(host, L"webapps.prod.there.com") == 0)
+        {
+            CComPtr<ICoreWebView2CookieManager> cookieManager;
+            if (FAILED(m_view->get_CookieManager(&cookieManager)) || cookieManager == nullptr)
+                return E_FAIL;
+
+            static WCHAR *domain = L".prod.there.com";
+            static WCHAR *path = L"/";
+
+            ForwardCookie(cookieManager, burl, L"ticket", domain, path);
+            ForwardCookie(cookieManager, burl, L"ticketssl", domain, path);
+            ForwardCookie(cookieManager, burl, L"ticketwlt", domain, path);
+        }
+    }
+
+    return S_OK;
+}
+
+HRESULT BrowserProxyModule::OnWindowCloseRequested(ICoreWebView2 *sender)
+{
+    if (sender == nullptr)
+        return E_INVALIDARG;
+
+    return S_OK;
+}
+
+HRESULT BrowserProxyModule::OnDOMContentLoaded(ICoreWebView2 *sender, ICoreWebView2DOMContentLoadedEventArgs *args)
+{
+    if (sender == nullptr || args == nullptr)
+        return E_INVALIDARG;
+
+    CComBSTR burl;
+    {
+        WCHAR *url = nullptr;
+        if (FAILED(sender->get_Source(&url)) || url == nullptr)
+            return E_FAIL;
+
+        burl = url;
+        CoTaskMemFree(url);
     }
 
     return S_OK;
@@ -847,11 +955,11 @@ HRESULT BrowserProxyModule::Navigate()
         if (wcsncmp(m_url, L"http://", 7) == 0 || wcsncmp(m_url, L"https://", 8) == 0)
             return E_FAIL;
 
-        CComBSTR url = L"http://";
-        if (FAILED(url.Append(m_url)))
+        CComBSTR burl = L"http://";
+        if (FAILED(burl.Append(m_url)))
             return E_FAIL;
 
-        m_url = url;
+        m_url = burl;
 
         if (FAILED(m_view->Navigate(m_url)))
             return E_FAIL;
@@ -926,6 +1034,35 @@ HRESULT BrowserProxyModule::SetVisibility(BOOL visible)
 
     if (m_controller != NULL)
         m_controller->put_IsVisible(visible);
+
+    return S_OK;
+}
+
+HRESULT BrowserProxyModule::ForwardCookie(ICoreWebView2CookieManager *cookieManager, const WCHAR *url,
+                                          const WCHAR *name, const WCHAR *domain, const WCHAR *path)
+{
+    WCHAR buff[1000];
+    DWORD size;
+
+    size = _countof(buff);
+    if (!InternetGetCookie(url, name, buff, &size))
+        return E_FAIL;
+
+    const WCHAR *value = nullptr;
+    {
+        DWORD skip = wcslen(name) + 1; // name=
+        if (size < skip)
+            return E_FAIL;
+
+        value = buff + skip;
+    }
+
+    CComPtr<ICoreWebView2Cookie> cookie;
+    if (FAILED(cookieManager->CreateCookie(name, value, domain, path, &cookie)) || cookie == nullptr)
+        return E_FAIL;
+
+    if (FAILED(cookieManager->AddOrUpdateCookie(cookie)))
+        return E_FAIL;
 
     return S_OK;
 }

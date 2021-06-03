@@ -640,27 +640,31 @@ HRESULT STDMETHODCALLTYPE FlashProxyModule::Invoke(HRESULT errorCode, ICoreWebVi
 
 HRESULT FlashProxyModule::OnWebMessageReceived(ICoreWebView2 *sender, ICoreWebView2WebMessageReceivedEventArgs *args)
 {
-    if (args == nullptr)
+    if (sender == nullptr || args == nullptr)
         return E_INVALIDARG;
 
-    WCHAR *command = nullptr;
-    if (FAILED(args->TryGetWebMessageAsString(&command)) || command == nullptr)
-        return E_FAIL;
-
-    WCHAR *query = wcsstr(command, L"?");
-    if (query != nullptr)
+    CComBSTR bcommand;
+    CComBSTR bquery;
     {
-        *query = 0;
-         query++;
-    }
-    else
-    {
-        query = command + wcslen(command);
-    }
+        WCHAR *command = nullptr;
+        if (FAILED(args->TryGetWebMessageAsString(&command)) || command == nullptr)
+            return E_FAIL;
 
-    CComBSTR bcommand = command;
-    CComBSTR bquery = query;
-    CoTaskMemFree(command);
+        WCHAR *query = wcsstr(command, L"?");
+        if (query != nullptr)
+        {
+            *query = 0;
+             query++;
+        }
+        else
+        {
+            query = command + wcslen(command);
+        }
+
+        bcommand = command;
+        bquery = query;
+        CoTaskMemFree(command);
+    }
 
 #ifdef THERE_DEVTOOLS
     if (_wcsicmp(bcommand, L"devtools") == 0 && sender != nullptr)
@@ -689,21 +693,27 @@ HRESULT FlashProxyModule::OnWebMessageReceived(ICoreWebView2 *sender, ICoreWebVi
 
 HRESULT FlashProxyModule::OnWebResourceRequested(ICoreWebView2 *sender, ICoreWebView2WebResourceRequestedEventArgs *args)
 {
-    if (args == nullptr)
+    if (sender == nullptr || args == nullptr)
         return E_INVALIDARG;
 
     ICoreWebView2WebResourceRequest *request = nullptr;
     if (FAILED(args->get_Request(&request)) || request == nullptr)
         return E_FAIL;
 
-    WCHAR *uri = nullptr;
-    if (FAILED(request->get_Uri(&uri)) || uri == nullptr)
-        return E_FAIL;
+    CComBSTR burl;
+    {
+        WCHAR *url = nullptr;
+        if (FAILED(request->get_Uri(&url)) || url == nullptr)
+            return E_FAIL;
 
-    if (_wcsnicmp(uri, L"http://127.0.0.1:9999/", 22) != 0 && _wcsnicmp(uri, L"http://localhost:9999/", 22) != 0)
+        burl = url;
+        CoTaskMemFree(url);
+    }
+
+    if (_wcsnicmp(burl, L"http://127.0.0.1:9999/", 22) != 0 && _wcsnicmp(burl, L"http://localhost:9999/", 22) != 0)
         return S_FALSE;
 
-    if (wcscmp(uri + 22, L"favicon.ico") == 0)
+    if (wcscmp(burl + 22, L"favicon.ico") == 0)
     {
         CComPtr<ICoreWebView2WebResourceResponse> response;
         if (FAILED(m_environment->CreateWebResourceResponse(nullptr, 404, L"Not Found", L"", &response)) || response == nullptr)
@@ -719,7 +729,7 @@ HRESULT FlashProxyModule::OnWebResourceRequested(ICoreWebView2 *sender, ICoreWeb
     if (flashRequest == nullptr)
         return E_FAIL;
 
-    if (FAILED(flashRequest->Init(m_serviceProvider, uri)))
+    if (FAILED(flashRequest->Init(m_serviceProvider, burl)))
         return E_FAIL;
 
     return S_OK;
@@ -727,7 +737,7 @@ HRESULT FlashProxyModule::OnWebResourceRequested(ICoreWebView2 *sender, ICoreWeb
 
 HRESULT FlashProxyModule::OnNavigationCompleted(ICoreWebView2 *sender, ICoreWebView2NavigationCompletedEventArgs *args)
 {
-    if (args == nullptr)
+    if (sender == nullptr || args == nullptr)
         return E_INVALIDARG;
 
     BOOL success = false;

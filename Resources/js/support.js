@@ -1,8 +1,8 @@
 let There = {
+  isCaseSensitive: false,
   variables: {},
   onReady: function() {},
   onVariable: function(name, value) {},
-  isCaseSensitive: false,
 };
 
 There.init = function(settings) {
@@ -12,9 +12,9 @@ There.init = function(settings) {
   if (settings != undefined) {
     Object.assign(There, settings);
   }
-  if (chrome.webview != undefined) {
-    window.chrome.webview.addEventListener('message', function(event) {
-      const url = new URL(event.data, 'http://host/');
+  if (window.chrome.webview != undefined) {
+    window.chrome.webview.addEventListener('message', function(message) {
+      const url = new URL(message.data, 'http://host/');
       if (url.pathname == '/setVariable') {
         const name = url.searchParams.get('name');
         const value = url.searchParams.get('value');
@@ -37,8 +37,8 @@ There.fsCommand = function(command, query) {
     }
     command += '?' + query;
   }
-  if (chrome.webview != undefined) {
-    chrome.webview.postMessage(command);
+  if (window.chrome.webview != undefined) {
+    window.chrome.webview.postMessage(command);
   }
 };
 
@@ -57,8 +57,8 @@ There.log = function(message) {
 };
 
 There.onDragMouseDown = function() {
-  if (chrome.webview != undefined) {
-    chrome.webview.hostObjects.sync.client.onDragMouseDown();
+  if (window.chrome.webview != undefined) {
+    window.chrome.webview.hostObjects.sync.client.onDragMouseDown();
   }
 };
 
