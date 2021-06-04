@@ -166,6 +166,7 @@ protected:
     HRESULT OnHistoryChanged(ICoreWebView2 *sender);
     HRESULT OnDocumentTitleChanged(ICoreWebView2 *sender);
     HRESULT OnWebResourceRequested(ICoreWebView2 *sender, ICoreWebView2WebResourceRequestedEventArgs *args);
+    HRESULT OnWebMessageReceived(ICoreWebView2 *sender, ICoreWebView2WebMessageReceivedEventArgs *args);
     HRESULT OnWindowCloseRequested(ICoreWebView2 *sender);
     HRESULT OnDOMContentLoaded(ICoreWebView2 *sender, ICoreWebView2DOMContentLoadedEventArgs *args);
     HRESULT Navigate();
@@ -175,6 +176,7 @@ protected:
     HRESULT SetVisibility(BOOL visible);
     HRESULT ForwardCookie(ICoreWebView2CookieManager *cookieManager, const WCHAR *url,
                           const WCHAR *name, const WCHAR *domain, const WCHAR *path);
+    HRESULT ApplyScript(ICoreWebView2 *view, LONG id);
 
 protected:
     ULONG                                 m_refCount;
@@ -187,6 +189,7 @@ protected:
     CComPtr<ICoreWebView2Environment>     m_environment;
     CComPtr<ICoreWebView2Controller2>     m_controller;
     CComPtr<ICoreWebView2_2>              m_view;
+    CComPtr<VoiceTrainerProxy>            m_voiceTrainerProxy;
     EventRegistrationToken                m_navigationStartingToken;
     EventRegistrationToken                m_navigationCompletedToken;
     EventRegistrationToken                m_newWindowRequestedToken;
@@ -194,6 +197,7 @@ protected:
     EventRegistrationToken                m_historyChangedToken;
     EventRegistrationToken                m_documentTitleChangedToken;
     EventRegistrationToken                m_webResourceRequestedToken;
+    EventRegistrationToken                m_webMessageReceivedToken;
     EventRegistrationToken                m_windowCloseRequestedToken;
     EventRegistrationToken                m_domContentLoadedToken;
     BOOL                                  m_ready;

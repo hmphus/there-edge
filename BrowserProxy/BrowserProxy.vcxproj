@@ -184,6 +184,7 @@
     <ClInclude Include="resource.h" />
     <ClInclude Include="BrowserProxy.h" />
     <ClInclude Include="BrowserProxy_i.h" />
+    <ClInclude Include="VoiceTrainerProxy.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BrowserProxy.cpp" />
@@ -198,26 +199,28 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Develop|Win32'">
       </PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="VoiceTrainerProxy.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="BrowserProxy.rc" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
     <None Include="BrowserProxy.def" />
     <None Include="BrowserProxy.rgs" />
+    <None Include="coupling.js" />
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <Midl Include="BrowserProxy.idl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
-    <Import Project="..\packages\Microsoft.Web.WebView2.1.0.865-prerelease\build\native\Microsoft.Web.WebView2.targets" Condition="Exists('..\packages\Microsoft.Web.WebView2.1.0.865-prerelease\build\native\Microsoft.Web.WebView2.targets')" />
+    <Import Project="..\packages\Microsoft.Web.WebView2.1.0.864.35\build\native\Microsoft.Web.WebView2.targets" Condition="Exists('..\packages\Microsoft.Web.WebView2.1.0.864.35\build\native\Microsoft.Web.WebView2.targets')" />
   </ImportGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
-    <Error Condition="!Exists('..\packages\Microsoft.Web.WebView2.1.0.865-prerelease\build\native\Microsoft.Web.WebView2.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.Web.WebView2.1.0.865-prerelease\build\native\Microsoft.Web.WebView2.targets'))" />
+    <Error Condition="!Exists('..\packages\Microsoft.Web.WebView2.1.0.864.35\build\native\Microsoft.Web.WebView2.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.Web.WebView2.1.0.864.35\build\native\Microsoft.Web.WebView2.targets'))" />
   </Target>
 </Project>

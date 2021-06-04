@@ -18,10 +18,12 @@
 #include "exdispid.h"
 #include "wrl.h"
 #include "WebView2.h"
+#include "VoiceTrainerProxy.h"
 #include "BrowserProxy_i.h"
 #include "BrowserProxy.h"
 
 BrowserProxyModule g_AtlModule;
+HINSTANCE g_Instance;
 
 void Log(const WCHAR *format, ...)
 {
@@ -46,6 +48,7 @@ void Log(const WCHAR *format, ...)
 
 extern "C" BOOL WINAPI DllMain(HINSTANCE hInstance, DWORD dwReason, LPVOID lpReserved)
 {
+    g_Instance = hInstance;
     return g_AtlModule.DllMain(dwReason, lpReserved);
 }
 
@@ -119,6 +122,7 @@ BrowserProxyModule::BrowserProxyModule():
     m_historyChangedToken(),
     m_documentTitleChangedToken(),
     m_webResourceRequestedToken(),
+    m_webMessageReceivedToken(),
     m_windowCloseRequestedToken(),
     m_domContentLoadedToken(),
     m_ready(false),
@@ -127,7 +131,6 @@ BrowserProxyModule::BrowserProxyModule():
 }
 
 BrowserProxyModule::~BrowserProxyModule()
-
 {
     if (m_view != nullptr)
     {
@@ -138,12 +141,19 @@ BrowserProxyModule::~BrowserProxyModule()
         m_view->remove_HistoryChanged(m_historyChangedToken);
         m_view->remove_DocumentTitleChanged(m_documentTitleChangedToken);
         m_view->remove_WebResourceRequested(m_webResourceRequestedToken);
+        m_view->remove_WebMessageReceived(m_webMessageReceivedToken);
         m_view->remove_WindowCloseRequested(m_windowCloseRequestedToken);
         m_view->remove_DOMContentLoaded(m_domContentLoadedToken);
     }
 
     if (m_controller != nullptr)
         m_controller->Close();
+
+    if (m_voiceTrainerProxy != nullptr)
+    {
+        m_voiceTrainerProxy->Close();
+        m_voiceTrainerProxy.Release();
+    }
 }
 
 HRESULT STDMETHODCALLTYPE BrowserProxyModule::QueryInterface(REFIID riid, void **object)
@@ -646,6 +656,12 @@ HRESULT STDMETHODCALLTYPE BrowserProxyModule::Invoke(HRESULT errorCode, ICoreWeb
         }
     ).Get(), &m_webResourceRequestedToken);
 
+    m_view->add_WebMessageReceived(Callback<ICoreWebView2WebMessageReceivedEventHandler>(
+        [this](ICoreWebView2 *sender, ICoreWebView2WebMessageReceivedEventArgs *args) -> HRESULT {
+            return OnWebMessageReceived(sender, args);
+        }
+    ).Get(), &m_webMessageReceivedToken);
+
     m_view->add_WindowCloseRequested(Callback<ICoreWebView2WindowCloseRequestedEventHandler>(
         [this](ICoreWebView2 *sender, IUnknown *args) -> HRESULT {
             return OnWindowCloseRequested(sender);
@@ -700,8 +716,33 @@ HRESULT BrowserProxyModule::OnNavigationStarting(ICoreWebView2 *sender,  ICoreWe
     if (FAILED(InvokeBrowserEvent(DISPID_BEFORENAVIGATE2, params)))
         return E_FAIL;
 
+    CComPtr<ICoreWebView2Settings> settings;
+    if (FAILED(sender->get_Settings(&settings)) || settings == nullptr)
+        return E_FAIL;
+
+    settings->put_IsWebMessageEnabled(false);
+
+    if (m_voiceTrainerProxy != nullptr)
+    {
+        m_voiceTrainerProxy->Close();
+        m_voiceTrainerProxy.Release();
+    }
+
     if (vcancel != VARIANT_FALSE)
+    {
         args->put_Cancel(true);
+        return S_OK;
+    }
+
+    if (VoiceTrainerProxy::Validate(m_url))
+    {
+        CComPtr<VoiceTrainerProxy> voiceTrainerProxy(new VoiceTrainerProxy());
+        if (voiceTrainerProxy != nullptr && SUCCEEDED(voiceTrainerProxy->Init(m_wnd, sender)))
+        {
+            m_voiceTrainerProxy = voiceTrainerProxy;
+            settings->put_IsWebMessageEnabled(true);
+        }
+    }
 
     return S_OK;
 }
@@ -889,7 +930,7 @@ HRESULT BrowserProxyModule::OnWebResourceRequested(ICoreWebView2 *sender, ICoreW
         CoTaskMemFree(url);
     }
 
-    WCHAR host[40];
+    WCHAR host[40] = {0};
     URL_COMPONENTS components;
     ZeroMemory(&components, sizeof(components));
     components.dwStructSize = sizeof(components);
@@ -916,6 +957,63 @@ HRESULT BrowserProxyModule::OnWebResourceRequested(ICoreWebView2 *sender, ICoreW
     return S_OK;
 }
 
+HRESULT BrowserProxyModule::OnWebMessageReceived(ICoreWebView2 *sender, ICoreWebView2WebMessageReceivedEventArgs *args)
+{
+    if (sender == nullptr || args == nullptr)
+        return E_INVALIDARG;
+
+    CComBSTR burl;
+    {
+        WCHAR *url = nullptr;
+        if (FAILED(args->get_Source(&url)) || url == nullptr)
+            return E_FAIL;
+
+        burl = url;
+        CoTaskMemFree(url);
+    }
+
+    CComBSTR bcommand;
+    CComBSTR bpath;
+    CComBSTR bquery;
+    {
+        WCHAR *command = nullptr;
+        if (FAILED(args->TryGetWebMessageAsString(&command)) || command == nullptr)
+            return E_FAIL;
+
+        WCHAR *query = wcsstr(command, L"?");
+        if (query != nullptr)
+        {
+            *query = 0;
+             query++;
+        }
+        else
+        {
+            query = command + wcslen(command);
+        }
+
+        WCHAR *path = wcsstr(command, L"/");
+        if (path != nullptr)
+        {
+            *path = 0;
+             path++;
+        }
+        else
+        {
+            path = command + wcslen(command);
+        }
+
+        bcommand = command;
+        bpath = path;
+        bquery = query;
+        CoTaskMemFree(command);
+    }
+
+    if (m_voiceTrainerProxy != nullptr && VoiceTrainerProxy::Validate(burl) && _wcsicmp(bcommand, L"voicetrainer") == 0)
+        m_voiceTrainerProxy->ProcessMessage(bpath, bquery);
+
+    return S_OK;
+}
+
 HRESULT BrowserProxyModule::OnWindowCloseRequested(ICoreWebView2 *sender)
 {
     if (sender == nullptr)
@@ -937,6 +1035,19 @@ HRESULT BrowserProxyModule::OnDOMContentLoaded(ICoreWebView2 *sender, ICoreWebVi
 
         burl = url;
         CoTaskMemFree(url);
+    }
+
+    WCHAR host[40] = {0};
+    URL_COMPONENTS components;
+    ZeroMemory(&components, sizeof(components));
+    components.dwStructSize = sizeof(components);
+    components.lpszHostName = host;
+    components.dwHostNameLength = _countof(host);
+
+    if (InternetCrackUrl(burl, 0, ICU_DECODE, &components))
+    {
+        if (wcscmp(host, L"webapps.prod.there.com") == 0)
+            ApplyScript(sender, IDR_COUPLING);
     }
 
     return S_OK;
@@ -1062,6 +1173,44 @@ HRESULT BrowserProxyModule::ForwardCookie(ICoreWebView2CookieManager *cookieMana
         return E_FAIL;
 
     if (FAILED(cookieManager->AddOrUpdateCookie(cookie)))
+        return E_FAIL;
+
+    return S_OK;
+}
+
+HRESULT BrowserProxyModule::ApplyScript(ICoreWebView2 *view, LONG id)
+{
+    HRSRC source = FindResource(g_Instance, MAKEINTRESOURCE(id), MAKEINTRESOURCE(TEXTFILE));
+    if (source == nullptr)
+        return E_FAIL;
+
+    DWORD dsize = SizeofResource(g_Instance, source);
+    if (dsize == 0)
+        return E_FAIL;
+
+    HGLOBAL resource = LoadResource(g_Instance, source);
+    if (resource == nullptr)
+        return E_FAIL;
+
+    const CHAR *data = static_cast<char*>(LockResource(resource));
+    if (data == nullptr)
+        return E_FAIL;
+
+    CComBSTR text(dsize + 1);
+    if (text.m_str == nullptr)
+        return E_FAIL;
+
+    DWORD tsize = MultiByteToWideChar(CP_UTF8, 0, data, dsize, text.m_str, dsize);
+    if (tsize != dsize)
+        return E_FAIL;
+
+    text[dsize] = 0;
+
+    if (FAILED(view->ExecuteScript(text, Callback<ICoreWebView2ExecuteScriptCompletedHandler>(
+        [this](HRESULT errorCode, LPCWSTR resultObjectAsJson) -> HRESULT {
+            return S_OK;
+        }
+    ).Get())))
         return E_FAIL;
 
     return S_OK;

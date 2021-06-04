@@ -4,15 +4,15 @@ using namespace ATL;
 
 void Log(const WCHAR *format, ...);
 
-class FlashRequest: public IBindCtx,
-                    public IBindStatusCallback,
-                    public IStream
+class FlashRequestProxy: public IBindCtx,
+                         public IBindStatusCallback,
+                         public IStream
 {
 public:
-    FlashRequest(ICoreWebView2Environment *environment, ICoreWebView2WebResourceRequestedEventArgs *args);
-    virtual ~FlashRequest();
+    FlashRequestProxy(ICoreWebView2Environment *environment, ICoreWebView2WebResourceRequestedEventArgs *args);
+    virtual ~FlashRequestProxy();
 
-    HRESULT STDMETHODCALLTYPE Init(IServiceProvider *serviceProvider, WCHAR *uri);
+    HRESULT Init(IServiceProvider *serviceProvider, WCHAR *uri);
 
     virtual HRESULT STDMETHODCALLTYPE QueryInterface(REFIID riid, void **object) override;
     virtual ULONG STDMETHODCALLTYPE AddRef() override;

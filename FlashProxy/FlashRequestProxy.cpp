@@ -16,9 +16,9 @@
 #include "atlstr.h"
 #include "atlsafe.h"
 #include "WebView2.h"
-#include "FlashRequest.h"
+#include "FlashRequestProxy.h"
 
-FlashRequest::FlashRequest(ICoreWebView2Environment *environment, ICoreWebView2WebResourceRequestedEventArgs *args):
+FlashRequestProxy::FlashRequestProxy(ICoreWebView2Environment *environment, ICoreWebView2WebResourceRequestedEventArgs *args):
     m_refCount(1),
     m_environment(environment),
     m_args(args),
@@ -30,13 +30,13 @@ FlashRequest::FlashRequest(ICoreWebView2Environment *environment, ICoreWebView2W
 {
 }
 
-FlashRequest::~FlashRequest()
+FlashRequestProxy::~FlashRequestProxy()
 {
     if (m_deferral != nullptr)
         m_deferral->Complete();
 }
 
-HRESULT STDMETHODCALLTYPE FlashRequest::Init(IServiceProvider *serviceProvider, WCHAR *uri)
+HRESULT FlashRequestProxy::Init(IServiceProvider *serviceProvider, WCHAR *uri)
 {
     if (FAILED(m_args->GetDeferral(&m_deferral)) || m_deferral == nullptr)
         return E_FAIL;
@@ -55,7 +55,7 @@ HRESULT STDMETHODCALLTYPE FlashRequest::Init(IServiceProvider *serviceProvider, 
     return S_OK;
 }
 
-HRESULT STDMETHODCALLTYPE FlashRequest::QueryInterface(REFIID riid, void **object)
+HRESULT STDMETHODCALLTYPE FlashRequestProxy::QueryInterface(REFIID riid, void **object)
 {
     if (IsEqualIID(riid, IID_IBindStatusCallback))
     {
@@ -82,12 +82,12 @@ HRESULT STDMETHODCALLTYPE FlashRequest::QueryInterface(REFIID riid, void **objec
     return E_NOINTERFACE;
 }
 
-ULONG STDMETHODCALLTYPE FlashRequest::AddRef()
+ULONG STDMETHODCALLTYPE FlashRequestProxy::AddRef()
 {
     return ++m_refCount;
 }
 
-ULONG STDMETHODCALLTYPE FlashRequest::Release()
+ULONG STDMETHODCALLTYPE FlashRequestProxy::Release()
 {
     ULONG refCount = m_refCount--;
 
@@ -97,7 +97,7 @@ ULONG STDMETHODCALLTYPE FlashRequest::Release()
     return refCount;
 }
 
-HRESULT STDMETHODCALLTYPE FlashRequest::GetObjectParam(LPOLESTR pszKey, IUnknown **ppunk)
+HRESULT STDMETHODCALLTYPE FlashRequestProxy::GetObjectParam(LPOLESTR pszKey, IUnknown **ppunk)
 {
     if (wcscmp(pszKey, L"_BSCB_Holder_") == 0)
     {
@@ -108,7 +108,7 @@ HRESULT STDMETHODCALLTYPE FlashRequest::GetObjectParam(LPOLESTR pszKey, IUnknown
     return E_NOINTERFACE;
 }
 
-HRESULT STDMETHODCALLTYPE FlashRequest::OnStartBinding(DWORD dwReserved, IBinding *pib)
+HRESULT STDMETHODCALLTYPE FlashRequestProxy::OnStartBinding(DWORD dwReserved, IBinding *pib)
 {
     if (pib == nullptr)
         return E_INVALIDARG;
@@ -117,7 +117,7 @@ HRESULT STDMETHODCALLTYPE FlashRequest::OnStartBinding(DWORD dwReserved, IBindin
     return S_OK;
 }
 
-HRESULT STDMETHODCALLTYPE FlashRequest::OnProgress(ULONG ulProgress, ULONG ulProgressMax, ULONG ulStatusCode, LPCWSTR szStatusText)
+HRESULT STDMETHODCALLTYPE FlashRequestProxy::OnProgress(ULONG ulProgress, ULONG ulProgressMax, ULONG ulStatusCode, LPCWSTR szStatusText)
 {
     switch (ulStatusCode)
     {
@@ -136,7 +136,7 @@ HRESULT STDMETHODCALLTYPE FlashRequest::OnProgress(ULONG ulProgress, ULONG ulPro
     return S_OK;
 }
 
-HRESULT STDMETHODCALLTYPE FlashRequest::OnStopBinding(HRESULT hresult, LPCWSTR szError)
+HRESULT STDMETHODCALLTYPE FlashRequestProxy::OnStopBinding(HRESULT hresult, LPCWSTR szError)
 {
     if (FAILED(hresult) || m_deferral != nullptr)
     {
@@ -162,7 +162,7 @@ HRESULT STDMETHODCALLTYPE FlashRequest::OnStopBinding(HRESULT hresult, LPCWSTR s
     return S_OK;
 }
 
-HRESULT STDMETHODCALLTYPE FlashRequest::GetBindInfo(DWORD *grfBINDF, BINDINFO *pbindinfo)
+HRESULT STDMETHODCALLTYPE FlashRequestProxy::GetBindInfo(DWORD *grfBINDF, BINDINFO *pbindinfo)
 {
     if (grfBINDF == nullptr || pbindinfo == nullptr)
         return E_INVALIDARG;
@@ -176,7 +176,7 @@ HRESULT STDMETHODCALLTYPE FlashRequest::GetBindInfo(DWORD *grfBINDF, BINDINFO *p
     return S_OK;
 }
 
-HRESULT STDMETHODCALLTYPE FlashRequest::OnDataAvailable(DWORD grfBSCF, DWORD dwSize, FORMATETC *pformatetc, STGMEDIUM *pstgmed)
+HRESULT STDMETHODCALLTYPE FlashRequestProxy::OnDataAvailable(DWORD grfBSCF, DWORD dwSize, FORMATETC *pformatetc, STGMEDIUM *pstgmed)
 {
     if (pformatetc == nullptr || pstgmed == nullptr)
         return E_INVALIDARG;
@@ -208,7 +208,7 @@ HRESULT STDMETHODCALLTYPE FlashRequest::OnDataAvailable(DWORD grfBSCF, DWORD dwS
     return S_OK;
 }
 
-HRESULT STDMETHODCALLTYPE FlashRequest::Read(void *pv, ULONG cb, ULONG *pcbRead)
+HRESULT STDMETHODCALLTYPE FlashRequestProxy::Read(void *pv, ULONG cb, ULONG *pcbRead)
 {
     if (pv == nullptr || pcbRead == nullptr || m_stream == nullptr)
         return E_INVALIDARG;

@@ -17,9 +17,9 @@
 #include "atlsafe.h"
 #include "wrl.h"
 #include "WebView2.h"
+#include "FlashRequestProxy.h"
 #include "FlashProxy_i.h"
 #include "FlashProxy.h"
-#include "FlashRequest.h"
 
 FlashProxyModule g_AtlModule;
 WCHAR FlashProxyModule::g_WindowClassName[] = L"ThereEdgeFlashProxy";
@@ -725,11 +725,11 @@ HRESULT FlashProxyModule::OnWebResourceRequested(ICoreWebView2 *sender, ICoreWeb
         return S_OK;
     }
 
-    CComPtr<FlashRequest> flashRequest(new FlashRequest(m_environment, args));
-    if (flashRequest == nullptr)
+    CComPtr<FlashRequestProxy> flashRequestProxy(new FlashRequestProxy(m_environment, args));
+    if (flashRequestProxy == nullptr)
         return E_FAIL;
 
-    if (FAILED(flashRequest->Init(m_serviceProvider, burl)))
+    if (FAILED(flashRequestProxy->Init(m_serviceProvider, burl)))
         return E_FAIL;
 
     return S_OK;

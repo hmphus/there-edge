@@ -31,6 +31,9 @@
     <ClInclude Include="BrowserProxy.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="VoiceTrainerProxy.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BrowserProxy.cpp">
@@ -38,6 +41,9 @@
     </ClCompile>
     <ClCompile Include="BrowserProxy_i.c">
       <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="VoiceTrainerProxy.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -49,10 +55,11 @@
     <None Include="BrowserProxy.rgs">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="packages.config">
+    <None Include="BrowserProxy.def">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="BrowserProxy.def">
+    <None Include="packages.config" />
+    <None Include="coupling.js">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>
