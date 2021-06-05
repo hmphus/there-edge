@@ -26,6 +26,7 @@ FlashRequestProxy::FlashRequestProxy(ICoreWebView2Environment *environment, ICor
     m_stream(),
     m_binding(),
     m_mimeType(),
+    m_contentType(),
     m_size(0)
 {
 }
@@ -40,6 +41,8 @@ HRESULT FlashRequestProxy::Init(IServiceProvider *serviceProvider, WCHAR *uri)
 {
     if (FAILED(m_args->GetDeferral(&m_deferral)) || m_deferral == nullptr)
         return E_FAIL;
+
+    DetermineContentType(uri);
 
     CComPtr<IBindHost> bindHost;
     if (FAILED(serviceProvider->QueryService(IID_IBindHost, &bindHost)))
@@ -193,10 +196,25 @@ HRESULT STDMETHODCALLTYPE FlashRequestProxy::OnDataAvailable(DWORD grfBSCF, DWOR
     if (m_environment == nullptr || m_args == nullptr || m_deferral == nullptr || m_stream == nullptr)
         return E_FAIL;
 
-    m_size = pformatetc->cfFormat == CF_TEXT ? dwSize - 1 : dwSize;
+    if (pformatetc->cfFormat == CF_TEXT)
+    {
+        m_size = dwSize - 1;
+        m_contentType = m_mimeType;
+    }
+    else
+    {
+        m_size = dwSize;
+    }
 
     CComPtr<ICoreWebView2WebResourceResponse> response;
-    if (FAILED(m_environment->CreateWebResourceResponse(this, 200, L"OK", L"", &response)) || response == nullptr)
+    if (FAILED(m_environment->CreateWebResourceResponse(this, 200, L"OK", nullptr, &response)) || response == nullptr)
+        return E_FAIL;
+
+    CComPtr<ICoreWebView2HttpResponseHeaders> headers;
+    if (FAILED(response->get_Headers(&headers)) || headers == nullptr)
+        return E_FAIL;
+
+    if (FAILED(headers->AppendHeader(L"Content-Type", m_contentType)))
         return E_FAIL;
 
     if (FAILED(m_args->put_Response(response)))
@@ -223,4 +241,58 @@ HRESULT STDMETHODCALLTYPE FlashRequestProxy::Read(void *pv, ULONG cb, ULONG *pcb
     }
 
     return hr;
+}
+
+HRESULT FlashRequestProxy::DetermineContentType(const WCHAR *uri)
+{
+    const WCHAR *ext = wcsrchr(uri, L'.');
+    if (ext == nullptr)
+        return E_FAIL;
+
+    ext++;
+
+    if (_wcsicmp(ext, L"css") == 0)
+    {
+        m_contentType = L"text/css";
+        return S_OK;
+    }
+
+    if (_wcsicmp(ext, L"html") == 0)
+    {
+        m_contentType = L"text/html";
+        return S_OK;
+    }
+
+    if (_wcsicmp(ext, L"js") == 0)
+    {
+        m_contentType = L"application/javascript";
+        return S_OK;
+    }
+
+    if (_wcsicmp(ext, L"png") == 0)
+    {
+        m_contentType = L"image/png";
+        return S_OK;
+    }
+
+    if (_wcsicmp(ext, L"swf") == 0)
+    {
+        m_contentType = L"application/vnd.adobe.flash.movie";
+        return S_OK;
+    }
+
+    if (_wcsicmp(ext, L"wasm") == 0)
+    {
+        m_contentType = L"application/wasm";
+        return S_OK;
+    }
+
+    if (_wcsicmp(ext, L"xml") == 0)
+    {
+        m_contentType = L"text/xml";
+        return S_OK;
+    }
+
+    //Log(L"Content type unknown for .%s\n", ext);
+    return E_FAIL;
 }

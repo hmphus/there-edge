@@ -980,7 +980,7 @@ HRESULT BrowserProxyModule::OnWebMessageReceived(ICoreWebView2 *sender, ICoreWeb
         if (FAILED(args->TryGetWebMessageAsString(&command)) || command == nullptr)
             return E_FAIL;
 
-        WCHAR *query = wcsstr(command, L"?");
+        WCHAR *query = wcschr(command, L'?');
         if (query != nullptr)
         {
             *query = 0;
@@ -991,7 +991,7 @@ HRESULT BrowserProxyModule::OnWebMessageReceived(ICoreWebView2 *sender, ICoreWeb
             query = command + wcslen(command);
         }
 
-        WCHAR *path = wcsstr(command, L"/");
+        WCHAR *path = wcschr(command, L'/');
         if (path != nullptr)
         {
             *path = 0;

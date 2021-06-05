@@ -49,6 +49,8 @@ protected:
     virtual HRESULT STDMETHODCALLTYPE Stat(STATSTG *pstatstg, DWORD grfStatFlag) override {return E_NOTIMPL;}
     virtual HRESULT STDMETHODCALLTYPE Clone(IStream **ppstm) override {return E_NOTIMPL;}
 
+    HRESULT DetermineContentType(const WCHAR *uri);
+
 protected:
     ULONG                                                m_refCount;
     CComPtr<ICoreWebView2Environment>                    m_environment;
@@ -57,5 +59,6 @@ protected:
     CComPtr<IStream>                                     m_stream;
     CComPtr<IBinding>                                    m_binding;
     CComBSTR                                             m_mimeType;
+    CComBSTR                                             m_contentType;
     ULONG                                                m_size;
 };

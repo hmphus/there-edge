@@ -650,7 +650,7 @@ HRESULT FlashProxyModule::OnWebMessageReceived(ICoreWebView2 *sender, ICoreWebVi
         if (FAILED(args->TryGetWebMessageAsString(&command)) || command == nullptr)
             return E_FAIL;
 
-        WCHAR *query = wcsstr(command, L"?");
+        WCHAR *query = wcschr(command, L'?');
         if (query != nullptr)
         {
             *query = 0;

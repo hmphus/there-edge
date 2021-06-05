@@ -72,7 +72,7 @@ BOOL VoiceTrainerProxy::Validate(const WCHAR *url)
     if (wcscmp(host, L"webapps.prod.there.com") != 0)
         return false;
 
-    WCHAR *query = wcsstr(path, L"?");
+    WCHAR *query = wcschr(path, L'?');
     if (query != nullptr)
         *query = 0;
 
@@ -344,7 +344,7 @@ HRESULT VoiceTrainerProxy::ProcessMessage(const WCHAR *path, const WCHAR *query)
         if (wcscpy_s(key, query) != 0)
             return E_FAIL;
 
-        WCHAR *value = wcsstr(key, L"=");
+        WCHAR *value = wcschr(key, L'=');
         if (value != nullptr)
         {
             *value = 0;
