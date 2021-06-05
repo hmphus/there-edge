@@ -1,4 +1,4 @@
-if (VoiceTrainer != undefined) {
+if (window.VoiceTrainer != undefined) {
   VoiceTrainer.style.display = 'none';
   VoiceTrainer.configState = 0;
   VoiceTrainer.recordLevel = 0;
@@ -23,7 +23,7 @@ if (VoiceTrainer != undefined) {
       }
     });
     window.chrome.webview.postMessage(`voiceTrainer/init`);
-  },
+  };
 
   VoiceTrainer.Config = function(state) {
     window.chrome.webview.postMessage(`voiceTrainer/put?configState=${state}`);
@@ -50,3 +50,22 @@ if (VoiceTrainer != undefined) {
     });
   }
 }
+
+window.ActiveXObject = function(name) {
+  this.name = name;
+};
+
+ActiveXObject.prototype.load = function(url) {
+  const self = this;
+  const request = new XMLHttpRequest();
+  request.addEventListener('load', function() {
+    self.readyState = 4;
+    if (self.onreadystatechange != undefined) {
+      self.onreadystatechange(this.responseXML);
+    }
+  });
+  request.open('GET', url);
+  request.send();
+};
+
+console.log('There Edge compatibility coupling installed');
