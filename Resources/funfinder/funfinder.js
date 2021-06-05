@@ -1,3 +1,34 @@
+There.init({
+  onReady: function() {
+    There.fsCommand('setStageWidthHeight', {
+      width: Number(There.variables.there_windowwidth || 800),
+      height: 36,
+    });
+
+    There.fsCommand('setWidthHeight', {
+      width: Number(There.variables.there_windowwidth || 800),
+      height: 36,
+    });
+
+    There.fsCommand('setTextureBitDepth', {
+      depth: 32,
+    });
+  },
+  onVariable: function(name, value) {
+    if (name == 'there_windowwidth') {
+      There.fsCommand('setStageWidthHeight', {
+        width: Number(value),
+        height: 36,
+      });
+
+      There.fsCommand('setWidthHeight', {
+        width: Number(value),
+        height: 36,
+      });
+    }
+  },
+});
+
 $(document).ready(function() {
   $('.funfinder .button').on('mouseover', function(event) {
     There.playSound('control rollover');
@@ -41,36 +72,5 @@ $(document).ready(function() {
 
   $('.funfinder .button[data-id="close"]').on('click', function() {
     There.fsCommand('closeWindow');
-  });
-
-  There.init({
-    onReady: function() {
-      There.fsCommand('setStageWidthHeight', {
-        width: Number(There.variables.there_windowwidth || 800),
-        height: 36,
-      });
-
-      There.fsCommand('setWidthHeight', {
-        width: Number(There.variables.there_windowwidth || 800),
-        height: 36,
-      });
-
-      There.fsCommand('setTextureBitDepth', {
-        depth: 32,
-      });
-    },
-    onVariable: function(name, value) {
-      if (name == 'there_windowwidth') {
-        There.fsCommand('setStageWidthHeight', {
-          width: Number(value),
-          height: 36,
-        });
-
-        There.fsCommand('setWidthHeight', {
-          width: Number(value),
-          height: 36,
-        });
-      }
-    },
   });
 });

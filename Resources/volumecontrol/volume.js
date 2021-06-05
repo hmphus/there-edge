@@ -1,8 +1,6 @@
-$(document).ready(function() {
-  There.init({
-    onReady: function() {
-      There.guiCommand('settings');
-      There.fsCommand('closeWindow');
-    },
-  });
+There.init({
+  onReady: function() {
+    There.guiCommand('settings');
+    There.fsCommand('closeWindow');
+  },
 });

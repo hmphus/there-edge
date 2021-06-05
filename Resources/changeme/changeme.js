@@ -1,3 +1,21 @@
+There.init({
+  onReady: function() {
+    There.fsCommand('setStageWidthHeight', {
+      width: 200,
+      height: 354,
+    });
+
+    There.fsCommand('setWidthHeight', {
+      width: 200,
+      height: 354,
+    });
+
+    There.fsCommand('setTextureBitDepth', {
+      depth: 32,
+    });
+  },
+});
+
 $(document).ready(function() {
   $('.areas .area').on('click', function() {
     $('.areas').attr('data-area', $(this).data('area'));
@@ -49,23 +67,5 @@ $(document).ready(function() {
     There.onDragMouseDown();
     event.preventDefault();
     event.stopPropagation();
-  });
-
-  There.init({
-    onReady: function() {
-      There.fsCommand('setStageWidthHeight', {
-        width: 200,
-        height: 354,
-      });
-
-      There.fsCommand('setWidthHeight', {
-        width: 200,
-        height: 354,
-      });
-
-      There.fsCommand('setTextureBitDepth', {
-        depth: 32,
-      });
-    },
   });
 });

@@ -1,6 +1,6 @@
 let There = {
-  isCaseSensitive: false,
   variables: {},
+  keys: {},
   onReady: function() {},
   onVariable: function(name, value) {},
 };
@@ -16,14 +16,12 @@ There.init = function(settings) {
     window.chrome.webview.addEventListener('message', function(message) {
       const url = new URL(message.data, 'http://host/');
       if (url.pathname == '/setVariable') {
-        const name = url.searchParams.get('name');
+        const originalName = url.searchParams.get('name');
+        const lowercaseName = originalName.toLowerCase();
         const value = url.searchParams.get('value');
-        There.variables[name.toLowerCase()] = value;
-        if (There.isCaseSensitive) {
-          There.onVariable(name, value);
-        } else {
-          There.onVariable(name.toLowerCase(), value);
-        }
+        There.keys[lowercaseName] = originalName;
+        There.variables[lowercaseName] = value;
+        There.onVariable(lowercaseName, value);
       }
     });
   }

@@ -1,3 +1,27 @@
+There.init({
+  onReady: function() {
+    There.fsCommand('setStageWidthHeight', {
+      width: 86,
+      height: 86,
+    });
+
+    There.fsCommand('setWidthHeight', {
+      width: 86,
+      height: 86,
+    });
+
+    There.fsCommand('setTextureBitDepth', {
+      depth: 32,
+    });
+  },
+
+  onVariable: function(name, value) {
+    if (name == 'there_avheading') {
+      $('.compass .face').css('transform', `rotate(${-value}deg)`);
+    }
+  },
+});
+
 $(document).ready(function() {
   $('.compass').on('mousedown', function(event) {
     There.onDragMouseDown();
@@ -14,29 +38,5 @@ $(document).ready(function() {
     event.stopPropagation();
   }).on('mouseup', function(event) {
     There.playSound('control up');
-  });
-
-  There.init({
-    onReady: function() {
-      There.fsCommand('setStageWidthHeight', {
-        width: 86,
-        height: 86,
-      });
-
-      There.fsCommand('setWidthHeight', {
-        width: 86,
-        height: 86,
-      });
-
-      There.fsCommand('setTextureBitDepth', {
-        depth: 32,
-      });
-    },
-
-    onVariable: function(name, value) {
-      if (name == 'there_avheading') {
-        $('.compass .face').css('transform', `rotate(${-value}deg)`);
-      }
-    },
   });
 });
