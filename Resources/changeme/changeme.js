@@ -64,7 +64,7 @@ $(document).ready(function() {
   });
 
   $('.titlebar').on('mousedown', function(event) {
-    There.onDragMouseDown();
+    There.fsCommand('beginDragWindow');
     event.preventDefault();
     event.stopPropagation();
   });

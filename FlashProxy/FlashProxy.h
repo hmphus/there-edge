@@ -90,11 +90,11 @@ protected:
     virtual HRESULT STDMETHODCALLTYPE GetNaturalExtent(DWORD dwAspect, LONG lindex, DVTARGETDEVICE *ptd,
                                                        HDC hicTargetDev, DVEXTENTINFO *pExtentInfo, LPSIZEL pSizel) override {return E_NOTIMPL;}
     virtual HRESULT STDMETHODCALLTYPE InterfaceSupportsErrorInfo(REFIID riid) override {return E_NOTIMPL;}
-    virtual HRESULT STDMETHODCALLTYPE GetTypeInfoCount(UINT *pctinfo) override;
-    virtual HRESULT STDMETHODCALLTYPE GetTypeInfo(UINT iTInfo, LCID lcid, ITypeInfo **ppTInfo) override;
-    virtual HRESULT STDMETHODCALLTYPE GetIDsOfNames(REFIID riid, LPOLESTR *rgszNames, UINT cNames, LCID lcid, DISPID *rgDispId) override;
+    virtual HRESULT STDMETHODCALLTYPE GetTypeInfoCount(UINT *pctinfo) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE GetTypeInfo(UINT iTInfo, LCID lcid, ITypeInfo **ppTInfo) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE GetIDsOfNames(REFIID riid, LPOLESTR *rgszNames, UINT cNames, LCID lcid, DISPID *rgDispId) override {return E_NOTIMPL;}
     virtual HRESULT STDMETHODCALLTYPE Invoke(DISPID dispIdMember, REFIID riid, LCID lcid, WORD wFlags, DISPPARAMS *pDispParams,
-                                             VARIANT *pVarResult, EXCEPINFO *pExcepInfo, UINT *puArgErr) override;
+                                             VARIANT *pVarResult, EXCEPINFO *pExcepInfo, UINT *puArgErr) override {return E_NOTIMPL;}
     virtual HRESULT STDMETHODCALLTYPE get_ReadyState(long *pVal) override {return E_NOTIMPL;}
     virtual HRESULT STDMETHODCALLTYPE get_TotalFrames(long *pVal) override {return E_NOTIMPL;}
     virtual HRESULT STDMETHODCALLTYPE get_Playing(VARIANT_BOOL *pVal) override {return E_NOTIMPL;}
@@ -209,6 +209,10 @@ protected:
     HRESULT SetRect(const RECT &rect);
     HRESULT SetVisibility(BOOL visible);
 
+public:
+    HRESULT RefreshWindow();
+    static LRESULT APIENTRY ChildWndProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam);
+
 protected:
     ULONG                                    m_refCount;
     QACONTAINER                              m_qaContainer;
@@ -222,6 +226,7 @@ protected:
     CComPtr<IUnknown>                        m_unknownContext;
     CComPtr<IUnknown>                        m_unknownOuter;
     CComPtr<IServiceProvider>                m_serviceProvider;
+    CComPtr<IOleInPlaceSiteWindowless>       m_inplaceSite;
     CComPtr<ICoreWebView2Environment>        m_environment;
     CComPtr<ICoreWebView2Controller2>        m_controller;
     CComPtr<ICoreWebView2>                   m_view;
@@ -230,4 +235,5 @@ protected:
     EventRegistrationToken                   m_navigationCompletedToken;
     BOOL                                     m_ready;
     BOOL                                     m_visible;
+    UINT                                     m_visibilityCounter;
 };

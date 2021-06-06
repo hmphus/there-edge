@@ -1,6 +1,8 @@
 let There = {
   variables: {},
   keys: {},
+  data: {},
+  isDragging: false,
   onReady: function() {},
   onVariable: function(name, value) {},
 };
@@ -25,18 +27,28 @@ There.init = function(settings) {
       }
     });
   }
+  $(document).on('mouseup', function(event) {
+    if (There.isDragging && event.button == 0) {
+      There.isDragging = false;
+      There.fsCommand('endDragWindow');
+    }
+  });
   There.onReady();
 };
 
 There.fsCommand = function(command, query) {
+  let message = command;
   if (query != undefined) {
     if (query.constructor.name != 'URLSearchParams') {
       query = new URLSearchParams(query).toString();
     }
-    command += '?' + query;
+    message += '?' + query;
+  }
+  if (command == 'beginDragWindow') {
+    There.isDragging = true;
   }
   if (window.chrome.webview != undefined) {
-    window.chrome.webview.postMessage(command);
+    window.chrome.webview.postMessage(message);
   }
 };
 
@@ -52,12 +64,6 @@ There.log = function(message) {
     level: 4,
     msg: message,
   });
-};
-
-There.onDragMouseDown = function() {
-  if (window.chrome.webview != undefined) {
-    window.chrome.webview.hostObjects.sync.client.onDragMouseDown();
-  }
 };
 
 There.fetch = function(settings) {

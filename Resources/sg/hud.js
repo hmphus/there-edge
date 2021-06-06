@@ -16,12 +16,12 @@ There.init({
   },
 
   onVariable: function(name, value) {
-    There.pendingVariables = [];
-    if (There.player != undefined) {
-      if (There.player.instance != undefined) {
-        There.player.instance.set_variable(There.keys[name], value);
+    There.data.pendingVariables = [];
+    if (There.data.player != undefined) {
+      if (There.data.player.instance != undefined) {
+        There.data.player.instance.set_variable(There.keys[name], value);
       } else {
-        There.pendingVariables.push({key: There.keys[name], value: value});
+        There.data.pendingVariables.push({key: There.keys[name], value: value});
       }
     } else if (name == 'dataversion') {
       let parameters = {};
@@ -30,28 +30,28 @@ There.init({
       }
       const movie = $('body').data('movie');
       const ruffle = window.RufflePlayer.newest();
-      There.player = ruffle.createPlayer();
-      There.player.config = {
+      There.data.player = ruffle.createPlayer();
+      There.data.player.config = {
         autoplay: 'on',
         unmuteOverlay: 'hidden',
         contextMenu: false,
         backgroundColor: null,
       };
-      There.player.onFSCommand = function(command, query) {
+      There.data.player.onFSCommand = function(command, query) {
         if (command == 'beginDragWindow') {
           return;
         }
         There.fsCommand(command, query);
       };
-      $('body').append(There.player);
-      There.player.load({
+      $('body').append(There.data.player);
+      There.data.player.load({
         url: `http://${There.variables.there_resourceshost}/resources/sg/${movie}.swf`,
         allowScriptAccess: true,
         parameters: new URLSearchParams(There.variables).toString(),
       }).then(function() {
-        while (There.pendingVariables.length > 0) {
-          const entry = There.pendingVariables.shift();
-          There.player.instance.set_variable(entry.key, entry.value);
+        while (There.data.pendingVariables.length > 0) {
+          const entry = There.data.pendingVariables.shift();
+          There.data.player.instance.set_variable(entry.key, entry.value);
         }
       });
     }

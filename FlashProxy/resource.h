@@ -5,6 +5,7 @@
 
 #define IDS_PROJNAME                    100
 #define IDR_FLASHPROXY                  101
+#define IDC_TIMER_UPDATE                1000
 
 // Next default values for new objects
 //

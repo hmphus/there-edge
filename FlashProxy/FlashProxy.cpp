@@ -115,6 +115,7 @@ FlashProxyModule::FlashProxyModule():
     m_unknownContext(),
     m_unknownOuter(),
     m_serviceProvider(),
+    m_inplaceSite(),
     m_environment(),
     m_controller(),
     m_view(),
@@ -122,12 +123,13 @@ FlashProxyModule::FlashProxyModule():
     m_webResourceRequestedToken(),
     m_navigationCompletedToken(),
     m_ready(false),
-    m_visible(false)
+    m_visible(false),
+    m_visibilityCounter(0)
 {
     WNDCLASSEX childClass = {0};
     childClass.cbSize = sizeof(WNDCLASSEX);
     childClass.style = CS_HREDRAW | CS_VREDRAW | CS_DBLCLKS;
-    childClass.lpfnWndProc = DefWindowProc;
+    childClass.lpfnWndProc = ChildWndProc;
     childClass.cbClsExtra = 0;
     childClass.cbWndExtra = 0;
     childClass.hInstance = GetModuleHandle(nullptr);
@@ -386,10 +388,7 @@ HRESULT STDMETHODCALLTYPE FlashProxyModule::DoVerb(LONG iVerb, LPMSG lpmsg, IOle
         case OLEIVERB_INPLACEACTIVATE:
         {
             if (m_wnd != nullptr)
-            {
-                SetVisibility(true);
                 return S_OK;
-            }
 
             if (m_environment != nullptr)
                 return S_OK;
@@ -398,6 +397,9 @@ HRESULT STDMETHODCALLTYPE FlashProxyModule::DoVerb(LONG iVerb, LPMSG lpmsg, IOle
                 return E_INVALIDARG;
 
             if (FAILED(pActiveSite->QueryInterface(&m_serviceProvider)))
+                return E_FAIL;
+
+            if (FAILED(pActiveSite->QueryInterface(&m_inplaceSite)))
                 return E_FAIL;
 
             if (lprcPosRect == nullptr)
@@ -421,6 +423,10 @@ HRESULT STDMETHODCALLTYPE FlashProxyModule::DoVerb(LONG iVerb, LPMSG lpmsg, IOle
                                    WS_CHILD | WS_CLIPCHILDREN | WS_CLIPSIBLINGS,
                                    m_pos.cx, m_pos.cy, m_size.cx, m_size.cy,
                                    hwndParent, nullptr, GetModuleHandle(nullptr), nullptr);
+            if (m_wnd == nullptr)
+                return E_FAIL;
+
+            SetWindowLongPtr(m_wnd, GWL_USERDATA, (LPARAM)this);
 
             if (FAILED(CreateCoreWebView2Environment(this)))
                 return E_FAIL;
@@ -453,7 +459,15 @@ HRESULT STDMETHODCALLTYPE FlashProxyModule::Draw(DWORD dwDrawAspect, LONG lindex
                                                  HDC hdcTargetDev, HDC hdcDraw, LPCRECTL lprcBounds, LPCRECTL lprcWBounds,
                                                  BOOL (STDMETHODCALLTYPE *pfnContinue)(ULONG_PTR dwContinue), ULONG_PTR dwContinue)
 {
-    //Log(L"Draw\n");
+    // WebView2 doesn't currently support offscreen rendering, which is how the Flash control works.
+    // Additional work is required for positioning and visibility, which would normally be taken care of by the client's renderer.
+    // See https://github.com/MicrosoftEdge/WebView2Feedback/issues/20 for details.
+
+    m_visibilityCounter = 5;
+
+    if (m_ready)
+        SetVisibility(true);
+
     return S_OK;
 }
 
@@ -466,44 +480,6 @@ HRESULT STDMETHODCALLTYPE FlashProxyModule::QueryHitPoint(DWORD dwAspect, LPCREC
 HRESULT STDMETHODCALLTYPE FlashProxyModule::QueryHitRect(DWORD dwAspect, LPCRECT pRectBounds, LPCRECT pRectLoc, LONG lCloseHint, DWORD *pHitResult)
 {
     //Log(L"QueryHitRect\n");
-    return E_NOTIMPL;
-}
-
-HRESULT STDMETHODCALLTYPE FlashProxyModule::GetTypeInfoCount(UINT *pctinfo)
-{
-    *pctinfo = 0;
-    return S_OK;
-}
-
-HRESULT STDMETHODCALLTYPE FlashProxyModule::GetTypeInfo(UINT iTInfo, LCID lcid, ITypeInfo **ppTInfo)
-{
-    return E_NOTIMPL;
-}
-
-HRESULT STDMETHODCALLTYPE FlashProxyModule::GetIDsOfNames(REFIID riid, LPOLESTR *rgszNames, UINT cNames, LCID lcid, DISPID *rgDispId)
-{
-    if (cNames == 1)
-    {
-        if (wcscmp(rgszNames[0], L"onDragMouseDown") == 0)
-        {
-            rgDispId[0] = 1;
-            return S_OK;
-        }
-    }
-
-    return DISP_E_UNKNOWNNAME;
-}
-
-HRESULT STDMETHODCALLTYPE FlashProxyModule::Invoke(DISPID dispIdMember, REFIID riid, LCID lcid, WORD wFlags, DISPPARAMS *pDispParams,
-                                                   VARIANT *pVarResult, EXCEPINFO *pExcepInfo, UINT *puArgErr)
-{
-    if (dispIdMember == 1)
-    {
-        ReleaseCapture();
-        SendMessage(m_wnd, WM_NCLBUTTONDOWN, HTCAPTION, 0);
-        return S_OK;
-    }
-
     return E_NOTIMPL;
 }
 
@@ -595,7 +571,7 @@ HRESULT STDMETHODCALLTYPE FlashProxyModule::Invoke(HRESULT errorCode, ICoreWebVi
     settings->put_IsBuiltInErrorPageEnabled(false);
     settings->put_IsStatusBarEnabled(false);
     settings->put_IsZoomControlEnabled(false);
-    settings->put_AreHostObjectsAllowed(true);
+    settings->put_AreHostObjectsAllowed(false);
     settings->put_IsScriptEnabled(true);
     settings->put_IsWebMessageEnabled(true);
 
@@ -605,11 +581,6 @@ HRESULT STDMETHODCALLTYPE FlashProxyModule::Invoke(HRESULT errorCode, ICoreWebVi
 
     COREWEBVIEW2_COLOR color = {0, 0, 0, 0};
     m_controller->put_DefaultBackgroundColor(color);
-
-    VARIANT hostObject = {};
-    hostObject.vt = VT_DISPATCH;
-    hostObject.pdispVal = static_cast<IDispatch*>(this);
-    m_view->AddHostObjectToScript(L"client", &hostObject);
 
     m_view->AddWebResourceRequestedFilter(L"http://127.0.0.1:9999/*", COREWEBVIEW2_WEB_RESOURCE_CONTEXT_ALL);
     m_view->AddWebResourceRequestedFilter(L"http://localhost:9999/*", COREWEBVIEW2_WEB_RESOURCE_CONTEXT_ALL);
@@ -667,12 +638,31 @@ HRESULT FlashProxyModule::OnWebMessageReceived(ICoreWebView2 *sender, ICoreWebVi
     }
 
 #ifdef THERE_DEVTOOLS
-    if (_wcsicmp(bcommand, L"devtools") == 0 && sender != nullptr)
+    if (_wcsicmp(bcommand, L"devtools") == 0)
     {
-        sender->OpenDevToolsWindow();
+        if (sender != nullptr)
+            sender->OpenDevToolsWindow();
+
         return S_OK;
     }
 #endif
+
+    if (_wcsicmp(bcommand, L"beginDragWindow") == 0)
+    {
+        if (m_wnd != nullptr)
+        {
+            ReleaseCapture();
+            SendMessage(GetParent(m_wnd), WM_LBUTTONDOWN, 0, 0);
+        }
+    }
+
+    if (_wcsicmp(bcommand, L"endDragWindow") == 0)
+    {
+        if (m_inplaceSite != nullptr)
+            m_inplaceSite->SetCapture(false);
+
+        return S_OK;
+    }
 
     VARIANTARG vargs[2];
     vargs[0].vt = VT_BSTR;
@@ -747,8 +737,8 @@ HRESULT FlashProxyModule::OnNavigationCompleted(ICoreWebView2 *sender, ICoreWebV
     {
         m_ready = true;
 
+        SetTimer(m_wnd, IDC_TIMER_UPDATE, 10, nullptr);
         SendVariables();
-        SetVisibility(true);
 
         VARIANTARG vargs[1];
         vargs[0].vt = VT_I4;
@@ -897,4 +887,45 @@ HRESULT FlashProxyModule::SetVisibility(BOOL visible)
         m_controller->put_IsVisible(visible);
 
     return S_OK;
+}
+
+HRESULT FlashProxyModule::RefreshWindow()
+{
+    if (m_visibilityCounter > 0)
+        m_visibilityCounter--;
+    else
+        SetVisibility(false);
+
+    if (m_inplaceSite != nullptr)
+    {
+        RECT rect = {m_pos.cx, m_pos.cy, m_pos.cx + 2, m_pos.cy + 2};
+        m_inplaceSite->InvalidateRect(&rect, false);
+    }
+
+    return S_OK;
+}
+
+
+LRESULT APIENTRY FlashProxyModule::ChildWndProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
+{
+    FlashProxyModule *flashProxy = reinterpret_cast<FlashProxyModule*>(GetWindowLongPtr(hWnd, GWL_USERDATA));
+
+    if (flashProxy != nullptr)
+    {
+        switch (Msg)
+        {
+            case WM_TIMER:
+            {
+                if (wParam == IDC_TIMER_UPDATE)
+                {
+                    KillTimer(hWnd, IDC_TIMER_UPDATE);
+                    flashProxy->RefreshWindow();
+                    SetTimer(hWnd, IDC_TIMER_UPDATE, 33, nullptr);
+                }
+                break;
+            }
+        }
+    }
+
+    return DefWindowProc(hWnd, Msg, wParam, lParam);
 }

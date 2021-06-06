@@ -24,7 +24,7 @@ There.init({
 
 $(document).ready(function() {
   $('.compass').on('mousedown', function(event) {
-    There.onDragMouseDown();
+    There.fsCommand('beginDragWindow');
     event.preventDefault();
     event.stopPropagation();
   });
