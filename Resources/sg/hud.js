@@ -16,7 +16,14 @@ There.init({
   },
 
   onVariable: function(name, value) {
-    if (name == 'dataversion' && There.player == undefined) {
+    There.pendingVariables = [];
+    if (There.player != undefined) {
+      if (There.player.instance != undefined) {
+        There.player.instance.set_variable(There.keys[name], value);
+      } else {
+        There.pendingVariables.push({key: There.keys[name], value: value});
+      }
+    } else if (name == 'dataversion') {
       let parameters = {};
       for (let key in There.keys) {
         parameters[There.keys[key]] = There.variables[key];
@@ -31,7 +38,6 @@ There.init({
         backgroundColor: null,
       };
       There.player.onFSCommand = function(command, query) {
-        console.log(command);
         if (command == 'beginDragWindow') {
           return;
         }
@@ -42,6 +48,11 @@ There.init({
         url: `http://${There.variables.there_resourceshost}/resources/sg/${movie}.swf`,
         allowScriptAccess: true,
         parameters: new URLSearchParams(There.variables).toString(),
+      }).then(function() {
+        while (There.pendingVariables.length > 0) {
+          const entry = There.pendingVariables.shift();
+          There.player.instance.set_variable(entry.key, entry.value);
+        }
       });
     }
   },
