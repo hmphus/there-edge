@@ -209,10 +209,6 @@ protected:
     HRESULT SetRect(const RECT &rect);
     HRESULT SetVisibility(BOOL visible);
 
-public:
-    HRESULT RefreshWindow();
-    static LRESULT APIENTRY ChildWndProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam);
-
 protected:
     ULONG                                    m_refCount;
     QACONTAINER                              m_qaContainer;
@@ -236,5 +232,4 @@ protected:
     EventRegistrationToken                   m_navigationCompletedToken;
     BOOL                                     m_ready;
     BOOL                                     m_visible;
-    UINT                                     m_visibilityCounter;
 };

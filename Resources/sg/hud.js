@@ -1,6 +1,6 @@
 There.init({
   onReady: function() {
-   There.fsCommand('setStageWidthHeight', {
+    There.fsCommand('setStageWidthHeight', {
       width: 800,
       height: 89,
     });

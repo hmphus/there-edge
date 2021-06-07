@@ -124,13 +124,12 @@ FlashProxyModule::FlashProxyModule():
     m_webResourceRequestedToken(),
     m_navigationCompletedToken(),
     m_ready(false),
-    m_visible(false),
-    m_visibilityCounter(0)
+    m_visible(false)
 {
     WNDCLASSEX childClass = {0};
     childClass.cbSize = sizeof(WNDCLASSEX);
     childClass.style = CS_HREDRAW | CS_VREDRAW | CS_DBLCLKS;
-    childClass.lpfnWndProc = ChildWndProc;
+    childClass.lpfnWndProc = DefWindowProc;
     childClass.cbClsExtra = 0;
     childClass.cbWndExtra = 0;
     childClass.hInstance = GetModuleHandle(nullptr);
@@ -450,7 +449,7 @@ HRESULT STDMETHODCALLTYPE FlashProxyModule::GetWindow(HWND *phwnd)
 
 HRESULT STDMETHODCALLTYPE FlashProxyModule::SetObjectRects(LPCRECT lprcPosRect, LPCRECT lprcClipRect)
 {
-    if (lprcClipRect == nullptr || lprcClipRect == nullptr)
+    if (lprcPosRect == nullptr || lprcClipRect == nullptr)
         return E_INVALIDARG;
 
     SetRect(*lprcClipRect);
@@ -465,12 +464,6 @@ HRESULT STDMETHODCALLTYPE FlashProxyModule::Draw(DWORD dwDrawAspect, LONG lindex
     // WebView2 doesn't currently support offscreen rendering, which is how the Flash control works.
     // Additional work is required for positioning and visibility, which would normally be taken care of by the client's renderer.
     // See https://github.com/MicrosoftEdge/WebView2Feedback/issues/20 for details.
-
-    m_visibilityCounter = 5;
-
-    if (m_ready)
-        SetVisibility(true);
-
     return S_OK;
 }
 
@@ -746,7 +739,7 @@ HRESULT FlashProxyModule::OnNavigationCompleted(ICoreWebView2 *sender, ICoreWebV
     {
         m_ready = true;
 
-        SetTimer(m_wnd, IDC_TIMER_UPDATE, 10, nullptr);
+        SetVisibility(true);
         SendVariables();
 
         VARIANTARG vargs[1];
@@ -898,45 +891,4 @@ HRESULT FlashProxyModule::SetVisibility(BOOL visible)
         m_controller->put_IsVisible(visible);
 
     return S_OK;
-}
-
-HRESULT FlashProxyModule::RefreshWindow()
-{
-    if (m_visibilityCounter > 0)
-        m_visibilityCounter--;
-    else
-        SetVisibility(false);
-
-    if (m_inplaceSite != nullptr)
-    {
-        RECT rect = {m_pos.cx, m_pos.cy, m_pos.cx + 2, m_pos.cy + 2};
-        m_inplaceSite->InvalidateRect(&rect, false);
-    }
-
-    return S_OK;
-}
-
-
-LRESULT APIENTRY FlashProxyModule::ChildWndProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
-{
-    FlashProxyModule *flashProxy = reinterpret_cast<FlashProxyModule*>(GetWindowLongPtr(hWnd, GWL_USERDATA));
-
-    if (flashProxy != nullptr)
-    {
-        switch (Msg)
-        {
-            case WM_TIMER:
-            {
-                if (wParam == IDC_TIMER_UPDATE)
-                {
-                    KillTimer(hWnd, IDC_TIMER_UPDATE);
-                    flashProxy->RefreshWindow();
-                    //SetTimer(hWnd, IDC_TIMER_UPDATE, 33, nullptr);
-                }
-                break;
-            }
-        }
-    }
-
-    return DefWindowProc(hWnd, Msg, wParam, lParam);
 }
