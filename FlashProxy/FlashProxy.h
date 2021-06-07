@@ -219,6 +219,7 @@ protected:
     QACONTROL                                m_qaControl;
     SIZE                                     m_pos;
     SIZE                                     m_size;
+    SIZE                                     m_offset;
     HWND                                     m_wnd;
     CComBSTR                                 m_url;
     CComSafeArray<BSTR>                      m_variables;

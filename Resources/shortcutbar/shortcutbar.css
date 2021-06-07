@@ -1,0 +1,240 @@
+body {
+  margin:0px;
+  font-family:sans-serif;
+  font-size:16px;
+  color:#000;
+  user-select:none;
+  text-size-adjust:none;
+  border-bottom:1px solid #62848c;
+  overflow:hidden;
+}
+
+.shortcutbar {
+  position:absolute;
+  left:0px;
+  top:0px;
+  width:100%;
+  height:25px;
+  border-top:1px solid #666;
+  background-image:url(shortcutbar.png);
+  background-size:calc(100vw * 532) 100px;
+  font-size:0px;
+}
+
+.shortcutbar .buttons.big .button {
+  display:inline-block;
+  margin-left:1px;
+  width:26px;
+  height:25px;
+  background-image:url(shortcutbar.png);
+}
+
+.shortcutbar[data-emotionsflashing="1"] .buttons.big .button[data-id="actions"] {
+  animation-name:blink;
+  animation-duration:1s;
+  animation-timing-function:steps(1);
+  animation-iteration-count:5;
+}
+
+@keyframes blink {
+  0% {
+    background-position-y:0px;
+  }
+  50% {
+    background-position-y:-25px;
+  }
+}
+
+.shortcutbar .buttons.big .button:hover {
+  background-position-y:-25px;
+}
+
+.shortcutbar .buttons.big .button:hover:active {
+  background-position-y:-50px;
+}
+
+.shortcutbar .buttons.big .button[data-id="there"] {
+  margin-left:7px;
+  background-position-x:-52px;
+}
+
+.shortcutbar .buttons.big .button[data-id="browser"] {
+  background-position-x:-78px;
+}
+
+.shortcutbar .buttons.big .button[data-id="im"] {
+  background-position-x:-104px;
+}
+
+.shortcutbar .buttons.big .button[data-id="actions"] {
+  background-position-x:-130px;
+}
+
+.shortcutbar .buttons.big .button[data-id="happening"] {
+  background-position-x:-156px;
+}
+
+.shortcutbar .buttons.big .button[data-id="activities"] {
+  background-position-x:-182px;
+}
+
+.shortcutbar .buttons.big .button[data-id="map"] {
+  background-position-x:-208px;
+}
+
+.shortcutbar .buttons.big .button[data-id="places"] {
+  background-position-x:-234px;
+}
+
+.shortcutbar .buttons.big .button[data-id="information"] {
+  background-position-x:-260px;
+}
+
+.shortcutbar .buttons.big .button[data-id="exit"] {
+  background-position-x:-286px;
+}
+
+.shortcutbar .buttons.big .button[data-id="shop"] {
+  background-position-x:-312px;
+}
+
+.shortcutbar .buttons.big .button[data-id="auctions"] {
+  background-position-x:-338px;
+}
+
+.shortcutbar .buttons.big .button[data-id="changeme"] {
+  background-position-x:-364px;
+}
+
+.shortcutbar .buttons.big .button[data-id="organizer"] {
+  background-position-x:-390px;
+}
+
+.shortcutbar .buttons.big .button[data-id="aerial"] {
+  background-position-x:-26px;
+}
+
+.shortcutbar .buttons.big .button[data-id="mirror"] {
+  background-position-x:-468px;
+}
+
+.shortcutbar .buttons.big .button[data-id="standard"] {
+  background-position-x:0px;
+}
+
+.shortcutbar .buttons.big .button[data-id="topics"] {
+  background-position-x:-416px;
+}
+
+.shortcutbar .buttons.big .button[data-id="guide"] {
+  background-position-x:-442px;
+}
+
+.shortcutbar[data-thisplaceenabled="0"] .buttons.big .button[data-id="information"],
+.shortcutbar[data-thisplaceenabled="0"] .buttons.big .button[data-id="information"]:hover,
+.shortcutbar[data-thisplaceenabled="0"] .buttons.big .button[data-id="information"]:active,
+.shortcutbar[data-thisplaceenabled="0"] .buttons.big .button[data-id="exit"],
+.shortcutbar[data-thisplaceenabled="0"] .buttons.big .button[data-id="exit"]:hover,
+.shortcutbar[data-thisplaceenabled="0"] .buttons.big .button[data-id="exit"]:active {
+  background-position-y:-75px;
+  pointer-events:none;
+}
+
+.shortcutbar[data-instandardview="0"][data-inbodyview="0"] .buttons.big .button[data-id="aerial"] {
+  display:none;
+}
+
+.shortcutbar:not([data-instandardview="0"][data-inbodyview="0"]) .buttons.big .button[data-id="standard"][data-index="0"] {
+  display:none;
+}
+
+.shortcutbar[data-instandardview="0"][data-inbodyview="1"] .buttons.big .button[data-id="mirror"] {
+  display:none;
+}
+
+.shortcutbar:not([data-instandardview="0"][data-inbodyview="1"]) .buttons.big .button[data-id="standard"][data-index="1"] {
+  display:none;
+}
+
+.shortcutbar[data-aerialviewallowed="0"] .buttons.big .button[data-id="aerial"],
+.shortcutbar[data-aerialviewallowed="0"] .buttons.big .button[data-id="aerial"]:hover,
+.shortcutbar[data-aerialviewallowed="0"] .buttons.big .button[data-id="aerial"]:active {
+  background-position-y:-75px;
+  pointer-events:none;
+}
+
+.shortcutbar .buttons.big .separator {
+  display:inline-block;
+  margin-left:6px;
+  margin-right:5px;
+  width:1px;
+  height:23px;
+  background-color:#62848c;
+  border:1px solid #62848c;
+  border-right-color:#fff;
+}
+
+.shortcutbar .buttons.big .window {
+  position:relative;
+  display:inline-block;
+  width:129px;
+  height:25px;
+}
+
+.shortcutbar .buttons.big .window .icon {
+  display:inline-block;
+  margin-left:2px;
+  width:24px;
+  height:25px;
+  background-image:url(shortcutbar.png);
+  background-position-x:-494px;
+  background-position-y:-75px;
+}
+
+.shortcutbar .buttons.big .window .text {
+  display:inline-block;
+  width:102px;
+  height:25px;
+}
+
+.shortcutbar .buttons.small {
+  position:absolute;
+  right:5px;
+  top:5px;
+  height:24px;
+}
+
+.shortcutbar .buttons.small .button {
+  display:inline-block;
+  margin-left:1px;
+  width:14px;
+  height:13px;
+  border:1px solid #666;
+  background-image:url(shortcutbar.png);
+  background-position-x:-518px;
+  border-radius:3px;
+}
+
+.shortcutbar .buttons.small .button[data-id="close"] {
+  background-position-y:0px;
+}
+
+.shortcutbar .buttons.small .button[data-id="close"]:hover {
+  background-position-y:-13px;
+}
+
+.shortcutbar .buttons.small .button[data-id="close"]:hover:active {
+  background-position-y:-26px;
+}
+
+.shortcutbar .buttons.small .button[data-id="help"] {
+  background-position-y:-39px;
+}
+
+.shortcutbar .buttons.small .button[data-id="help"]:hover {
+  background-position-y:-52px;
+}
+
+.shortcutbar .buttons.small .button[data-id="help"]:hover:active {
+  background-position-y:-65px;
+}

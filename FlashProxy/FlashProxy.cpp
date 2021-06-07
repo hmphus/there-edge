@@ -108,6 +108,7 @@ FlashProxyModule::FlashProxyModule():
     m_qaControl(),
     m_pos(),
     m_size(),
+    m_offset(),
     m_wnd(nullptr),
     m_url(),
     m_variables(),
@@ -449,8 +450,10 @@ HRESULT STDMETHODCALLTYPE FlashProxyModule::GetWindow(HWND *phwnd)
 
 HRESULT STDMETHODCALLTYPE FlashProxyModule::SetObjectRects(LPCRECT lprcPosRect, LPCRECT lprcClipRect)
 {
-    if (lprcClipRect != nullptr)
-        SetRect(*lprcClipRect);
+    if (lprcClipRect == nullptr || lprcClipRect == nullptr)
+        return E_INVALIDARG;
+
+    SetRect(*lprcClipRect);
 
     return S_OK;
 }
@@ -647,6 +650,12 @@ HRESULT FlashProxyModule::OnWebMessageReceived(ICoreWebView2 *sender, ICoreWebVi
     }
 #endif
 
+    if (_wcsicmp(bcommand, L"declareToolbar") == 0)
+    {
+        m_offset.cy = -1;
+        return S_OK;
+    }
+
     if (_wcsicmp(bcommand, L"beginDragWindow") == 0)
     {
         if (m_wnd != nullptr)
@@ -836,7 +845,7 @@ HRESULT FlashProxyModule::SetRect(const RECT &rect)
         flags |= SWP_NOMOVE;
 
     LONG width = rect.right > rect.left ? rect.right - rect.left : 1;
-    LONG height= rect.bottom > rect.top ? rect.bottom - rect.top : 1;
+    LONG height = rect.bottom > rect.top ? rect.bottom - rect.top : 1;
 
     if (width == m_size.cx && height == m_size.cy)
         flags |= SWP_NOSIZE;
@@ -864,6 +873,8 @@ HRESULT FlashProxyModule::SetRect(const RECT &rect)
         {
             RECT bounds;
             GetClientRect(m_wnd, &bounds);
+            bounds.left += m_offset.cx;
+            bounds.top += m_offset.cy;
             m_controller->put_Bounds(bounds);
         }
     }
@@ -920,7 +931,7 @@ LRESULT APIENTRY FlashProxyModule::ChildWndProc(HWND hWnd, UINT Msg, WPARAM wPar
                 {
                     KillTimer(hWnd, IDC_TIMER_UPDATE);
                     flashProxy->RefreshWindow();
-                    SetTimer(hWnd, IDC_TIMER_UPDATE, 33, nullptr);
+                    //SetTimer(hWnd, IDC_TIMER_UPDATE, 33, nullptr);
                 }
                 break;
             }

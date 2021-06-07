@@ -1,5 +1,7 @@
 There.init({
   onReady: function() {
+    There.fsCommand('declareToolbar');
+
     There.fsCommand('setStageWidthHeight', {
       width: Number(There.variables.there_windowwidth || 800),
       height: 36,
@@ -14,6 +16,7 @@ There.init({
       depth: 32,
     });
   },
+
   onVariable: function(name, value) {
     if (name == 'there_windowwidth') {
       There.fsCommand('setStageWidthHeight', {
@@ -40,27 +43,27 @@ $(document).ready(function() {
   });
 
   $('.funfinder .button[data-id="events"]').on('click', function() {
-      There.guiCommand('happeningNow');
+    There.guiCommand('happeningNow');
   });
 
   $('.funfinder .button[data-id="chats"]').on('click', function() {
-      There.guiCommand('conversations');
+    There.guiCommand('conversations');
   });
 
   $('.funfinder .button[data-id="clubs"]').on('click', function() {
-      There.guiCommand('clubs');
+    There.guiCommand('clubs');
   });
 
   $('.funfinder .button[data-id="map"]').on('click', function() {
-      There.guiCommand('map');
+    There.guiCommand('map');
   });
 
   $('.funfinder .button[data-id="shop"]').on('click', function() {
-      There.guiCommand('shop');
+    There.guiCommand('shop');
   });
 
   $('.funfinder .button[data-id="guide"]').on('click', function() {
-      There.guiCommand('guide');
+    There.guiCommand('guide');
   });
 
   $('.funfinder .button[data-id="help"]').on('click', function() {

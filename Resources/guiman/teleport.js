@@ -14,6 +14,7 @@ There.init({
       depth: 32,
     });
   },
+
   onVariable: function(name, value) {
     if (name == 'there_ready' && value == '1') {
       There.fetch({
