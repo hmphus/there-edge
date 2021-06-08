@@ -2,6 +2,7 @@ let There = {
   variables: {},
   keys: {},
   data: {},
+  timers: {},
   isDragging: false,
   onReady: function() {},
   onVariable: function(name, value) {},
@@ -73,6 +74,7 @@ There.fetch = function(settings) {
     dataType: settings.dataType != undefined ? settings.dataType : 'xml',
     success: settings.success,
     error: settings.error,
+    complete: settings.complete,
   });
 };
 
@@ -103,5 +105,18 @@ There.playSound = function(name) {
     There.fsCommand('PlayUISound', {
       uiSoundSelector: id,
     });
+  }
+};
+
+There.setNamedTimer = function(name, timeout, callback) {
+  There.clearNamedTimer(name);
+  There.timers[name] = setTimeout(callback, timeout);
+};
+
+There.clearNamedTimer = function(name) {
+  const timer = There.timers[name];
+  if (timer != undefined) {
+    clearTimeout(timer);
+    delete There.timers[name];
   }
 };

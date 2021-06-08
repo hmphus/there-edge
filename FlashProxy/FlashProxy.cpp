@@ -108,7 +108,6 @@ FlashProxyModule::FlashProxyModule():
     m_qaControl(),
     m_pos(),
     m_size(),
-    m_offset(),
     m_wnd(nullptr),
     m_url(),
     m_variables(),
@@ -643,12 +642,6 @@ HRESULT FlashProxyModule::OnWebMessageReceived(ICoreWebView2 *sender, ICoreWebVi
     }
 #endif
 
-    if (_wcsicmp(bcommand, L"declareToolbar") == 0)
-    {
-        m_offset.cy = -1;
-        return S_OK;
-    }
-
     if (_wcsicmp(bcommand, L"beginDragWindow") == 0)
     {
         if (m_wnd != nullptr)
@@ -866,8 +859,6 @@ HRESULT FlashProxyModule::SetRect(const RECT &rect)
         {
             RECT bounds;
             GetClientRect(m_wnd, &bounds);
-            bounds.left += m_offset.cx;
-            bounds.top += m_offset.cy;
             m_controller->put_Bounds(bounds);
         }
     }

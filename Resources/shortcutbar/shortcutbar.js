@@ -1,7 +1,5 @@
 There.init({
   onReady: function() {
-    There.fsCommand('declareToolbar');
-
     There.fsCommand('setStageWidthHeight', {
       width: Number(There.variables.there_windowwidth || 800),
       height: 25,
@@ -100,7 +98,8 @@ $(document).ready(function() {
   });
 
   $('.shortcutbar .button[data-id="organizer"]').on('click', function() {
-    There.guiCommand('organizer', {
+    There.guiCommand({
+      action: 'organizer',
       folder: 'gear',
     });
   });

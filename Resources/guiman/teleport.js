@@ -16,7 +16,7 @@ There.init({
   },
 
   onVariable: function(name, value) {
-    if (name == 'there_ready' && value == '1') {
+    if (name == 'there_ready' && value == 1) {
       There.fetch({
         path: '/VersionedXmlSvc/veilHints',
         query: {

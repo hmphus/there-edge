@@ -1,0 +1,161 @@
+body {
+  margin:0px;
+  font-family:sans-serif;
+  font-size:16px;
+  color:#000;
+  user-select:none;
+  text-size-adjust:none;
+  border-bottom:1px solid #62848c;
+  overflow:hidden;
+}
+
+.emotionsbar {
+  position:absolute;
+  left:0px;
+  top:0px;
+  width:100%;
+  height:22px;
+  border-top:1px solid #808080;
+  border-bottom:1px solid #808080;
+  background-color:#bbeedd;
+  font-size:0px;
+}
+
+.emotionsbar .buttons.big .banks,
+.emotionsbar .buttons.big .emotions {
+  display:inline-block;
+}
+
+.emotionsbar .buttons.big .bank {
+  display:inline-block;
+  height:20px;
+  line-height:20px;
+  padding:1px 8px;
+  vertical-align:top;
+  border-left:1px solid #fff;
+  border-right:1px solid #999;
+  background-image:url(emotionsbar.png);
+  background-position-y:-1px;
+  font-size:11px;
+  font-family:Tahoma, sans-serif;
+}
+
+.emotionsbar .buttons.big .bank:first-of-type {
+  border-left:none;
+}
+
+.emotionsbar .buttons.big .bank:hover {
+  background-position-y:-47px;
+  text-shadow:1px 1px 1px #0006;
+}
+
+.emotionsbar .buttons.big .bank:hover:active {
+  background-position-y:-47px;
+  text-shadow:0px 0px 2px #0006;
+  padding:2px 7px 0px 9px;
+}
+
+.emotionsbar .buttons.big .bank[data-selected="1"]:hover,
+.emotionsbar .buttons.big .bank[data-selected="1"]:active,
+.emotionsbar .buttons.big .bank[data-selected="1"] {
+  background-position-y:-24px;
+  text-shadow:none;
+  padding:1px 8px;
+}
+
+.emotionsbar .buttons.big .button {
+  display:inline-block;
+  height:20px;
+  line-height:20px;
+  padding:1px 4px;
+  vertical-align:top;
+  font-size:11px;
+  font-family:Tahoma, sans-serif;
+}
+
+.emotionsbar .buttons.big .button:hover {
+  background-color:#88d4bb;
+}
+
+.emotionsbar .buttons.big .button:hover:active,
+.emotionsbar .buttons.big .button[data-id="talk"]:active,
+.emotionsbar[data-voicetoggle="1"][data-voiceisspeaking="1"] .buttons.big .button[data-id="talk"] {
+  background-color:#88d4bb;
+  padding:2px 3px 0px 5px;
+}
+
+.emotionsbar .buttons.big .button:not([data-enabled="1"]),
+.emotionsbar .buttons.big .button:not([data-enabled="1"]):hover,
+.emotionsbar .buttons.big .button:not([data-enabled="1"]):active,
+.emotionsbar:not([data-voicetoggle="1"]) .buttons.big .button[data-id="talk"],
+.emotionsbar:not([data-voicetoggle="1"]) .buttons.big .button[data-id="talk"]:hover,
+.emotionsbar:not([data-voicetoggle="1"]) .buttons.big .button[data-id="talk"]:active,
+.emotionsbar:not([data-voicetoggle="1"]) .buttons.big .button[data-id="turnhandsfreeon"],
+.emotionsbar:not([data-voicetoggle="1"]) .buttons.big .button[data-id="turnhandsfreeon"]:hover,
+.emotionsbar:not([data-voicetoggle="1"]) .buttons.big .button[data-id="turnhandsfreeon"]:active,
+.emotionsbar:not([data-voicetoggle="1"]) .buttons.big .button[data-id="turnhandsfreeoff"],
+.emotionsbar:not([data-voicetoggle="1"]) .buttons.big .button[data-id="turnhandsfreeoff"]:hover,
+.emotionsbar:not([data-voicetoggle="1"]) .buttons.big .button[data-id="turnhandsfreeoff"]:active {
+  padding:1px 4px;
+  pointer-events:none;
+  background-color:unset;
+  color:#999;
+}
+
+.emotionsbar:not([data-voicehandfree="1"]) .buttons.big .button[data-id="turnhandsfreeoff"] {
+  display:none;
+}
+
+.emotionsbar[data-voicehandfree="1"] .buttons.big .button[data-id="turnhandsfreeon"] {
+  display:none;
+}
+
+.emotionsbar:not([data-voicetoggle="1"]) .buttons.big .button[data-id="turnvoiceoff"] {
+  display:none;
+}
+
+.emotionsbar[data-voicetoggle="1"] .buttons.big .button[data-id="turnvoiceon"] {
+  display:none;
+}
+
+.emotionsbar .buttons.small {
+  position:absolute;
+  right:5px;
+  top:3px;
+}
+
+.emotionsbar .buttons.small .button {
+  display:inline-block;
+  margin-left:1px;
+  width:14px;
+  height:13px;
+  border:1px solid #666;
+  background-image:url(emotionsbar.png);
+  border-radius:3px;
+}
+
+.emotionsbar .buttons.small .button[data-id="close"] {
+  background-position-x:0px;
+  background-position-y:-69px;
+}
+
+.emotionsbar .buttons.small .button[data-id="close"]:hover {
+  background-position-y:-82px;
+}
+
+.emotionsbar .buttons.small .button[data-id="close"]:hover:active {
+  background-position-y:-95px;
+}
+
+.emotionsbar .buttons.small .button[data-id="help"] {
+  background-position-x:-14px;
+  background-position-y:-69px;
+}
+
+.emotionsbar .buttons.small .button[data-id="help"]:hover {
+  background-position-y:-82px;
+}
+
+.emotionsbar .buttons.small .button[data-id="help"]:hover:active {
+  background-position-y:-95px;
+}
