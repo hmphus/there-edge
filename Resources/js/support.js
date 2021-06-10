@@ -2,10 +2,15 @@ let There = {
   variables: {},
   keys: {},
   data: {},
-  timers: {},
-  isDragging: false,
   onReady: function() {},
   onVariable: function(name, value) {},
+  private: {
+    queue: [],
+    timers: {},
+    intervals: {},
+    isReady: false,
+    isDragging: false,
+  },
 };
 
 There.init = function(settings) {
@@ -19,22 +24,47 @@ There.init = function(settings) {
     window.chrome.webview.addEventListener('message', function(message) {
       const url = new URL(message.data, 'http://host/');
       if (url.pathname == '/setVariable') {
-        const originalName = url.searchParams.get('name');
-        const lowercaseName = originalName.toLowerCase();
+        const name = url.searchParams.get('name');
         const value = url.searchParams.get('value');
-        There.keys[lowercaseName] = originalName;
-        There.variables[lowercaseName] = value;
-        There.onVariable(lowercaseName, value);
+        if (There.private.isReady) {
+          There.processVariable(name, value);
+        } else {
+          There.private.queue.push({
+            type: 'variable',
+            name: name,
+            value: value,
+          });
+        }
       }
     });
   }
   $(document).on('mouseup', function(event) {
-    if (There.isDragging && event.button == 0) {
-      There.isDragging = false;
+    if (There.private.isDragging && event.button == 0) {
+      There.private.isDragging = false;
       There.fsCommand('endDragWindow');
     }
   });
-  There.onReady();
+  $(document).ready(function() {
+    There.private.isReady = true;
+    There.onReady();
+    There.processQueue();
+  });
+};
+
+There.processQueue = function() {
+  while (There.private.queue.length > 0) {
+    const entry = There.private.queue.shift();
+    if (entry.type == 'variable') {
+      There.processVariable(entry.name, entry.value);
+    }
+  }
+};
+
+There.processVariable = function(name, value) {
+  const lowercaseName = name.toLowerCase();
+  There.keys[lowercaseName] = name;
+  There.variables[lowercaseName] = value;
+  There.onVariable(lowercaseName, value);
 };
 
 There.fsCommand = function(command, query) {
@@ -46,7 +76,7 @@ There.fsCommand = function(command, query) {
     message += '?' + query;
   }
   if (command == 'beginDragWindow') {
-    There.isDragging = true;
+    There.private.isDragging = true;
   }
   if (window.chrome.webview != undefined) {
     window.chrome.webview.postMessage(message);
@@ -60,10 +90,14 @@ There.guiCommand = function(query) {
   There.fsCommand('guiCommand', query);
 };
 
-There.log = function(message) {
+There.log = function(level, message) {
+  if (level.constructor.name == 'String' && message == undefined) {
+    message = level;
+    level = 4;
+  }
   There.fsCommand('Log', {
-    level: 4,
-    msg: message,
+    level: level,
+    msg: message + '\n',
   });
 };
 
@@ -99,24 +133,49 @@ There.playSound = function(name) {
     'message recieved': 4103,
     'system message': 4104,
     'avatar message': 4105,
+    'system message one': 4108,
+    'avatar message one': 4109,
   };
-  const id = names[name];
+  const id = typeof(name) == 'string' ? names[name] : name;
   if (id != undefined) {
+    if (id == 4104 || id == 4105) {
+      There.private.stopSoundId = id + 2;
+    }
     There.fsCommand('PlayUISound', {
       uiSoundSelector: id,
     });
   }
 };
 
+There.stopSound = function() {
+  if (There.private.stopSoundId != undefined) {
+    There.playSound(There.private.stopSoundId);
+    delete There.private.stopSoundId;
+  }
+};
+
 There.setNamedTimer = function(name, timeout, callback) {
   There.clearNamedTimer(name);
-  There.timers[name] = setTimeout(callback, timeout);
+  There.private.timers[name] = setTimeout(callback, timeout);
 };
 
 There.clearNamedTimer = function(name) {
-  const timer = There.timers[name];
+  const timer = There.private.timers[name];
   if (timer != undefined) {
     clearTimeout(timer);
-    delete There.timers[name];
+    delete There.private.timers[name];
+  }
+};
+
+There.setNamedInterval = function(name, timeout, callback) {
+  There.clearNamedInterval(name);
+  There.private.intervals[name] = setInterval(callback, timeout);
+};
+
+There.clearNamedInterval = function(name) {
+  const interval = There.private.intervals[name];
+  if (interval != undefined) {
+    clearInterval(interval);
+    delete There.private.intervals[name];
   }
 };

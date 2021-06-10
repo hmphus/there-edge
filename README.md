@@ -14,4 +14,4 @@ Install [Visual Studio 2019](https://visualstudio.microsoft.com/vs/) with the "D
 
 This project is currently in the [initial development](https://github.com/hmphus/there-edge/projects/1) phase.
 
-![Screenshot](https://media.fotki.com/2v2aHNnv5x3JhYT.png)
+![Screenshot](https://media.fotki.com/2v2aeib6Cx3JhYT.png)

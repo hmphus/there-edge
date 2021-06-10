@@ -197,7 +197,7 @@ body {
 
 .shortcutbar .buttons.small {
   position:absolute;
-  right:5px;
+  right:6px;
   top:5px;
   height:24px;
 }
@@ -208,9 +208,9 @@ body {
   width:14px;
   height:13px;
   border:1px solid #666;
+  border-radius:3px;
   background-image:url(shortcutbar.png);
   background-position-x:-518px;
-  border-radius:3px;
 }
 
 .shortcutbar .buttons.small .button[data-id="close"] {

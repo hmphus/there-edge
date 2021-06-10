@@ -32,7 +32,7 @@ There.init({
       });
     }
 
-    if (name == 'there_ready' && value == 1 && document.readyState == 'complete') {
+    if (name == 'there_ready') {
       There.fetchEmotionsXml();
     }
 
@@ -87,7 +87,15 @@ There.init({
         });
       }
       $(divBank).data('actions', emotions);
-      $(divBank).on('click', There.onEmotionsBank);
+      $(divBank).on('click', function() {
+        There.handleEmotionsBank(this);
+      }).on('mouseover', function() {
+        There.playSound('control rollover');
+      }).on('mousedown', function() {
+        There.playSound('control down');
+      }).on('mouseup', function() {
+        There.playSound('control up');
+      });
       $('.emotionsbar .banks').append($(divBank));
     }
     if(There.variables.there_voiceenabled == 1) {
@@ -120,7 +128,15 @@ There.init({
         text: 'Voice Trainer',
         enabled: '1',
       }]);
-      $(divBank).on('click', There.onEmotionsBank);
+      $(divBank).on('click', function() {
+        There.handleEmotionsBank(this);
+      }).on('mouseover', function() {
+        There.playSound('control rollover');
+      }).on('mousedown', function() {
+        There.playSound('control down');
+      }).on('mouseup', function() {
+        There.playSound('control up');
+      });
       $('.emotionsbar .banks').append($(divBank));
     }
     const divNewSelected = $('.emotionsbar .bank[data-selected="1"]').first();
@@ -132,8 +148,7 @@ There.init({
     }
   },
 
-  onEmotionsBank: function() {
-    const divBank = this;
+  handleEmotionsBank: function(divBank) {
     $('.emotionsbar .bank').attr('data-selected', '0');
     $(divBank).attr('data-selected', '1');
     $('.emotionsbar .emotions').empty();
@@ -143,26 +158,37 @@ There.init({
       $(divButton).attr('data-id', action.id);
       $(divButton).attr('data-enabled', action.enabled);
       if (action.id == 'talk') {
-        $(divButton).on('mousedown', function(event) {
+        $(divButton).on('mouseover', function() {
+          There.playSound('control rollover');
+        }).on('mousedown', function() {
+          There.playSound('control down');
           There.guiCommand({
             action: 'voiceTalk',
             toggle: '1',
           });
-        }).on('mouseup', function(event) {
+        }).on('mouseup', function() {
+          There.playSound('control up');
           There.guiCommand({
             action: 'voiceTalk',
             toggle: '0',
           });
         });
       } else {
-        $(divButton).on('click', There.onEmotionsClick);
+        $(divButton).on('click', function() {
+          There.handleEmotionsClick(this);
+        }).on('mouseover', function() {
+          There.playSound('control rollover');
+        }).on('mousedown', function() {
+          There.playSound('control down');
+        }).on('mouseup', function() {
+          There.playSound('control up');
+        });
       }
       $('.emotionsbar .emotions').append($(divButton));
     }
   },
 
-  onEmotionsClick: function() {
-    const divButton = this;
+  handleEmotionsClick: function(divButton) {
     if ($(divButton).attr('data-enabled') != 1) {
       return;
     }
@@ -238,8 +264,4 @@ $(document).ready(function() {
   $('.emotionsbar .button[data-id="close"]').on('click', function() {
     There.fsCommand('closeWindow');
   });
-
-  if (There.there_ready == '1') {
-    There.fetchEmotionsXml();
-  }
 });

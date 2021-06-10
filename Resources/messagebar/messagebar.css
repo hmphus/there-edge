@@ -1,0 +1,334 @@
+body {
+  margin:0px;
+  font-family:sans-serif;
+  font-size:16px;
+  color:#000;
+  user-select:none;
+  text-size-adjust:none;
+  overflow:hidden;
+}
+
+.messagebar {
+  position:absolute;
+  left:0px;
+  top:0px;
+  width:800px;
+  height:56px;
+  font-size:0px;
+  overflow:hidden;
+}
+
+.messagebar .animator {
+  position:absolute;
+  left:0px;
+  top:56px;
+  transition-property:top;
+}
+
+.messagebar[data-msgbaropened="0"] .animator {
+  transition-duration:700ms;
+}
+
+.messagebar[data-msgbaropened="1"] .animator {
+  top:0px;
+  transition-duration:300ms;
+}
+
+.messagebar .left {
+  position:relative;
+  display:inline-block;
+  width:44px;
+  height:54px;
+  border:1px solid #666;
+  border-right-color:#999;
+  border-bottom-color:#808080;
+  border-top-left-radius:10px;
+  background-image:url(messagebar.png);
+  background-position:0px 0px;
+}
+
+.messagebar .middle {
+  position:relative;
+  display:inline-block;
+  width:708px;
+  height:54px;
+  border-top:1px solid #666;
+  border-bottom:1px solid #808080;
+  background-color:#fffc;
+}
+
+.messagebar[data-flash="1"] .middle {
+  animation-name:flash;
+  animation-duration:150ms;
+  animation-timing-function:steps(1);
+  animation-iteration-count:3;
+}
+
+@keyframes flash {
+  0% {
+    background-color:#fffc;
+  }
+  50% {
+    background-color:#fff;
+  }
+}
+
+.messagebar .right {
+  position:relative;
+  display:inline-block;
+  width:44px;
+  height:54px;
+  border:1px solid #666;
+  border-left-color:#999;
+  border-bottom-color:#808080;
+  border-top-right-radius:10px;
+  background-image:url(messagebar.png);
+  background-position:-44px 0px;
+}
+
+.messagebar .left .icon {
+  position:absolute;
+  left:12px;
+  top:16px;
+  width:22px;
+  height:22px;
+}
+
+.messagebar .left .icon[data-id="Receive"] {
+  background-image:url(messagebar.png);
+  background-position:0px -115px;
+}
+
+.messagebar .left .icon[data-id="QuestInfo"] {
+  background-image:url(messagebar.png);
+  background-position:0px -137px;
+}
+
+.messagebar .left .icon[data-id="Im"] {
+  background-image:url(messagebar.png);
+  background-position:0px -159px;
+}
+
+.messagebar .left .icon[data-id="PermDeny"] {
+  background-image:url(messagebar.png);
+  background-position:0px -181px;
+}
+
+.messagebar .left .icon[data-id="PermAllow"] {
+  background-image:url(messagebar.png);
+  background-position:0px -203px;
+}
+
+.messagebar .left .icon[data-id="Summon"] {
+  background-image:url(messagebar.png);
+  background-position:-44px -115px;
+}
+
+.messagebar .left .icon[data-id="Info"] {
+  background-image:url(messagebar.png);
+  background-position:-44px -137px;
+}
+
+.messagebar .left .icon[data-id="Error"] {
+  background-image:url(messagebar.png);
+  background-position:-44px -159px;
+}
+
+.messagebar .left .icon[data-state="0"] {
+  background-position-x:-22px;
+}
+
+.messagebar .left .icon[data-id="information"][data-state="0"],
+.messagebar .left .icon[data-id="attention"][data-state="0"],
+.messagebar .left .icon[data-id="aral"][data-state="0"] {
+  background-position-x:-66px;
+}
+
+.messagebar .left .icon[data-id="MktgInfo"] {
+  left:3px;
+  top:11px;
+  width:41px;
+  height:43px;
+  background-image:url(messagebar.png);
+  background-position:-47px -182px;
+}
+
+.messagebar .message {
+  position:absolute;
+  left:7px;
+  top:3px;
+  width:667px;
+  height:48px;
+  font-size:11px;
+  font-family:Tahoma, sans-serif;
+  font-weight:bold;
+  line-height:15px;
+}
+
+.messagebar .message[data-buttoncount="1"] {
+  width:615px;
+}
+
+.messagebar .message[data-buttoncount="2"] {
+  width:563px;
+}
+
+.messagebar .message[data-buttoncount="3"] {
+  width:512px;
+}
+
+.messagebar .buttons.big {
+   position:absolute;
+   right:22px;
+   top:17px;
+}
+
+.messagebar .buttons.big .button {
+  display:inline-block;
+  margin-left:2px;
+  width:49px;
+  height:18px;
+  line-height:18px;
+  padding:1px;
+  border:1px solid #666;
+  border-radius:6px;
+  vertical-align:top;
+  background-image:url(messagebar.png);
+  background-position:0px -55px;
+  font-size:11px;
+  font-family:Tahoma, sans-serif;
+  text-align:center;
+}
+
+.messagebar .buttons.big .button:hover {
+  background-position-y:-75px;
+  text-shadow:1px 1px 1px #0006;
+}
+
+.messagebar .buttons.big .button:hover:active {
+  background-position-y:-95px;
+  text-shadow:0px 0px 2px #0006;
+  padding:2px 0px 0px 2px;
+}
+
+.messagebar .buttons.big .button[data-id=""] {
+  display:none;
+}
+
+.messagebar .buttons.arrows {
+   position:absolute;
+   right:0px;
+   top:0px;
+   width:15px;
+   height:54px;
+   border-left:1px solid #999;
+   background-color:#fff;
+}
+
+.messagebar .buttons.arrows .button {
+  position:absolute;
+  left:0px;
+  width:15px;
+  height:26px;
+}
+
+.messagebar .buttons.arrows .button[data-id="up"] {
+  top:0px;
+  border-bottom:1px solid #999;
+}
+
+.messagebar .buttons.arrows .button[data-id="down"] {
+  bottom:1px;
+}
+
+.messagebar .buttons.arrows .button svg {
+  position:absolute;
+  left:4px;
+  top:11px;
+}
+
+.messagebar .buttons.arrows .button:hover svg {
+  filter:drop-shadow(1px 1px 1px #0006);
+}
+
+.messagebar .buttons.arrows .button:hover:active svg {
+  left:5px;
+  top:12px;
+  filter:drop-shadow(0px 0px 2px #0006);
+}
+
+.messagebar .buttons.arrows .button[data-enabled="0"],
+.messagebar .buttons.arrows .button[data-enabled="0"]:hover,
+.messagebar .buttons.arrows .button[data-enabled="0"]:active {
+  pointer-events:none;
+}
+
+.messagebar .buttons.arrows .button[data-enabled="0"] svg,
+.messagebar .buttons.arrows .button[data-enabled="0"]:hover svg,
+.messagebar .buttons.arrows .button[data-enabled="0"]:active svg {
+  left:4px;
+  top:11px;
+  filter:none;
+}
+
+.messagebar .buttons.arrows .button[data-enabled="0"] svg path,
+.messagebar .buttons.arrows .button[data-enabled="0"]:hover svg path,
+.messagebar .buttons.arrows .button[data-enabled="0"]:active svg path {
+  fill:#aaa;
+}
+
+.messagebar .buttons.small {
+  position:absolute;
+  right:5px;
+  top:20px;
+}
+
+.messagebar .buttons.small .button {
+  display:inline-block;
+  margin-left:1px;
+  width:14px;
+  height:13px;
+  border:1px solid #666;
+  border-radius:3px;
+  background-image:url(messagebar.png);
+}
+
+.messagebar .buttons.small .button[data-id="close"] {
+  background-position-x:-51px;
+  background-position-y:-55px;
+}
+
+.messagebar .buttons.small .button[data-id="close"]:hover {
+  background-position-y:-68px;
+}
+
+.messagebar .buttons.small .button[data-id="close"]:hover:active {
+  background-position-y:-81px;
+}
+
+.messagebar .buttons.small .button[data-id="close"][data-enabled="0"],
+.messagebar .buttons.small .button[data-id="close"][data-enabled="0"]:hover,
+.messagebar .buttons.small .button[data-id="close"][data-enabled="0"]:active {
+  background-position-y:-94px;
+  pointer-events:none;
+}
+
+.messagebar .buttons.small .button[data-id="help"] {
+  background-position-x:-65px;
+  background-position-y:-55px;
+}
+
+.messagebar .buttons.small .button[data-id="help"]:hover {
+  background-position-y:-68px;
+}
+
+.messagebar .buttons.small .button[data-id="help"]:hover:active {
+  background-position-y:-81px;
+}
+
+.messagebar .buttons.small .button[data-id="help"][data-enabled="0"],
+.messagebar .buttons.small .button[data-id="help"][data-enabled="0"]:hover,
+.messagebar .buttons.small .button[data-id="help"][data-enabled="0"]:active {
+  background-position-y:-94px;
+  pointer-events:none;
+}

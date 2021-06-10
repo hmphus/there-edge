@@ -16,12 +16,12 @@ There.init({
   },
 
   onVariable: function(name, value) {
-    There.data.pendingVariables = [];
+    There.data.queue = [];
     if (There.data.player != undefined) {
       if (There.data.player.instance != undefined) {
         There.data.player.instance.set_variable(There.keys[name], value);
       } else {
-        There.data.pendingVariables.push({key: There.keys[name], value: value});
+        There.data.queue.push({key: There.keys[name], value: value});
       }
     } else if (name == 'dataversion') {
       let parameters = {};
@@ -49,8 +49,8 @@ There.init({
         allowScriptAccess: true,
         parameters: new URLSearchParams(There.variables).toString(),
       }).then(function() {
-        while (There.data.pendingVariables.length > 0) {
-          const entry = There.data.pendingVariables.shift();
+        while (There.data.queue.length > 0) {
+          const entry = There.data.queue.shift();
           There.data.player.instance.set_variable(entry.key, entry.value);
         }
       });
