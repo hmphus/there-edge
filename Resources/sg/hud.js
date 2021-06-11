@@ -1,4 +1,9 @@
 There.init({
+  data: {
+    queue: [],
+    isReady: false,
+  },
+
   onReady: function() {
     There.fsCommand('setStageWidthHeight', {
       width: 800,
@@ -16,17 +21,10 @@ There.init({
   },
 
   onVariable: function(name, value) {
-    There.data.queue = [];
-    if (There.data.player != undefined) {
-      if (There.data.player.instance != undefined) {
-        There.data.player.instance.set_variable(There.keys[name], value);
-      } else {
-        There.data.queue.push({key: There.keys[name], value: value});
-      }
-    } else if (name == 'dataversion') {
-      let parameters = {};
-      for (let key in There.keys) {
-        parameters[There.keys[key]] = There.variables[key];
+    There.data.queue.push({name: name, value: value});
+    if (There.data.player == undefined) {
+      if (name != 'dataversion') {
+        return;
       }
       const movie = $('body').data('movie');
       const ruffle = window.RufflePlayer.newest();
@@ -42,18 +40,29 @@ There.init({
           return;
         }
         There.fsCommand(command, query);
+        if (There.data.isReady == false) {
+          There.data.isReady = true;
+          setTimeout(There.forwardHudVariables, 0);
+        }
       };
       $('body').append(There.data.player);
       There.data.player.load({
         url: `http://${There.variables.there_resourceshost}/resources/sg/${movie}.swf`,
         allowScriptAccess: true,
-        parameters: new URLSearchParams(There.variables).toString(),
       }).then(function() {
-        while (There.data.queue.length > 0) {
-          const entry = There.data.queue.shift();
-          There.data.player.instance.set_variable(entry.key, entry.value);
-        }
+        $('ruffle-player').attr('data-ready', '1');
       });
+      return;
+    }
+    There.forwardHudVariables();
+  },
+
+  forwardHudVariables: function() {
+    if (There.data.isReady) {
+      while (There.data.queue.length > 0) {
+        const entry = There.data.queue.shift();
+        There.data.player.instance.set_variable(`_root.${entry.name}`, entry.value);
+      }
     }
   },
 });

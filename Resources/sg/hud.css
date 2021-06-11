@@ -9,7 +9,10 @@ body {
 }
 
 ruffle-player {
-  display:block;
   width: 800px;
   height: 89px;
+}
+
+ruffle-player:not([data-ready="1"]) {
+  display:none;
 }
