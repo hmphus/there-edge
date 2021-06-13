@@ -13,6 +13,7 @@ class FlashProxyModule: public ATL::CAtlDllModuleT<FlashProxyModule>,
                         public IOleObject,
                         public IOleInPlaceObjectWindowless,
                         public IViewObjectEx,
+                        public ITimerSink,
                         public ISupportErrorInfo,
                         public IThereEdgeShockwaveFlash,
                         public ICoreWebView2CreateCoreWebView2EnvironmentCompletedHandler,
@@ -89,6 +90,7 @@ protected:
     virtual HRESULT STDMETHODCALLTYPE QueryHitRect(DWORD dwAspect, LPCRECT pRectBounds, LPCRECT pRectLoc, LONG lCloseHint, DWORD *pHitResult) override;
     virtual HRESULT STDMETHODCALLTYPE GetNaturalExtent(DWORD dwAspect, LONG lindex, DVTARGETDEVICE *ptd,
                                                        HDC hicTargetDev, DVEXTENTINFO *pExtentInfo, LPSIZEL pSizel) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE OnTimer(VARIANT vtimeAdvise);
     virtual HRESULT STDMETHODCALLTYPE InterfaceSupportsErrorInfo(REFIID riid) override {return E_NOTIMPL;}
     virtual HRESULT STDMETHODCALLTYPE GetTypeInfoCount(UINT *pctinfo) override {return E_NOTIMPL;}
     virtual HRESULT STDMETHODCALLTYPE GetTypeInfo(UINT iTInfo, LCID lcid, ITypeInfo **ppTInfo) override {return E_NOTIMPL;}
@@ -223,9 +225,12 @@ protected:
     CComPtr<IUnknown>                        m_unknownOuter;
     CComPtr<IServiceProvider>                m_serviceProvider;
     CComPtr<IOleInPlaceSiteWindowless>       m_inplaceSite;
+    CComPtr<ITimer>                          m_timer;
     CComPtr<ICoreWebView2Environment>        m_environment;
     CComPtr<ICoreWebView2Controller2>        m_controller;
     CComPtr<ICoreWebView2>                   m_view;
+    LONG                                     m_visibilityCount;
+    DWORD                                    m_timerCookie;
     EventRegistrationToken                   m_webMessageReceivedToken;
     EventRegistrationToken                   m_webResourceRequestedToken;
     EventRegistrationToken                   m_navigationCompletedToken;

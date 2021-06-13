@@ -15,6 +15,7 @@
 #include "atlctl.h"
 #include "atlstr.h"
 #include "atlsafe.h"
+#include "ocmm.h"
 #include "wrl.h"
 #include "WebView2.h"
 #include "FlashRequestProxy.h"
@@ -116,9 +117,12 @@ FlashProxyModule::FlashProxyModule():
     m_unknownOuter(),
     m_serviceProvider(),
     m_inplaceSite(),
+    m_timer(),
     m_environment(),
     m_controller(),
     m_view(),
+    m_visibilityCount(0),
+    m_timerCookie(),
     m_webMessageReceivedToken(),
     m_webResourceRequestedToken(),
     m_navigationCompletedToken(),
@@ -143,6 +147,9 @@ FlashProxyModule::FlashProxyModule():
 
 FlashProxyModule::~FlashProxyModule()
 {
+    if (m_timer != nullptr && m_timerCookie > 0)
+        m_timer->Unadvise(m_timerCookie);
+
     if (m_view != nullptr)
     {
         m_view->remove_WebMessageReceived(m_webMessageReceivedToken);
@@ -373,6 +380,14 @@ HRESULT STDMETHODCALLTYPE FlashProxyModule::Unadvise(DWORD dwCookie)
 
 HRESULT STDMETHODCALLTYPE FlashProxyModule::Close(DWORD dwSaveOption)
 {
+    m_ready = false;
+
+    if (m_timer != nullptr && m_timerCookie > 0)
+    {
+        m_timer->Unadvise(m_timerCookie);
+        m_timerCookie = 0;
+    }
+
     if (m_controller != nullptr)
         m_controller->Close();
 
@@ -401,22 +416,43 @@ HRESULT STDMETHODCALLTYPE FlashProxyModule::DoVerb(LONG iVerb, LPMSG lpmsg, IOle
             if (FAILED(pActiveSite->QueryInterface(&m_inplaceSite)))
                 return E_FAIL;
 
+            CComPtr<ITimerService> timerService;
+            if (FAILED(pActiveSite->QueryInterface(&timerService)))
+                return E_FAIL;
+
+            if (FAILED(timerService->CreateTimer(nullptr, &m_timer)))
+                return E_FAIL;
+
+            VARIANT timeMin;
+            if (FAILED(m_timer->GetTime(&timeMin)) || timeMin.vt != VT_I4)
+                return E_FAIL;
+
+            VARIANT timeMax;
+            timeMax.vt = VT_I4;
+            timeMax.lVal = 0;
+            VARIANT timeInterval;
+            timeInterval.vt = VT_I4;
+            timeInterval.lVal = 100;
+            timeMin.lVal += timeInterval.lVal;
+            if (FAILED(m_timer->Advise(timeMin, timeMax, timeInterval, 0, static_cast<ITimerSink*>(this), &m_timerCookie)))
+                return E_FAIL;
+
             if (lprcPosRect == nullptr)
                 return E_INVALIDARG;
 
             SetRect(*lprcPosRect);
 
-            if (hwndParent != nullptr)
-            {
-                RECT bounds;
-                GetClientRect(hwndParent, &bounds);
+            if (hwndParent == nullptr)
+                return E_FAIL;
 
-                WCHAR value[25];
-                _ltow_s(bounds.right - bounds.left, value, _countof(value), 10);
-                SetVariable(L"There_WindowWidth", value);
-                _ltow_s(bounds.bottom - bounds.top, value, _countof(value), 10);
-                SetVariable(L"There_WindowHeight", value);
-            }
+            RECT bounds;
+            GetClientRect(hwndParent, &bounds);
+
+            WCHAR value[25];
+            _ltow_s(bounds.right - bounds.left, value, _countof(value), 10);
+            SetVariable(L"There_WindowWidth", value);
+            _ltow_s(bounds.bottom - bounds.top, value, _countof(value), 10);
+            SetVariable(L"There_WindowHeight", value);
 
             m_wnd = CreateWindowEx(WS_EX_TRANSPARENT, g_WindowClassName, L"",
                                    WS_CHILD | WS_CLIPCHILDREN | WS_CLIPSIBLINGS,
@@ -424,8 +460,6 @@ HRESULT STDMETHODCALLTYPE FlashProxyModule::DoVerb(LONG iVerb, LPMSG lpmsg, IOle
                                    hwndParent, nullptr, GetModuleHandle(nullptr), nullptr);
             if (m_wnd == nullptr)
                 return E_FAIL;
-
-            SetWindowLongPtr(m_wnd, GWL_USERDATA, (LPARAM)this);
 
             if (FAILED(CreateCoreWebView2Environment(this)))
                 return E_FAIL;
@@ -463,6 +497,13 @@ HRESULT STDMETHODCALLTYPE FlashProxyModule::Draw(DWORD dwDrawAspect, LONG lindex
     // WebView2 doesn't currently support offscreen rendering, which is how the Flash control works.
     // Additional work is required for positioning and visibility, which would normally be taken care of by the client's renderer.
     // See https://github.com/MicrosoftEdge/WebView2Feedback/issues/20 for details.
+
+    if (m_ready)
+    {
+        m_visibilityCount = 3;
+        SetVisibility(true);
+    }
+
     return S_OK;
 }
 
@@ -476,6 +517,28 @@ HRESULT STDMETHODCALLTYPE FlashProxyModule::QueryHitRect(DWORD dwAspect, LPCRECT
 {
     //Log(L"QueryHitRect\n");
     return E_NOTIMPL;
+}
+
+HRESULT STDMETHODCALLTYPE FlashProxyModule::OnTimer(VARIANT vtimeAdvise)
+{
+    if (m_ready)
+    {
+        if (m_visibilityCount > 0)
+        {
+            m_visibilityCount--;
+            if (m_visibilityCount == 0)
+                SetVisibility(false);
+        }
+
+        RECT rect;
+        rect.left = m_pos.cx;
+        rect.top = m_pos.cy;
+        rect.right = m_pos.cx + m_size.cx;
+        rect.bottom = m_pos.cy + m_size.cy;
+        m_inplaceSite->InvalidateRect(&rect, false);
+    }
+
+    return S_OK;
 }
 
 HRESULT STDMETHODCALLTYPE FlashProxyModule::put_Movie(BSTR pVal)
@@ -732,7 +795,6 @@ HRESULT FlashProxyModule::OnNavigationCompleted(ICoreWebView2 *sender, ICoreWebV
     {
         m_ready = true;
 
-        SetVisibility(true);
         SendVariables();
 
         VARIANTARG vargs[1];

@@ -26,7 +26,7 @@ body {
 }
 
 .messagebar[data-msgbaropened="0"] .animator {
-  transition-duration:700ms;
+  transition-duration:200ms;
 }
 
 .messagebar[data-msgbaropened="1"] .animator {
@@ -59,9 +59,9 @@ body {
 
 .messagebar[data-flash="1"] .middle {
   animation-name:flash;
-  animation-duration:150ms;
+  animation-duration:200ms;
   animation-timing-function:steps(1);
-  animation-iteration-count:3;
+  animation-iteration-count:2;
 }
 
 @keyframes flash {
