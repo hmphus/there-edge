@@ -115,6 +115,8 @@ BrowserProxyModule::BrowserProxyModule():
     m_environment(),
     m_controller(),
     m_view(),
+    m_newWindowDeferral(),
+    m_newWindowArgs(),
     m_navigationStartingToken(),
     m_navigationCompletedToken(),
     m_newWindowRequestedToken(),
@@ -674,6 +676,8 @@ HRESULT STDMETHODCALLTYPE BrowserProxyModule::Invoke(HRESULT errorCode, ICoreWeb
         }
     ).Get(), &m_domContentLoadedToken);
 
+    ProcessDeferral();
+
     if (FAILED(Navigate()))
         return E_FAIL;
 
@@ -811,8 +815,22 @@ HRESULT BrowserProxyModule::OnNewWindowRequested(ICoreWebView2 *sender, ICoreWeb
 
     if (vdispatch != nullptr)
     {
-        // TODO: Defer this request until the new ICoreWebView2 is ready, then configure the popup appropriately.
+        CComPtr<IThereEdgeWebBrowser2> browser;
+        vdispatch->QueryInterface(&browser);
         vdispatch->Release();
+
+        if (browser == nullptr)
+            return E_FAIL;
+
+        BrowserProxyModule *module = dynamic_cast<BrowserProxyModule*>(browser.p);
+        if (module == nullptr)
+            return E_FAIL;
+
+        if (FAILED(args->put_Handled(true)))
+            return E_FAIL;
+
+        if (FAILED(module->SetDeferral(args)))
+            return E_FAIL;
     }
 
     return S_OK;
@@ -1033,6 +1051,22 @@ HRESULT BrowserProxyModule::OnWindowCloseRequested(ICoreWebView2 *sender)
     if (sender == nullptr)
         return E_INVALIDARG;
 
+    VARIANT_BOOL vcancel = VARIANT_FALSE;
+
+    VARIANTARG vargs[2];
+    vargs[0].vt = VT_BOOL | VT_BYREF;
+    vargs[0].pboolVal = &vcancel;
+    vargs[1].vt = VT_BOOL;
+    vargs[0].boolVal = VARIANT_TRUE;
+
+    DISPPARAMS params;
+    params.rgvarg = vargs;
+    params.cArgs = _countof(vargs);
+    params.cNamedArgs = 0;
+
+    if (FAILED(InvokeBrowserEvent(DISPID_WINDOWCLOSING, params)))
+        return E_FAIL;
+
     return S_OK;
 }
 
@@ -1226,6 +1260,149 @@ HRESULT BrowserProxyModule::ApplyScript(ICoreWebView2 *view, LONG id)
         }
     ).Get())))
         return E_FAIL;
+
+    return S_OK;
+}
+
+HRESULT BrowserProxyModule::SetDeferral(ICoreWebView2NewWindowRequestedEventArgs *args)
+{
+    if (FAILED(args->GetDeferral(&m_newWindowDeferral)))
+        return E_FAIL;
+
+    m_newWindowArgs = args;
+
+    return S_OK;
+}
+
+HRESULT BrowserProxyModule::ProcessDeferral()
+{
+    if (m_newWindowDeferral == nullptr || m_newWindowArgs == nullptr || m_view == nullptr)
+        return S_FALSE;
+
+    if (FAILED(m_newWindowArgs->put_NewWindow(m_view)))
+        return E_FAIL;
+
+    CComPtr<ICoreWebView2WindowFeatures> features;
+    if (SUCCEEDED(m_newWindowArgs->get_WindowFeatures(&features)))
+    {
+        BOOL hasPosition = false;
+        if (SUCCEEDED(features->get_HasPosition(&hasPosition)) && hasPosition)
+        {
+            UINT32 left;
+            if (SUCCEEDED(features->get_Left(&left)))
+            {
+                VARIANTARG vargs[1];
+                vargs[0].vt = VT_I4;
+                vargs[0].lVal = left;
+
+                DISPPARAMS params;
+                params.rgvarg = vargs;
+                params.cArgs = _countof(vargs);
+                params.cNamedArgs = 0;
+
+                InvokeBrowserEvent(DISPID_WINDOWSETLEFT, params);
+            }
+
+            UINT32 top;
+            if (SUCCEEDED(features->get_Top(&top)))
+            {
+                VARIANTARG vargs[1];
+                vargs[0].vt = VT_I4;
+                vargs[0].lVal = top;
+
+                DISPPARAMS params;
+                params.rgvarg = vargs;
+                params.cArgs = _countof(vargs);
+                params.cNamedArgs = 0;
+
+                InvokeBrowserEvent(DISPID_WINDOWSETTOP, params);
+            }
+        }
+
+        BOOL hasSize = false;
+        if (SUCCEEDED(features->get_HasSize(&hasSize)) && hasSize)
+        {
+            UINT32 width;
+            if (SUCCEEDED(features->get_Width(&width)))
+            {
+                VARIANTARG vargs[1];
+                vargs[0].vt = VT_I4;
+                vargs[0].lVal = width;
+
+                DISPPARAMS params;
+                params.rgvarg = vargs;
+                params.cArgs = _countof(vargs);
+                params.cNamedArgs = 0;
+
+                InvokeBrowserEvent(DISPID_WINDOWSETWIDTH, params);
+            }
+
+            UINT32 height;
+            if (SUCCEEDED(features->get_Height(&height)))
+            {
+                VARIANTARG vargs[1];
+                vargs[0].vt = VT_I4;
+                vargs[0].lVal = height;
+
+                DISPPARAMS params;
+                params.rgvarg = vargs;
+                params.cArgs = _countof(vargs);
+                params.cNamedArgs = 0;
+
+                InvokeBrowserEvent(DISPID_WINDOWSETHEIGHT, params);
+            }
+        }
+
+        BOOL hasMenuBar = false;
+        if (SUCCEEDED(features->get_ShouldDisplayMenuBar(&hasMenuBar)))
+        {
+            VARIANTARG vargs[1];
+            vargs[0].vt = VT_BOOL;
+            vargs[0].boolVal = hasMenuBar ? VARIANT_TRUE : VARIANT_FALSE;
+
+            DISPPARAMS params;
+            params.rgvarg = vargs;
+            params.cArgs = _countof(vargs);
+            params.cNamedArgs = 0;
+
+            InvokeBrowserEvent(DISPID_ONMENUBAR, params);
+        }
+
+        BOOL hasToolbar = false;
+        if (SUCCEEDED(features->get_ShouldDisplayToolbar(&hasToolbar)))
+        {
+            VARIANTARG vargs[1];
+            vargs[0].vt = VT_BOOL;
+            vargs[0].boolVal = hasToolbar ? VARIANT_TRUE : VARIANT_FALSE;
+
+            DISPPARAMS params;
+            params.rgvarg = vargs;
+            params.cArgs = _countof(vargs);
+            params.cNamedArgs = 0;
+
+            InvokeBrowserEvent(DISPID_ONTOOLBAR, params);
+        }
+
+        BOOL hasStatus = false;
+        if (SUCCEEDED(features->get_ShouldDisplayStatus(&hasStatus)))
+        {
+            VARIANTARG vargs[1];
+            vargs[0].vt = VT_BOOL;
+            vargs[0].boolVal = hasStatus ? VARIANT_TRUE : VARIANT_FALSE;
+
+            DISPPARAMS params;
+            params.rgvarg = vargs;
+            params.cArgs = _countof(vargs);
+            params.cNamedArgs = 0;
+
+            InvokeBrowserEvent(DISPID_ONSTATUSBAR, params);
+        }
+    }
+
+    m_newWindowDeferral->Complete();
+
+    m_newWindowDeferral.Release();
+    m_newWindowArgs.Release();
 
     return S_OK;
 }
