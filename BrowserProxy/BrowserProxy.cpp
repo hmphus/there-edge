@@ -784,7 +784,7 @@ HRESULT BrowserProxyModule::OnNewWindowRequested(ICoreWebView2 *sender, ICoreWeb
     if (sender == nullptr || args == nullptr)
         return E_INVALIDARG;
 
-    IDispatch *vdispatch = static_cast<IDispatch*>(this);
+    IDispatch *vdispatch = nullptr;
     VARIANT_BOOL vcancel = VARIANT_FALSE;
 
     VARIANTARG vargs[2];
@@ -800,6 +800,20 @@ HRESULT BrowserProxyModule::OnNewWindowRequested(ICoreWebView2 *sender, ICoreWeb
 
     if (FAILED(InvokeBrowserEvent(DISPID_NEWWINDOW2, params)))
         return E_FAIL;
+
+    if (vcancel)
+    {
+        if (FAILED(args->put_Handled(true)))
+            return E_FAIL;
+
+        return S_OK;
+    }
+
+    if (vdispatch != nullptr)
+    {
+        // TODO: Defer this request until the new ICoreWebView2 is ready, then configure the popup appropriately.
+        vdispatch->Release();
+    }
 
     return S_OK;
 }

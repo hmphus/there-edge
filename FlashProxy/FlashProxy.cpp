@@ -25,6 +25,8 @@
 FlashProxyModule g_AtlModule;
 WCHAR FlashProxyModule::g_WindowClassName[] = L"ThereEdgeFlashProxy";
 
+//#define THERE_VISIBILITY_CHECK
+
 void Log(const WCHAR *format, ...)
 {
 #ifdef THERE_LOGGING
@@ -110,6 +112,9 @@ FlashProxyModule::FlashProxyModule():
     m_pos(),
     m_size(),
     m_wnd(nullptr),
+    m_maskRects(),
+    m_maskRectCount(0),
+    m_visibilityCount(0),
     m_url(),
     m_variables(),
     m_flashEvents(),
@@ -121,7 +126,6 @@ FlashProxyModule::FlashProxyModule():
     m_environment(),
     m_controller(),
     m_view(),
-    m_visibilityCount(0),
     m_timerCookie(),
     m_webMessageReceivedToken(),
     m_webResourceRequestedToken(),
@@ -498,29 +502,57 @@ HRESULT STDMETHODCALLTYPE FlashProxyModule::Draw(DWORD dwDrawAspect, LONG lindex
     // Additional work is required for positioning and visibility, which would normally be taken care of by the client's renderer.
     // See https://github.com/MicrosoftEdge/WebView2Feedback/issues/20 for details.
 
+#ifdef THERE_VISIBILITY_CHECK
     if (m_ready)
     {
-        m_visibilityCount = 3;
+        // If we don't receive another draw call in this many timer events, we assume we aren't visible.
+        // Unfortunately, it appears that the There_Visible variable is always true, so we can't use that.
+        m_visibilityCount = 5;
         SetVisibility(true);
     }
+#endif
 
     return S_OK;
 }
 
 HRESULT STDMETHODCALLTYPE FlashProxyModule::QueryHitPoint(DWORD dwAspect, LPCRECT pRectBounds, POINT ptlLoc, LONG lCloseHint, DWORD *pHitResult)
 {
-    //Log(L"QueryHitPoint\n");
-    return E_NOTIMPL;
-}
+    if (pHitResult == nullptr)
+        return E_INVALIDARG;
 
-HRESULT STDMETHODCALLTYPE FlashProxyModule::QueryHitRect(DWORD dwAspect, LPCRECT pRectBounds, LPCRECT pRectLoc, LONG lCloseHint, DWORD *pHitResult)
-{
-    //Log(L"QueryHitRect\n");
-    return E_NOTIMPL;
+    POINT point;
+    point.x = ptlLoc.x - m_pos.cx;
+    point.y = ptlLoc.y - m_pos.cy;
+
+    if (point.x < 0 || point.y < 0 || point.x >= m_size.cx || point.y >= m_size.cy)
+    {
+        *pHitResult = HITRESULT_OUTSIDE;
+        return S_OK;
+    }
+
+    if (!m_visible)
+    {
+        *pHitResult = HITRESULT_TRANSPARENT;
+        return S_OK;
+    }
+
+    for (LONG i = 0; i < m_maskRectCount; ++i)
+    {
+        RECT maskRect = m_maskRects[m_maskRectCount];
+        if (point.x >= maskRect.left && point.y >= maskRect.top && point.x < maskRect.right && point.y < maskRect.bottom)
+        {
+            *pHitResult = HITRESULT_TRANSPARENT;
+            return S_OK;
+        }
+    }
+
+    *pHitResult = HITRESULT_HIT;
+    return S_OK;
 }
 
 HRESULT STDMETHODCALLTYPE FlashProxyModule::OnTimer(VARIANT vtimeAdvise)
 {
+#ifdef THERE_VISIBILITY_CHECK
     if (m_ready)
     {
         if (m_visibilityCount > 0)
@@ -537,6 +569,7 @@ HRESULT STDMETHODCALLTYPE FlashProxyModule::OnTimer(VARIANT vtimeAdvise)
         rect.bottom = m_pos.cy + m_size.cy;
         m_inplaceSite->InvalidateRect(&rect, false);
     }
+#endif
 
     return S_OK;
 }
@@ -722,6 +755,17 @@ HRESULT FlashProxyModule::OnWebMessageReceived(ICoreWebView2 *sender, ICoreWebVi
         return S_OK;
     }
 
+    if (_wcsicmp(bcommand, L"setMask") == 0)
+    {
+        if (FAILED(UrlUnescapeInPlace(bquery, 0)))
+            return E_FAIL;
+
+        if (FAILED(SetMaskRects(_wcsnicmp(bquery, L"rects=", 6) == 0 ? bquery + 6 : L"")))
+            return E_FAIL;
+
+        return S_OK;
+    }
+
     VARIANTARG vargs[2];
     vargs[0].vt = VT_BSTR;
     vargs[0].bstrVal = bquery;
@@ -794,6 +838,10 @@ HRESULT FlashProxyModule::OnNavigationCompleted(ICoreWebView2 *sender, ICoreWebV
     if (success)
     {
         m_ready = true;
+
+#ifndef THERE_VISIBILITY_CHECK
+        SetVisibility(true);
+#endif
 
         SendVariables();
 
@@ -910,6 +958,12 @@ HRESULT FlashProxyModule::SetRect(const RECT &rect)
     if (m_wnd == nullptr)
         return S_OK;
 
+    if (m_ready && m_pos.cx == 0 && m_size.cx >= 800 && m_size.cy < 60 && (flags & SWP_NOMOVE) == 0 && m_visibilityCount > 0)
+    {
+        // We are a toolbar that has been moved, so trigger the next timer event to evaluate visibility immediately.
+        m_visibilityCount = 2;
+    }
+
     SetWindowPos(m_wnd, nullptr, m_pos.cx, m_pos.cy, m_size.cx, m_size.cy, flags | SWP_NOZORDER | SWP_NOACTIVATE);
 
     if (m_controller != nullptr)
@@ -942,6 +996,32 @@ HRESULT FlashProxyModule::SetVisibility(BOOL visible)
 
     if (m_controller != NULL)
         m_controller->put_IsVisible(visible);
+
+    return S_OK;
+}
+
+HRESULT FlashProxyModule::SetMaskRects(WCHAR *text)
+{
+    for (m_maskRectCount = 0; m_maskRectCount < _countof(m_maskRects) && text[0] != 0; ++m_maskRectCount)
+    {
+        RECT &maskRect = m_maskRects[m_maskRectCount];
+
+        maskRect.left = wcstol(text, &text, 10);
+        if (text[0] != ',')
+            break;
+
+        maskRect.top = wcstol(text + 1, &text, 10);
+        if (text[0] != ',')
+            break;
+
+        maskRect.right = maskRect.left + wcstol(text + 1, &text, 10);\
+        if (text[0] != ',')
+            break;
+
+        maskRect.bottom = maskRect.top + wcstol(text + 1, &text, 10);
+        if (text[0] == ',')
+            ++text;
+    }
 
     return S_OK;
 }

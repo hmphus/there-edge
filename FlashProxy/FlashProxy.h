@@ -87,7 +87,7 @@ protected:
     virtual HRESULT STDMETHODCALLTYPE GetRect(DWORD dwAspect, LPRECTL pRect) override {return E_NOTIMPL;}
     virtual HRESULT STDMETHODCALLTYPE GetViewStatus(DWORD *pdwStatus) override {return E_NOTIMPL;}
     virtual HRESULT STDMETHODCALLTYPE QueryHitPoint(DWORD dwAspect, LPCRECT pRectBounds, POINT ptlLoc, LONG lCloseHint, DWORD *pHitResult) override;
-    virtual HRESULT STDMETHODCALLTYPE QueryHitRect(DWORD dwAspect, LPCRECT pRectBounds, LPCRECT pRectLoc, LONG lCloseHint, DWORD *pHitResult) override;
+    virtual HRESULT STDMETHODCALLTYPE QueryHitRect(DWORD dwAspect, LPCRECT pRectBounds, LPCRECT pRectLoc, LONG lCloseHint, DWORD *pHitResult) override {return E_NOTIMPL;}
     virtual HRESULT STDMETHODCALLTYPE GetNaturalExtent(DWORD dwAspect, LONG lindex, DVTARGETDEVICE *ptd,
                                                        HDC hicTargetDev, DVEXTENTINFO *pExtentInfo, LPSIZEL pSizel) override {return E_NOTIMPL;}
     virtual HRESULT STDMETHODCALLTYPE OnTimer(VARIANT vtimeAdvise);
@@ -210,6 +210,7 @@ protected:
     HRESULT SetSize(const SIZE &size);
     HRESULT SetRect(const RECT &rect);
     HRESULT SetVisibility(BOOL visible);
+    HRESULT SetMaskRects(WCHAR *text);
 
 protected:
     ULONG                                    m_refCount;
@@ -218,6 +219,9 @@ protected:
     SIZE                                     m_pos;
     SIZE                                     m_size;
     HWND                                     m_wnd;
+    RECT                                     m_maskRects[10];
+    LONG                                     m_maskRectCount;
+    LONG                                     m_visibilityCount;
     CComBSTR                                 m_url;
     CComSafeArray<BSTR>                      m_variables;
     CComPtr<IThereEdgeShockwaveFlashEvents>  m_flashEvents;
@@ -229,7 +233,6 @@ protected:
     CComPtr<ICoreWebView2Environment>        m_environment;
     CComPtr<ICoreWebView2Controller2>        m_controller;
     CComPtr<ICoreWebView2>                   m_view;
-    LONG                                     m_visibilityCount;
     DWORD                                    m_timerCookie;
     EventRegistrationToken                   m_webMessageReceivedToken;
     EventRegistrationToken                   m_webResourceRequestedToken;
