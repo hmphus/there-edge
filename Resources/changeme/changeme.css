@@ -1,10 +1,12 @@
 body {
   margin:0px;
-  font-family:sans-serif;
+  font-family:tahoma, sans-serif;
   font-size:16px;
   color:#000;
   user-select:none;
   text-size-adjust:none;
+  transform:scale(1);
+  transform-origin:top left;
 }
 
 .changeme {
@@ -52,7 +54,7 @@ body {
   position:absolute;
   left:49px;
   top:1px;
-  width:145px;
+  width:144px;
   height:23px;
   line-height:23px;
   font-size:13px;
@@ -60,22 +62,15 @@ body {
   border-top-left-radius:5px;
   border-top-right-radius:5px;
   border-bottom:1px solid #808080;
-  background-color:#9ee8f4;
-  background-image:linear-gradient(
-    rgba(0,0,0,0.2) 0%,
-    rgba(255,255,255,0.5) 15%,
-    rgba(255,255,255,0.4) 30%,
-    rgba(0,0,0,0.0) 45%,
-    rgba(0,0,0,0.0) 55%,
-    rgba(255,255,255,0.1) 70%,
-    rgba(255,255,255,0.1) 85%,
-    rgba(0,0,0,0.2) 100%);
+  background-image:url(changeme.png);
+  background-position:0px -948px;
 }
 
 .changeme[data-state="bar"] .titlebar {
   border-bottom-left-radius:5px;
   border-bottom-right-radius:5px;
   border-bottom:none;
+  background-position:0px -971px;
 }
 
 .changeme .titlebar .buttons {
@@ -89,58 +84,53 @@ body {
 .changeme .titlebar .buttons .button {
   display:none;
   margin-left:1px;
-  width:12px;
-  height:11px;
-  line-height:11px;
-  padding:1px 1px 1px 1px;
-  font-size:10px;
-  color:#333;
-  text-align:center;
+  width:14px;
+  height:13px;
   border:1px solid #666;
-  border-radius:4px;
-  background-color:#9ee8f4;
-  background-image:linear-gradient(
-    rgba(0,0,0,0.2) 0%,
-    rgba(255,255,255,0.5) 15%,
-    rgba(255,255,255,0.4) 30%,
-    rgba(0,0,0,0.0) 45%,
-    rgba(0,0,0,0.0) 55%,
-    rgba(255,255,255,0.1) 70%,
-    rgba(255,255,255,0.1) 85%,
-    rgba(0,0,0,0.2) 100%);
-  overflow:hidden;
-  cursor:pointer;
+  border-radius:3px;
+  background-image:url(changeme.png);
   z-index:2;
 }
 
-.changeme .titlebar .buttons .button svg path {
-  fill:#333;
-}
-
-.changeme .titlebar .buttons .button[data-id="help"],
 .changeme .titlebar .buttons .button[data-id="close"] {
   display:inline-block;
+  background-position:-172px -840px;
+
 }
 
 .changeme .titlebar .buttons .button[data-id="help"] {
-  font-weight:bold;
+  display:inline-block;
+  background-position:-186px -840px;
 }
 
 .changeme[data-state="full"] .titlebar .buttons .button[data-id="bar"] {
   display:inline-block;
+  background-position:-172px -879px;
 }
 
 .changeme[data-state="bar"] .titlebar .buttons .button[data-id="full"] {
   display:inline-block;
+  background-position:-186px -879px;
 }
 
-.changeme .titlebar .buttons .button:hover {
-  background-color:#7bddee;
+.changeme .titlebar .buttons .button:hover[data-id="close"],
+.changeme .titlebar .buttons .button:hover[data-id="help"] {
+  background-position-y:-853px;
 }
 
-.changeme .titlebar .buttons .button:hover:active {
-  padding:2px 0px 0px 2px;
-  background-image:none;
+.changeme .titlebar .buttons .button:hover:active[data-id="close"],
+.changeme .titlebar .buttons .button:hover:active[data-id="help"] {
+  background-position-y:-866px;
+}
+
+.changeme .titlebar .buttons .button:hover[data-id="bar"],
+.changeme .titlebar .buttons .button:hover[data-id="full"] {
+  background-position-y:-892px;
+}
+
+.changeme .titlebar .buttons .button:hover:active[data-id="bar"],
+.changeme .titlebar .buttons .button:hover:active[data-id="full"] {
+  background-position-y:-905px;
 }
 
 .areas {
@@ -160,7 +150,6 @@ body {
   background-image:url(changeme.png);
   background-repeat:no-repeat;
   display:none;
-  cursor:pointer;
 }
 
 .areas[data-gender="male"] .area[data-gender="male"] {
@@ -265,7 +254,8 @@ body {
   left:-10px;
   width:12px;
   height:9px;
-  background-image:linear-gradient(135deg, #ffe8a9 0%, #cea537 100%);
+  background-image:url(changeme.png);
+  background-position:-188px -985px;
   border:1px solid #333;
   border-top-left-radius:3px;
   border-bottom-left-radius:3px;
@@ -331,9 +321,8 @@ body {
   border-top-left-radius:4px;
   border-top-right-radius:4px;
   background-color:#abd2d9;
-  font-size:12px;
+  font-size:11px;
   text-align:center;
-  cursor:pointer;
   z-index:2;
 }
 
@@ -378,9 +367,9 @@ body {
 
 .tabs .wardrobe .listing .title {
   height:17px;
-  line-height:17px;
+  line-height:16px;
   background-color:#e5f3f8;
-  font-size:12px;
+  font-size:11px;
   text-align:center;
   color:#333;
   border-bottom:1px solid #666;
@@ -394,7 +383,6 @@ body {
 .tabs .wardrobe .listing .list .item {
   height:48px;
   border-bottom:1px dashed #999;
-  cursor:pointer;
 }
 
 .tabs .wardrobe .listing .list .item:hover {
@@ -440,34 +428,66 @@ body {
 }
 
 .footer .button {
+  display:inline-block;
+  margin-left:2px;
   height:18px;
   line-height:18px;
-  padding:1px 4px 1px 4px;
-  display:inline-block;
-  font-size:12px;
-  text-align:center;
-  cursor:pointer;
+  padding:1px;
   border:1px solid #666;
   border-radius:6px;
-  background-color:#9ee8f4;
-  background-image:linear-gradient(
-    rgba(0,0,0,0.2) 0%,
-    rgba(255,255,255,0.5) 15%,
-    rgba(255,255,255,0.4) 30%,
-    rgba(0,0,0,0.0) 45%,
-    rgba(0,0,0,0.0) 55%,
-    rgba(255,255,255,0.1) 70%,
-    rgba(255,255,255,0.1) 85%,
-    rgba(0,0,0,0.2) 100%);
+  vertical-align:top;
+  background-image:url(changeme.png);
+  font-size:11px;
+  text-align:center;
 }
 
 .footer .button:hover {
-  background-color:#7bddee;
+  text-shadow:1px 1px 1px #0006;
 }
 
 .footer .button:hover:active {
-  padding:2px 3px 0px 5px;
-  background-image:none;
+  text-shadow:0px 0px 2px #0006;
+  padding:2px 0px 0px 2px;
+}
+
+.footer .button[data-enabled="0"],
+.footer .button[data-enabled="0"]:hover,
+.footer .button[data-enabled="0"]:active {
+  pointer-events:none;
+  color:#7dbbca;
+  text-shadow:1px 1px 1px #fff;
+}
+
+.footer .button.medium {
+  width:34px;
+  background-position:0px -908px;
+}
+
+.footer .button.medium:hover {
+  background-position-x:-36px;
+}
+
+.footer .button.medium:hover:active {
+  background-position-x:-72px;
+}
+
+.footer .button.medium[data-enabled="0"],
+.footer .button.medium[data-enabled="0"]:hover,
+.footer .button.medium[data-enabled="0"]:active {
+  background-position-x:-108px;
+}
+
+.footer .button.big {
+  width:55px;
+  background-position:0px -928px;
+}
+
+.footer .button.big:hover {
+  background-position-x:-57px;
+}
+
+.footer .button.big:hover:active {
+  background-position-x:-114px;
 }
 
 .changeme[data-state="bar"] .areas,

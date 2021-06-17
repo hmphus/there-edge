@@ -14,9 +14,6 @@ let There = {
 };
 
 There.init = function(settings) {
-  $('body').on('contextmenu', function(event) {
-    return false;
-  });
   if (settings != undefined) {
     Object.assign(There, settings);
   }
@@ -38,13 +35,10 @@ There.init = function(settings) {
       }
     });
   }
-  $(document).on('mouseup', function(event) {
-    if (There.private.isDragging && event.button == 0) {
-      There.private.isDragging = false;
-      There.fsCommand('endDragWindow');
-    }
-  });
   $(document).ready(function() {
+    $('body').on('contextmenu', function(event) {
+      return false;
+    });
     There.private.isReady = true;
     There.onReady();
     There.processQueue();

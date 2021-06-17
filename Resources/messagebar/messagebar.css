@@ -1,6 +1,6 @@
 body {
   margin:0px;
-  font-family:sans-serif;
+  font-family:tahoma, sans-serif;
   font-size:16px;
   color:#000;
   user-select:none;
@@ -160,7 +160,6 @@ body {
   width:667px;
   height:48px;
   font-size:11px;
-  font-family:Tahoma, sans-serif;
   font-weight:bold;
   line-height:15px;
 }
@@ -196,7 +195,6 @@ body {
   background-image:url(messagebar.png);
   background-position:0px -55px;
   font-size:11px;
-  font-family:Tahoma, sans-serif;
   text-align:center;
 }
 

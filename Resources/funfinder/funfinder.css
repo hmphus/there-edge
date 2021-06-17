@@ -1,6 +1,6 @@
 body {
   margin:0px;
-  font-family:sans-serif;
+  font-family:verdana, sans-serif;
   font-size:16px;
   color:#000;
   user-select:none;
@@ -92,7 +92,6 @@ body {
   line-height:20px;
   padding:1px 1px 1px 1px;
   vertical-align:top;
-  font-family:verdana;
   font-size:9.5px;
   transform:scaley(1.2);
   color:#000;

@@ -712,17 +712,15 @@ HRESULT FlashProxyModule::OnWebMessageReceived(ICoreWebView2 *sender, ICoreWebVi
     {
         if (m_wnd != nullptr)
         {
-            ReleaseCapture();
-            SendMessage(GetParent(m_wnd), WM_LBUTTONDOWN, 0, 0);
+            HWND parentWnd = GetParent(m_wnd);
+
+            POINT point;
+            GetCursorPos(&point);
+            ScreenToClient(parentWnd, &point);
+
+            SetCapture(m_wnd);
+            SendMessage(parentWnd, WM_LBUTTONDOWN, 0, MAKELPARAM(point.x, point.y));
         }
-    }
-
-    if (_wcsicmp(bcommand, L"endDragWindow") == 0)
-    {
-        if (m_inplaceSite != nullptr)
-            m_inplaceSite->SetCapture(false);
-
-        return S_OK;
     }
 
     if (_wcsicmp(bcommand, L"setMask") == 0)
@@ -994,12 +992,8 @@ void FlashProxyModule::GuessToolbarVisibility()
     if (m_identity != Identity::MessageBar)
         return;
 
-    HWND parentWnd = GetParent(m_wnd);
-    if (parentWnd == nullptr)
-        return;
-
     RECT bounds;
-    GetClientRect(parentWnd, &bounds);
+    GetClientRect(GetParent(m_wnd), &bounds);
 
     LONG y = bounds.bottom - m_pos.cy - 56;
     UINT32 visibilityMask = 0;
@@ -1159,9 +1153,10 @@ LRESULT FlashProxyModule::BroadcastMessage(UINT Msg, WPARAM wParam, LPARAM lPara
 {
     LRESULT result = 0;
 
-    HWND parentWnd = GetParent(m_wnd);
-    if (parentWnd != nullptr)
+    if (m_wnd != nullptr)
     {
+        HWND parentWnd = GetParent(m_wnd);
+
         for (HWND wnd = FindWindowEx(parentWnd, nullptr, g_WindowClassName, nullptr); wnd != nullptr; wnd = FindWindowEx(parentWnd, wnd, g_WindowClassName, nullptr))
             result |= SendMessage(wnd, Msg, wParam, lParam);
     }
@@ -1203,6 +1198,47 @@ LRESULT APIENTRY FlashProxyModule::ChildWndProc(HWND hWnd, UINT Msg, WPARAM wPar
         {
             if (flashProxy != nullptr)
                 return (LRESULT)flashProxy->m_identity;
+
+            return 0;
+        }
+
+        case WM_MOUSEMOVE:
+        {
+            if (GetCapture() == hWnd)
+            {
+                HWND parentWnd = GetParent(hWnd);
+
+                POINT point = {GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam)};
+                ClientToScreen(hWnd, &point);
+                ScreenToClient(parentWnd, &point);
+
+                SendMessage(parentWnd, WM_MOUSEMOVE, 0, MAKELPARAM(point.x, point.y));
+
+                return 0;
+            }
+        }
+
+        case WM_LBUTTONUP:
+        {
+            if (GetCapture() == hWnd)
+            {
+                HWND parentWnd = GetParent(hWnd);
+
+                POINT point = {GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam)};
+                ClientToScreen(hWnd, &point);
+                ScreenToClient(parentWnd, &point);
+
+                ReleaseCapture();
+                SendMessage(parentWnd, WM_LBUTTONUP, 0, MAKELPARAM(point.x, point.y));
+
+                return 0;
+            }
+        }
+
+        case WM_CAPTURECHANGED:
+        {
+            if (flashProxy != nullptr && flashProxy->m_inplaceSite != nullptr)
+                flashProxy->m_inplaceSite->SetCapture(false);
 
             return 0;
         }

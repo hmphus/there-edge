@@ -1,6 +1,6 @@
 body {
   margin:0px;
-  font-family:sans-serif;
+  font-family:tahoma, sans-serif;
   font-size:16px;
   color:#000;
   user-select:none;
@@ -36,7 +36,6 @@ body {
   background-image:url(emotionsbar.png);
   background-position-y:-2px;
   font-size:11px;
-  font-family:Tahoma, sans-serif;
 }
 
 .emotionsbar .buttons.big .bank:first-of-type {
@@ -69,7 +68,6 @@ body {
   padding:1px 4px;
   vertical-align:top;
   font-size:11px;
-  font-family:Tahoma, sans-serif;
 }
 
 .emotionsbar .buttons.big .button:hover {
