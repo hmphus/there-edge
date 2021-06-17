@@ -16,6 +16,13 @@ body {
   height:86px;
   background-color:#ffffff40;
   border-radius:5px;
+  transition-property:opacity;
+  transition-duration:250ms;
+}
+
+.compass[data-teleporting="1"] {
+  opacity:0;
+  pointer-events:none;
 }
 
 .compass .face {

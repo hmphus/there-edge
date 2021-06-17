@@ -132,6 +132,7 @@ HRESULT STDMETHODCALLTYPE FlashRequestProxy::OnProgress(ULONG ulProgress, ULONG 
             m_mimeType = szStatusText;
             break;
         }
+
         default:
             break;
     }

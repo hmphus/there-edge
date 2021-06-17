@@ -22,10 +22,13 @@
 #include "FlashProxy_i.h"
 #include "FlashProxy.h"
 
+#define WM_FLASHPROXY_SET_VISIBILITY     (WM_USER + 1)
+#define WM_FLASHPROXY_REQUEST_VISIBILITY (WM_USER + 2)
+#define WM_FLASHPROXY_SET_TELEPORTING    (WM_USER + 3)
+#define WM_FLASHPROXY_GET_IDENTITY       (WM_USER + 4)
+
 FlashProxyModule g_AtlModule;
 WCHAR FlashProxyModule::g_WindowClassName[] = L"ThereEdgeFlashProxy";
-
-//#define THERE_VISIBILITY_CHECK
 
 void Log(const WCHAR *format, ...)
 {
@@ -114,7 +117,7 @@ FlashProxyModule::FlashProxyModule():
     m_wnd(nullptr),
     m_maskRects(),
     m_maskRectCount(0),
-    m_visibilityCount(0),
+    m_identity(Identity::Unknown),
     m_url(),
     m_variables(),
     m_flashEvents(),
@@ -122,11 +125,9 @@ FlashProxyModule::FlashProxyModule():
     m_unknownOuter(),
     m_serviceProvider(),
     m_inplaceSite(),
-    m_timer(),
     m_environment(),
     m_controller(),
     m_view(),
-    m_timerCookie(),
     m_webMessageReceivedToken(),
     m_webResourceRequestedToken(),
     m_navigationCompletedToken(),
@@ -136,7 +137,7 @@ FlashProxyModule::FlashProxyModule():
     WNDCLASSEX childClass = {0};
     childClass.cbSize = sizeof(WNDCLASSEX);
     childClass.style = CS_HREDRAW | CS_VREDRAW | CS_DBLCLKS;
-    childClass.lpfnWndProc = DefWindowProc;
+    childClass.lpfnWndProc = ChildWndProc;
     childClass.cbClsExtra = 0;
     childClass.cbWndExtra = 0;
     childClass.hInstance = GetModuleHandle(nullptr);
@@ -151,9 +152,6 @@ FlashProxyModule::FlashProxyModule():
 
 FlashProxyModule::~FlashProxyModule()
 {
-    if (m_timer != nullptr && m_timerCookie > 0)
-        m_timer->Unadvise(m_timerCookie);
-
     if (m_view != nullptr)
     {
         m_view->remove_WebMessageReceived(m_webMessageReceivedToken);
@@ -386,11 +384,13 @@ HRESULT STDMETHODCALLTYPE FlashProxyModule::Close(DWORD dwSaveOption)
 {
     m_ready = false;
 
-    if (m_timer != nullptr && m_timerCookie > 0)
-    {
-        m_timer->Unadvise(m_timerCookie);
-        m_timerCookie = 0;
-    }
+    GuessToolbarVisibility();
+
+    if (m_identity == Identity::Teleport)
+        BroadcastMessage(WM_FLASHPROXY_SET_TELEPORTING, 0, 0);
+
+    if (m_wnd != nullptr)
+        SetWindowLongPtr(m_wnd, GWL_USERDATA, 0);
 
     if (m_controller != nullptr)
         m_controller->Close();
@@ -420,27 +420,6 @@ HRESULT STDMETHODCALLTYPE FlashProxyModule::DoVerb(LONG iVerb, LPMSG lpmsg, IOle
             if (FAILED(pActiveSite->QueryInterface(&m_inplaceSite)))
                 return E_FAIL;
 
-            CComPtr<ITimerService> timerService;
-            if (FAILED(pActiveSite->QueryInterface(&timerService)))
-                return E_FAIL;
-
-            if (FAILED(timerService->CreateTimer(nullptr, &m_timer)))
-                return E_FAIL;
-
-            VARIANT timeMin;
-            if (FAILED(m_timer->GetTime(&timeMin)) || timeMin.vt != VT_I4)
-                return E_FAIL;
-
-            VARIANT timeMax;
-            timeMax.vt = VT_I4;
-            timeMax.lVal = 0;
-            VARIANT timeInterval;
-            timeInterval.vt = VT_I4;
-            timeInterval.lVal = 100;
-            timeMin.lVal += timeInterval.lVal;
-            if (FAILED(m_timer->Advise(timeMin, timeMax, timeInterval, 0, static_cast<ITimerSink*>(this), &m_timerCookie)))
-                return E_FAIL;
-
             if (lprcPosRect == nullptr)
                 return E_INVALIDARG;
 
@@ -465,11 +444,14 @@ HRESULT STDMETHODCALLTYPE FlashProxyModule::DoVerb(LONG iVerb, LPMSG lpmsg, IOle
             if (m_wnd == nullptr)
                 return E_FAIL;
 
+            SetWindowLongPtr(m_wnd, GWL_USERDATA, (LPARAM)this);
+
             if (FAILED(CreateCoreWebView2Environment(this)))
                 return E_FAIL;
 
             return S_OK;
         }
+
         default:
             return E_NOTIMPL;
     }
@@ -501,16 +483,6 @@ HRESULT STDMETHODCALLTYPE FlashProxyModule::Draw(DWORD dwDrawAspect, LONG lindex
     // WebView2 doesn't currently support offscreen rendering, which is how the Flash control works.
     // Additional work is required for positioning and visibility, which would normally be taken care of by the client's renderer.
     // See https://github.com/MicrosoftEdge/WebView2Feedback/issues/20 for details.
-
-#ifdef THERE_VISIBILITY_CHECK
-    if (m_ready)
-    {
-        // If we don't receive another draw call in this many timer events, we assume we aren't visible.
-        // Unfortunately, it appears that the There_Visible variable is always true, so we can't use that.
-        m_visibilityCount = 5;
-        SetVisibility(true);
-    }
-#endif
 
     return S_OK;
 }
@@ -550,30 +522,6 @@ HRESULT STDMETHODCALLTYPE FlashProxyModule::QueryHitPoint(DWORD dwAspect, LPCREC
     return S_OK;
 }
 
-HRESULT STDMETHODCALLTYPE FlashProxyModule::OnTimer(VARIANT vtimeAdvise)
-{
-#ifdef THERE_VISIBILITY_CHECK
-    if (m_ready)
-    {
-        if (m_visibilityCount > 0)
-        {
-            m_visibilityCount--;
-            if (m_visibilityCount == 0)
-                SetVisibility(false);
-        }
-
-        RECT rect;
-        rect.left = m_pos.cx;
-        rect.top = m_pos.cy;
-        rect.right = m_pos.cx + m_size.cx;
-        rect.bottom = m_pos.cy + m_size.cy;
-        m_inplaceSite->InvalidateRect(&rect, false);
-    }
-#endif
-
-    return S_OK;
-}
-
 HRESULT STDMETHODCALLTYPE FlashProxyModule::put_Movie(BSTR pVal)
 {
     if (m_url.Length() > 0)
@@ -587,7 +535,26 @@ HRESULT STDMETHODCALLTYPE FlashProxyModule::put_Movie(BSTR pVal)
         return E_FAIL;
 
     CComBSTR url;
-    if (FAILED(url.Append(pVal, length)) || FAILED(url.Append(L".html")))
+    if (FAILED(url.Append(pVal, length)))
+        return E_FAIL;
+
+    WCHAR *name = wcsrchr(url, L'/');
+    if (name != nullptr)
+    {
+        name++;
+        if (_wcsicmp(name, L"teleportslideshow") == 0)
+            m_identity = Identity::Teleport;
+        else if (_wcsicmp(name, L"shortcutbar") == 0)
+            m_identity = Identity::ShortcutBar;
+        else if (_wcsicmp(name, L"funfinder") == 0)
+            m_identity = Identity::FunFinder;
+        else if (_wcsicmp(name, L"emotionsbar") == 0)
+            m_identity = Identity::EmotionsBar;
+        else if (_wcsicmp(name, L"messagebar") == 0)
+            m_identity = Identity::MessageBar;
+    }
+
+   if (FAILED(url.Append(L".html")))
         return E_FAIL;
 
     m_url = url;
@@ -677,19 +644,22 @@ HRESULT STDMETHODCALLTYPE FlashProxyModule::Invoke(HRESULT errorCode, ICoreWebVi
     m_view->AddWebResourceRequestedFilter(L"http://localhost:9999/*", COREWEBVIEW2_WEB_RESOURCE_CONTEXT_ALL);
 
     m_view->add_WebMessageReceived(Callback<ICoreWebView2WebMessageReceivedEventHandler>(
-        [this](ICoreWebView2 *sender, ICoreWebView2WebMessageReceivedEventArgs *args) -> HRESULT {
+        [this](ICoreWebView2 *sender, ICoreWebView2WebMessageReceivedEventArgs *args) -> HRESULT
+        {
             return OnWebMessageReceived(sender, args);
         }
     ).Get(), &m_webMessageReceivedToken);
 
     m_view->add_WebResourceRequested(Callback<ICoreWebView2WebResourceRequestedEventHandler>(
-        [this](ICoreWebView2 *sender, ICoreWebView2WebResourceRequestedEventArgs *args) -> HRESULT {
+        [this](ICoreWebView2 *sender, ICoreWebView2WebResourceRequestedEventArgs *args) -> HRESULT
+        {
             return OnWebResourceRequested(sender, args);
         }
     ).Get(), &m_webResourceRequestedToken);
 
     m_view->add_NavigationCompleted(Callback<ICoreWebView2NavigationCompletedEventHandler>(
-        [this](ICoreWebView2 *sender, ICoreWebView2NavigationCompletedEventArgs *args) -> HRESULT {
+        [this](ICoreWebView2 *sender, ICoreWebView2NavigationCompletedEventArgs *args) -> HRESULT
+        {
             return OnNavigationCompleted(sender, args);
         }
     ).Get(), &m_navigationCompletedToken);
@@ -839,9 +809,10 @@ HRESULT FlashProxyModule::OnNavigationCompleted(ICoreWebView2 *sender, ICoreWebV
     {
         m_ready = true;
 
-#ifndef THERE_VISIBILITY_CHECK
-        SetVisibility(true);
-#endif
+        if (IsToolbar())
+            BroadcastMessage(WM_FLASHPROXY_REQUEST_VISIBILITY, 0, 0);
+        else
+            SetVisibility();
 
         SendVariables();
 
@@ -883,6 +854,16 @@ HRESULT FlashProxyModule::Navigate()
 
     if (FAILED(m_view->Navigate(m_url)))
         return E_FAIL;
+
+    if (m_identity == Identity::Teleport)
+    {
+        BroadcastMessage(WM_FLASHPROXY_SET_TELEPORTING, 0, 1);
+    }
+    else
+    {
+        if (((UINT32)BroadcastMessage(WM_FLASHPROXY_GET_IDENTITY, 0, 0) & (UINT32)Identity::Teleport) != 0)
+           SetVariable(L"There_Teleporting", L"1");
+    }
 
     return S_OK;
 }
@@ -958,13 +939,9 @@ HRESULT FlashProxyModule::SetRect(const RECT &rect)
     if (m_wnd == nullptr)
         return S_OK;
 
-    if (m_ready && m_pos.cx == 0 && m_size.cx >= 800 && m_size.cy < 60 && (flags & SWP_NOMOVE) == 0 && m_visibilityCount > 0)
-    {
-        // We are a toolbar that has been moved, so trigger the next timer event to evaluate visibility immediately.
-        m_visibilityCount = 2;
-    }
-
     SetWindowPos(m_wnd, nullptr, m_pos.cx, m_pos.cy, m_size.cx, m_size.cy, flags | SWP_NOZORDER | SWP_NOACTIVATE);
+
+    GuessToolbarVisibility();
 
     if (m_controller != nullptr)
     {
@@ -978,24 +955,6 @@ HRESULT FlashProxyModule::SetRect(const RECT &rect)
             m_controller->put_Bounds(bounds);
         }
     }
-
-    return S_OK;
-}
-
-HRESULT FlashProxyModule::SetVisibility(BOOL visible)
-{
-    if (visible == m_visible)
-        return S_OK;
-
-    m_visible = visible;
-
-    if (m_wnd == nullptr)
-        return S_OK;
-
-    ShowWindow(m_wnd, visible ? SW_SHOWNA : SW_HIDE);
-
-    if (m_controller != NULL)
-        m_controller->put_IsVisible(visible);
 
     return S_OK;
 }
@@ -1014,7 +973,7 @@ HRESULT FlashProxyModule::SetMaskRects(WCHAR *text)
         if (text[0] != ',')
             break;
 
-        maskRect.right = maskRect.left + wcstol(text + 1, &text, 10);\
+        maskRect.right = maskRect.left + wcstol(text + 1, &text, 10);
         if (text[0] != ',')
             break;
 
@@ -1024,4 +983,230 @@ HRESULT FlashProxyModule::SetMaskRects(WCHAR *text)
     }
 
     return S_OK;
+}
+
+void FlashProxyModule::GuessToolbarVisibility()
+{
+    // Unfortunately, it appears that the There_Visible variable is always true.
+    // The actual visibility is handled inside the client since Flash renders during the Draw function.
+    // The best we can do is figure out which toolbars are visibile based on the location of the message bar.
+
+    if (m_identity != Identity::MessageBar)
+        return;
+
+    HWND parentWnd = GetParent(m_wnd);
+    if (parentWnd == nullptr)
+        return;
+
+    RECT bounds;
+    GetClientRect(parentWnd, &bounds);
+
+    LONG y = bounds.bottom - m_pos.cy - 56;
+    UINT32 visibilityMask = 0;
+
+    if (m_ready)
+    {
+        switch (y)
+        {
+            case 0:   // Hidden
+            {
+                visibilityMask = 0;
+                break;
+            }
+
+            case 24:  // MenuBar MessageBar
+            {
+                visibilityMask = (UINT32)Identity::MessageBar;
+                break;
+            }
+
+            case 48:  // MenuBar ShortcutBar MessageBar
+            {
+                visibilityMask = (UINT32)Identity::ShortcutBar | (UINT32)Identity::MessageBar;
+                break;
+            }
+
+            case 58:  // MenuBar FunFinder MessageBar
+            {
+                visibilityMask = (UINT32)Identity::FunFinder | (UINT32)Identity::MessageBar;
+                break;
+            }
+
+            case 46:  // MenuBar EmotionsBar MessageBar
+            {
+                visibilityMask = (UINT32)Identity::EmotionsBar | (UINT32)Identity::MessageBar;
+                break;
+            }
+
+            case 82:  // MenuBar ShortcutBar FunFinder MessageBar
+            {
+                visibilityMask = (UINT32)Identity::ShortcutBar | (UINT32)Identity::FunFinder | (UINT32)Identity::MessageBar;
+                break;
+            }
+
+            case 70:  // MenuBar ShortcutBar EmotionsBar MessageBar
+            {
+                visibilityMask = (UINT32)Identity::ShortcutBar | (UINT32)Identity::EmotionsBar | (UINT32)Identity::MessageBar;
+                break;
+            }
+
+            case 80:  // MenuBar FunFinder EmotionsBar MessageBar
+            {
+                visibilityMask = (UINT32)Identity::FunFinder | (UINT32)Identity::EmotionsBar | (UINT32)Identity::MessageBar;
+                break;
+            }
+
+            case 104: // MenuBar ShortcutBar FunFinder EmotionsBar MessageBar
+            {
+                visibilityMask = (UINT32)Identity::ShortcutBar | (UINT32)Identity::FunFinder | (UINT32)Identity::EmotionsBar | (UINT32)Identity::MessageBar;
+                break;
+            }
+
+            case 88:  // Hidden SocialGame
+            {
+                visibilityMask = 0;
+                break;
+            }
+
+            case 112: // MenuBar SocialGame MessageBar
+            {
+                visibilityMask = (UINT32)Identity::MessageBar;
+                break;
+            }
+
+            case 136: // MenuBar ShortcutBar SocialGame MessageBar
+            {
+                visibilityMask = (UINT32)Identity::ShortcutBar | (UINT32)Identity::MessageBar;
+                break;
+            }
+
+            case 146: // MenuBar FunFinder SocialGame MessageBar
+            {
+                visibilityMask = (UINT32)Identity::FunFinder | (UINT32)Identity::MessageBar;
+                break;
+            }
+
+            case 134: // MenuBar EmotionsBar SocialGame MessageBar
+            {
+                visibilityMask = (UINT32)Identity::EmotionsBar | (UINT32)Identity::MessageBar;
+                break;
+            }
+
+            case 170: // MenuBar ShortcutBar FunFinder SocialGame MessageBar
+            {
+                visibilityMask = (UINT32)Identity::ShortcutBar | (UINT32)Identity::FunFinder | (UINT32)Identity::MessageBar;
+                break;
+            }
+
+            case 158: // MenuBar ShortcutBar EmotionsBar SocialGame MessageBar
+            {
+                visibilityMask = (UINT32)Identity::ShortcutBar | (UINT32)Identity::EmotionsBar | (UINT32)Identity::MessageBar;
+                break;
+            }
+
+            case 168: // MenuBar FunFinder EmotionsBar SocialGame MessageBar
+            {
+                visibilityMask = (UINT32)Identity::FunFinder | (UINT32)Identity::EmotionsBar | (UINT32)Identity::MessageBar;
+                break;
+            }
+
+            case 192: // MenuBar ShortcutBar FunFinder EmotionsBar SocialGame MessageBar
+            {
+                visibilityMask = (UINT32)Identity::ShortcutBar | (UINT32)Identity::FunFinder | (UINT32)Identity::EmotionsBar | (UINT32)Identity::MessageBar;
+                break;
+            }
+
+            default:
+                break;
+        }
+    }
+
+    BroadcastMessage(WM_FLASHPROXY_SET_VISIBILITY, 0, (LPARAM)visibilityMask);
+}
+
+void FlashProxyModule::SetVisibility(UINT32 visibilityMask)
+{
+    BOOL visible = true;
+
+    if (IsToolbar())
+    {
+        if (((UINT32)m_identity & visibilityMask) == 0)
+            visible = false;
+    }
+
+    if (visible == m_visible)
+        return;
+
+    m_visible = visible;
+
+    if (m_wnd == nullptr)
+        return;
+
+    ShowWindow(m_wnd, visible ? SW_SHOWNA : SW_HIDE);
+
+    if (m_controller != NULL)
+        m_controller->put_IsVisible(visible);
+
+    return;
+}
+
+BOOL FlashProxyModule::IsToolbar()
+{
+    return ((UINT32)m_identity & ((UINT32)Identity::ShortcutBar | (UINT32)Identity::FunFinder | (UINT32)Identity::EmotionsBar | (UINT32)Identity::MessageBar)) != 0;
+}
+
+LRESULT FlashProxyModule::BroadcastMessage(UINT Msg, WPARAM wParam, LPARAM lParam)
+{
+    LRESULT result = 0;
+
+    HWND parentWnd = GetParent(m_wnd);
+    if (parentWnd != nullptr)
+    {
+        for (HWND wnd = FindWindowEx(parentWnd, nullptr, g_WindowClassName, nullptr); wnd != nullptr; wnd = FindWindowEx(parentWnd, wnd, g_WindowClassName, nullptr))
+            result |= SendMessage(wnd, Msg, wParam, lParam);
+    }
+
+    return result;
+}
+
+LRESULT APIENTRY FlashProxyModule::ChildWndProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
+{
+    FlashProxyModule *flashProxy = reinterpret_cast<FlashProxyModule*>(GetWindowLongPtr(hWnd, GWL_USERDATA));
+
+    switch (Msg)
+    {
+        case WM_FLASHPROXY_SET_VISIBILITY:
+        {
+            if (flashProxy != nullptr)
+                flashProxy->SetVisibility((UINT32)lParam);
+
+            return 0;
+        }
+
+        case WM_FLASHPROXY_REQUEST_VISIBILITY:
+        {
+            if (flashProxy != nullptr)
+                flashProxy->GuessToolbarVisibility();
+
+            return 0;
+        }
+
+        case WM_FLASHPROXY_SET_TELEPORTING:
+        {
+            if (flashProxy != nullptr)
+                flashProxy->SetVariable(L"There_Teleporting", lParam ? L"1" : L"0");
+
+            return 0;
+        }
+
+        case WM_FLASHPROXY_GET_IDENTITY:
+        {
+            if (flashProxy != nullptr)
+                return (LRESULT)flashProxy->m_identity;
+
+            return 0;
+        }
+    }
+
+    return DefWindowProc(hWnd, Msg, wParam, lParam);
 }

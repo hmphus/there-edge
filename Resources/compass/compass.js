@@ -19,6 +19,10 @@ There.init({
     if (name == 'there_avheading') {
       $('.compass .face').css('transform', `rotate(${-value}deg)`);
     }
+
+    if (name == 'there_teleporting') {
+      $('.compass').attr(name.replace('there_', 'data-'), value);
+    }
   },
 });
 

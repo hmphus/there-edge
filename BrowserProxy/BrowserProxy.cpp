@@ -362,6 +362,7 @@ HRESULT STDMETHODCALLTYPE BrowserProxyModule::DoVerb(LONG iVerb, LPMSG lpmsg, IO
 
             return S_OK;
         }
+
         default:
             return E_NOTIMPL;
     }
@@ -617,61 +618,71 @@ HRESULT STDMETHODCALLTYPE BrowserProxyModule::Invoke(HRESULT errorCode, ICoreWeb
     m_view->AddWebResourceRequestedFilter(L"https://webapps.prod.there.com/*", COREWEBVIEW2_WEB_RESOURCE_CONTEXT_DOCUMENT);
 
     m_view->add_NavigationStarting(Callback<ICoreWebView2NavigationStartingEventHandler>(
-        [this](ICoreWebView2 *sender, ICoreWebView2NavigationStartingEventArgs *args) -> HRESULT {
+        [this](ICoreWebView2 *sender, ICoreWebView2NavigationStartingEventArgs *args) -> HRESULT
+        {
             return OnNavigationStarting(sender, args);
         }
     ).Get(), &m_navigationStartingToken);
 
     m_view->add_NavigationCompleted(Callback<ICoreWebView2NavigationCompletedEventHandler>(
-        [this](ICoreWebView2 *sender, ICoreWebView2NavigationCompletedEventArgs *args) -> HRESULT {
+        [this](ICoreWebView2 *sender, ICoreWebView2NavigationCompletedEventArgs *args) -> HRESULT
+        {
             return OnNavigationCompleted(sender, args);
         }
     ).Get(), &m_navigationCompletedToken);
 
     m_view->add_NewWindowRequested(Callback<ICoreWebView2NewWindowRequestedEventHandler>(
-        [this](ICoreWebView2 *sender, ICoreWebView2NewWindowRequestedEventArgs *args) -> HRESULT {
+        [this](ICoreWebView2 *sender, ICoreWebView2NewWindowRequestedEventArgs *args) -> HRESULT
+        {
             return OnNewWindowRequested(sender, args);
         }
     ).Get(), &m_newWindowRequestedToken);
 
     m_view->add_SourceChanged(Callback<ICoreWebView2SourceChangedEventHandler>(
-        [this](ICoreWebView2 *sender, ICoreWebView2SourceChangedEventArgs *args) -> HRESULT {
+        [this](ICoreWebView2 *sender, ICoreWebView2SourceChangedEventArgs *args) -> HRESULT
+        {
             return OnSourceChanged(sender, args);
         }
     ).Get(), &m_sourceChangedToken);
 
     m_view->add_HistoryChanged(Callback<ICoreWebView2HistoryChangedEventHandler>(
-        [this](ICoreWebView2 *sender, IUnknown *args) -> HRESULT {
+        [this](ICoreWebView2 *sender, IUnknown *args) -> HRESULT
+        {
             return OnHistoryChanged(sender);
         }
     ).Get(), &m_historyChangedToken);
 
     m_view->add_DocumentTitleChanged(Callback<ICoreWebView2DocumentTitleChangedEventHandler>(
-        [this](ICoreWebView2 *sender, IUnknown *args) -> HRESULT {
+        [this](ICoreWebView2 *sender, IUnknown *args) -> HRESULT
+        {
             return OnDocumentTitleChanged(sender);
         }
     ).Get(), &m_documentTitleChangedToken);
 
     m_view->add_WebResourceRequested(Callback<ICoreWebView2WebResourceRequestedEventHandler>(
-        [this](ICoreWebView2 *sender, ICoreWebView2WebResourceRequestedEventArgs *args) -> HRESULT {
+        [this](ICoreWebView2 *sender, ICoreWebView2WebResourceRequestedEventArgs *args) -> HRESULT
+        {
             return OnWebResourceRequested(sender, args);
         }
     ).Get(), &m_webResourceRequestedToken);
 
     m_view->add_WebMessageReceived(Callback<ICoreWebView2WebMessageReceivedEventHandler>(
-        [this](ICoreWebView2 *sender, ICoreWebView2WebMessageReceivedEventArgs *args) -> HRESULT {
+        [this](ICoreWebView2 *sender, ICoreWebView2WebMessageReceivedEventArgs *args) -> HRESULT
+        {
             return OnWebMessageReceived(sender, args);
         }
     ).Get(), &m_webMessageReceivedToken);
 
     m_view->add_WindowCloseRequested(Callback<ICoreWebView2WindowCloseRequestedEventHandler>(
-        [this](ICoreWebView2 *sender, IUnknown *args) -> HRESULT {
+        [this](ICoreWebView2 *sender, IUnknown *args) -> HRESULT
+        {
             return OnWindowCloseRequested(sender);
         }
     ).Get(), &m_windowCloseRequestedToken);
 
     m_view->add_DOMContentLoaded(Callback<ICoreWebView2DOMContentLoadedEventHandler>(
-        [this](ICoreWebView2 *sender, ICoreWebView2DOMContentLoadedEventArgs *args) -> HRESULT {
+        [this](ICoreWebView2 *sender, ICoreWebView2DOMContentLoadedEventArgs *args) -> HRESULT
+        {
             return OnDOMContentLoaded(sender, args);
         }
     ).Get(), &m_domContentLoadedToken);
@@ -824,9 +835,6 @@ HRESULT BrowserProxyModule::OnNewWindowRequested(ICoreWebView2 *sender, ICoreWeb
 
         BrowserProxyModule *module = dynamic_cast<BrowserProxyModule*>(browser.p);
         if (module == nullptr)
-            return E_FAIL;
-
-        if (FAILED(args->put_Handled(true)))
             return E_FAIL;
 
         if (FAILED(module->SetDeferral(args)))
@@ -1255,7 +1263,8 @@ HRESULT BrowserProxyModule::ApplyScript(ICoreWebView2 *view, LONG id)
     text[dsize] = 0;
 
     if (FAILED(view->ExecuteScript(text, Callback<ICoreWebView2ExecuteScriptCompletedHandler>(
-        [this](HRESULT errorCode, LPCWSTR resultObjectAsJson) -> HRESULT {
+        [this](HRESULT errorCode, LPCWSTR resultObjectAsJson) -> HRESULT
+        {
             return S_OK;
         }
     ).Get())))
@@ -1280,6 +1289,9 @@ HRESULT BrowserProxyModule::ProcessDeferral()
         return S_FALSE;
 
     if (FAILED(m_newWindowArgs->put_NewWindow(m_view)))
+        return E_FAIL;
+
+    if (FAILED(m_newWindowArgs->put_Handled(true)))
         return E_FAIL;
 
     CComPtr<ICoreWebView2WindowFeatures> features;

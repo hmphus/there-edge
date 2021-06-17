@@ -13,7 +13,6 @@ class FlashProxyModule: public ATL::CAtlDllModuleT<FlashProxyModule>,
                         public IOleObject,
                         public IOleInPlaceObjectWindowless,
                         public IViewObjectEx,
-                        public ITimerSink,
                         public ISupportErrorInfo,
                         public IThereEdgeShockwaveFlash,
                         public ICoreWebView2CreateCoreWebView2EnvironmentCompletedHandler,
@@ -22,6 +21,16 @@ class FlashProxyModule: public ATL::CAtlDllModuleT<FlashProxyModule>,
 public:
     DECLARE_LIBID(LIBID_FlashProxyLib)
     DECLARE_REGISTRY_APPID_RESOURCEID(IDR_FLASHPROXY, "{682E7C31-6CE3-4FB3-9883-479ED34CB1B9}")
+
+    enum class Identity: UINT32
+    {
+        Unknown     = 0x00,
+        Teleport    = 0x01,
+        ShortcutBar = 0x02,
+        FunFinder   = 0x04,
+        EmotionsBar = 0x08,
+        MessageBar  = 0x10,
+    };
 
     static WCHAR g_WindowClassName[];
 
@@ -90,7 +99,6 @@ protected:
     virtual HRESULT STDMETHODCALLTYPE QueryHitRect(DWORD dwAspect, LPCRECT pRectBounds, LPCRECT pRectLoc, LONG lCloseHint, DWORD *pHitResult) override {return E_NOTIMPL;}
     virtual HRESULT STDMETHODCALLTYPE GetNaturalExtent(DWORD dwAspect, LONG lindex, DVTARGETDEVICE *ptd,
                                                        HDC hicTargetDev, DVEXTENTINFO *pExtentInfo, LPSIZEL pSizel) override {return E_NOTIMPL;}
-    virtual HRESULT STDMETHODCALLTYPE OnTimer(VARIANT vtimeAdvise);
     virtual HRESULT STDMETHODCALLTYPE InterfaceSupportsErrorInfo(REFIID riid) override {return E_NOTIMPL;}
     virtual HRESULT STDMETHODCALLTYPE GetTypeInfoCount(UINT *pctinfo) override {return E_NOTIMPL;}
     virtual HRESULT STDMETHODCALLTYPE GetTypeInfo(UINT iTInfo, LCID lcid, ITypeInfo **ppTInfo) override {return E_NOTIMPL;}
@@ -209,8 +217,14 @@ protected:
     HRESULT InvokeFlashEvent(const WCHAR *cmd, DISPPARAMS &args, VARIANT *result = nullptr);
     HRESULT SetSize(const SIZE &size);
     HRESULT SetRect(const RECT &rect);
-    HRESULT SetVisibility(BOOL visible);
     HRESULT SetMaskRects(WCHAR *text);
+    void GuessToolbarVisibility();
+    void SetVisibility(UINT32 visibilityMask = ~0);
+    BOOL IsToolbar();
+    LRESULT BroadcastMessage(UINT Msg, WPARAM wParam, LPARAM lParam);
+
+public:
+    static LRESULT APIENTRY ChildWndProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam);
 
 protected:
     ULONG                                    m_refCount;
@@ -221,7 +235,7 @@ protected:
     HWND                                     m_wnd;
     RECT                                     m_maskRects[10];
     LONG                                     m_maskRectCount;
-    LONG                                     m_visibilityCount;
+    Identity                                 m_identity;
     CComBSTR                                 m_url;
     CComSafeArray<BSTR>                      m_variables;
     CComPtr<IThereEdgeShockwaveFlashEvents>  m_flashEvents;
@@ -229,11 +243,9 @@ protected:
     CComPtr<IUnknown>                        m_unknownOuter;
     CComPtr<IServiceProvider>                m_serviceProvider;
     CComPtr<IOleInPlaceSiteWindowless>       m_inplaceSite;
-    CComPtr<ITimer>                          m_timer;
     CComPtr<ICoreWebView2Environment>        m_environment;
     CComPtr<ICoreWebView2Controller2>        m_controller;
     CComPtr<ICoreWebView2>                   m_view;
-    DWORD                                    m_timerCookie;
     EventRegistrationToken                   m_webMessageReceivedToken;
     EventRegistrationToken                   m_webResourceRequestedToken;
     EventRegistrationToken                   m_navigationCompletedToken;

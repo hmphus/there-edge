@@ -179,7 +179,7 @@ There.init({
     if (index < There.data.messages.length || message.response == undefined) {
       $('.messagebar .message').text(message.text);
     } else {
-      $('.messagebar .message').text(message.text + ' ' + message.response);
+      $('.messagebar .message').text(message.text + message.response);
     }
     if (message.response == undefined) {
       $('.messagebar .message').attr('data-buttoncount', message.buttons.length);
@@ -265,9 +265,7 @@ There.init({
     if (button == undefined) {
       return;
     }
-    if (message.buttons.length > 1)  {
-      message.response = `You responded "${button.text}".`;
-    }
+    message.response = message.buttons.length > 1 ? ` You responded "${button.text}".` : '';
     There.fsCommand('messageBarResponse', {
       id: message.id,
       button: button.id,
@@ -300,7 +298,7 @@ There.init({
     const message = There.data.messages[index];
     if (message != undefined && There.data.hasTimeout) {
       There.data.hasTimeout = false;
-      message.response = `Message timed out.`;
+      message.response = ` Message timed out.`;
       There.fsCommand('messageBarResponse', {
         id: message.id,
         timeout: 1,
@@ -326,10 +324,14 @@ There.init({
 
   showMessageBar: function() {
     $('.messagebar').attr('data-msgbaropened', '1');
+    There.fsCommand('setMask', {
+      rects: '0,0,800,58',
+    });
   },
 
   hideMessageBar: function() {
     $('.messagebar').attr('data-msgbaropened', '0');
+    There.fsCommand('setMask');
   },
 });
 
