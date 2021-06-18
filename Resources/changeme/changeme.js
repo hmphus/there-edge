@@ -17,21 +17,6 @@ There.init({
 });
 
 $(document).ready(function() {
-  $('.areas .area').on('click', function() {
-    $('.areas').attr('data-area', $(this).data('area'));
-    $('.tabs .wardrobe .listing .title').text($(this).data('title'));
-    if ($(this).data('area') == 'tops') {
-      $('.tabs .wardrobe .listing .list .item').show();
-    } else {
-      $('.tabs .wardrobe .listing .list .item').hide();
-    }
-  });
-
-  $('.tabs .tab').on('click', function() {
-    $('.changeme').attr('data-tab', $(this).data('tab'));
-    $('.tabs').attr('data-tab', $(this).data('tab'));
-  });
-
   $('.titlebar .buttons .button[data-id="bar"]').on('click', function() {
     $('.changeme').attr('data-state', 'bar');
   }).on('mousedown', function(event) {
@@ -52,6 +37,27 @@ $(document).ready(function() {
   $('.titlebar .buttons .button[data-id="close"]').on('click', function() {
   }).on('mousedown', function(event) {
     event.stopPropagation();
+  });
+
+  $('.sections .section .tab').on('click', function() {
+    const section = $(this).parent().data('section');
+    $('.changeme').attr('data-section', section);
+    if (section == 'wardrobe') {
+      $('.changeme').attr('data-area', 'hairstyles');
+    }
+    if (section == 'body') {
+      $('.changeme').attr('data-area', 'head');
+    }
+  });
+
+  $('.areas .area').on('click', function() {
+    $('.changeme').attr('data-area', $(this).data('area'));
+    $('.sections .section[data-section="wardrobe"] .listing .title').text($(this).data('title'));
+    if ($(this).data('area') == 'tops') {
+      $('.sections .section[data-section="wardrobe"] .listing').attr('data-count', '8');
+    } else {
+      $('.sections .section[data-section="wardrobe"] .listing').attr('data-count', '0');
+    }
   });
 
   $('.footer .button[data-id="save"]').on('click', function() {

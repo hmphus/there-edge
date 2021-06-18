@@ -9,7 +9,7 @@
 <script src="changeme.js"></script>
 </head>
 <body>
-<div class="changeme" data-tab="wardrobe" data-state="full">
+<div class="changeme" data-state="full" data-section="wardrobe" data-gender="male" data-area="hairstyles">
 <svg class="fill bar" viewBox="0 0 200 354" width="200" height="354"><path d="M49,6Q49,1 54,1L193,1Q198,1 198,6L198,19Q198,24 193,24L54,24Q49,24 49,19Z"></path></svg>
 <svg class="fill wardrobe body" viewBox="0 0 200 354" width="200" height="354"><path d="M3,52Q3,47 8,47L44,47Q49,47 49,42L49,6Q49,1 54,1L193,1Q198,1 198,6L198,348Q198,353 193,353L54,353Q49,353 49,348L49,303Q49,298 44,298L8,298Q3,298 3,293Z"></path></svg>
 <div class="titlebar">ChangeMe
@@ -22,31 +22,38 @@
 </div>
 <svg class="border bar" viewBox="0 0 200 354" width="200" height="354"><path d="M49,6Q49,1 54,1L193,1Q198,1 198,6L198,19Q198,24 193,24L54,24Q49,24 49,19Z"></path></svg>
 <svg class="border fill wardrobe body" viewBox="0 0 200 354" width="200" height="354"><path d="M3,52Q3,47 8,47L44,47Q49,47 49,42L49,6Q49,1 54,1L193,1Q198,1 198,6L198,348Q198,353 193,353L54,353Q49,353 49,348L49,303Q49,298 44,298L8,298Q3,298 3,293Z"></path></svg>
-<div class="areas" data-gender="male" data-area="tops">
-<div class="area" data-gender="male" data-area="hairstyles" data-title="Hairstyles"></div>
-<div class="area" data-gender="male" data-area="grooming" data-title="Grooming"></div>
-<div class="area" data-gender="male" data-area="accessories" data-title="Accessories"></div>
-<div class="area" data-gender="male" data-area="tops" data-title="Tops"></div>
-<div class="area" data-gender="male" data-area="bottoms" data-title="Bottoms"></div>
-<div class="area" data-gender="male" data-area="footware" data-title="Footwear"></div>
-<div class="area" data-gender="male" data-area="outfits" data-title="Outfits"></div>
-<div class="area" data-gender="female" data-area="hairstyles" data-title="Hairstyles"></div>
-<div class="area" data-gender="female" data-area="cosmetics" data-title="Cosmetics"></div>
-<div class="area" data-gender="female" data-area="accessories" data-title="Accessories"></div>
-<div class="area" data-gender="female" data-area="tops" data-title="Tops"></div>
-<div class="area" data-gender="female" data-area="bottoms" data-title="Bottoms"></div>
-<div class="area" data-gender="female" data-area="footware" data-title="Footwear"></div>
-<div class="area" data-gender="female" data-area="outfits" data-title="Outfits"></div>
+<div class="areas">
+<div class="area" data-section="wardrobe" data-gender="male" data-area="hairstyles" data-title="Hairstyles"></div>
+<div class="area" data-section="wardrobe" data-gender="male" data-area="grooming" data-title="Grooming"></div>
+<div class="area" data-section="wardrobe" data-gender="male" data-area="accessories" data-title="Accessories"></div>
+<div class="area" data-section="wardrobe" data-gender="male" data-area="tops" data-title="Tops"></div>
+<div class="area" data-section="wardrobe" data-gender="male" data-area="bottoms" data-title="Bottoms"></div>
+<div class="area" data-section="wardrobe" data-gender="male" data-area="footware" data-title="Footwear"></div>
+<div class="area" data-section="wardrobe" data-gender="male" data-area="outfits" data-title="Outfits"></div>
+<div class="area" data-section="wardrobe" data-gender="female" data-area="hairstyles" data-title="Hairstyles"></div>
+<div class="area" data-section="wardrobe" data-gender="female" data-area="cosmetics" data-title="Cosmetics"></div>
+<div class="area" data-section="wardrobe" data-gender="female" data-area="accessories" data-title="Accessories"></div>
+<div class="area" data-section="wardrobe" data-gender="female" data-area="tops" data-title="Tops"></div>
+<div class="area" data-section="wardrobe" data-gender="female" data-area="bottoms" data-title="Bottoms"></div>
+<div class="area" data-section="wardrobe" data-gender="female" data-area="footware" data-title="Footwear"></div>
+<div class="area" data-section="wardrobe" data-gender="female" data-area="outfits" data-title="Outfits"></div>
+<div class="area" data-section="body" data-area="head" data-title="Head Shape"></div>
+<div class="area" data-section="body" data-area="face" data-title="Facial Features"></div>
+<div class="area" data-section="body" data-area="body" data-title="Body Toning"></div>
+<div class="area" data-section="body" data-area="skin" data-title="Skin Color"></div>
+<div class="area" data-section="body" data-area="looksets" data-title="Looksets"></div>
 <div class="arrow"></div>
 </div>
-<div class="tabs" data-tab="wardrobe">
-<div class="body">
-<div class="tab" data-tab="body">Body</div>
+<div class="sections">
+<div class="section" data-section="body">
+<div class="tab">Body</div>
+<div class="spa">To customize your body, visit a Spa!<br><br><span class="link" data-id="spas">Click here</span> to see a list of Spas.</div>
 </div>
-<div class="wardrobe">
-<div class="tab" data-tab="wardrobe">Wardrobe</div>
-<div class="listing">
+<div class="section" data-section="wardrobe">
+<div class="tab">Wardrobe</div>
+<div class="listing" data-count="8">
 <div class="title">Tops</div>
+<div class="empty">You have no items in this category.</div>
 <div class="list">
 <div class="item"><div class="icon" style="background-image:url(iconspng/1003036.png);"></div><div class="text">Male Leather Jacket</div></div>
 <div class="item"><div class="icon" style="background-image:url(iconspng/1001069sk1whitetshirt.png);"></div><div class="text">Smiley Tee (M)</div></div>
