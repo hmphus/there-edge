@@ -52,11 +52,11 @@ $(document).ready(function() {
 
   $('.areas .area').on('click', function() {
     $('.changeme').attr('data-area', $(this).data('area'));
-    $('.sections .section[data-section="wardrobe"] .listing .title').text($(this).data('title'));
+    $('.sections .section[data-section="wardrobe"] .panel .title').text($(this).data('title'));
     if ($(this).data('area') == 'tops') {
-      $('.sections .section[data-section="wardrobe"] .listing').attr('data-count', '8');
+      $('.sections .section[data-section="wardrobe"] .panel').attr('data-count', '8');
     } else {
-      $('.sections .section[data-section="wardrobe"] .listing').attr('data-count', '0');
+      $('.sections .section[data-section="wardrobe"] .panel').attr('data-count', '0');
     }
   });
 

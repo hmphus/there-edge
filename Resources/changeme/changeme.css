@@ -408,7 +408,7 @@ body {
   border-bottom:none;
 }
 
-.sections .section[data-section="wardrobe"] .listing {
+.sections .section[data-section="wardrobe"] .panel {
   position:absolute;
   top:5px;
   left:4px;
@@ -421,7 +421,7 @@ body {
   overflow:hidden;
 }
 
-.sections .section[data-section="wardrobe"] .listing .title {
+.sections .section[data-section="wardrobe"] .panel .title {
   height:17px;
   line-height:17px;
   background-color:#e5f3f8;
@@ -431,43 +431,43 @@ body {
   border-bottom:1px solid #666;
 }
 
-.sections .section[data-section="wardrobe"] .listing .empty {
+.sections .section[data-section="wardrobe"] .panel .empty {
   height:223px;
   padding:10px 5px;
   font-size:11px;
 }
 
-.sections .section[data-section="wardrobe"] .listing:not([data-count="0"]) .empty {
+.sections .section[data-section="wardrobe"] .panel:not([data-count="0"]) .empty {
   display:none;
 }
 
-.sections .section[data-section="wardrobe"] .listing .list {
+.sections .section[data-section="wardrobe"] .panel .items {
   height:243px;
   overflow-y:scroll;
 }
 
-.sections .section[data-section="wardrobe"] .listing[data-count="0"] .list {
+.sections .section[data-section="wardrobe"] .panel[data-count="0"] .items {
   display:none;
 }
 
-.sections .section[data-section="wardrobe"] .listing .list .item {
+.sections .section[data-section="wardrobe"] .panel .items .item {
   height:48px;
   border-bottom:1px dashed #999;
 }
 
-.sections .section[data-section="wardrobe"] .listing .list .item:hover {
+.sections .section[data-section="wardrobe"] .panel .items .item:hover {
   background-color:#f0f0f0;
 }
 
-.sections .section[data-section="wardrobe"] .listing .list .item.wearing {
+.sections .section[data-section="wardrobe"] .panel .items .item[data-selected="1"] {
   background-color:#c4f0f8;
 }
 
-.sections .section[data-section="wardrobe"] .listing .list .item:last-of-type {
+.sections .section[data-section="wardrobe"] .panel .items .item:last-of-type {
   border-bottom:none;
 }
 
-.sections .section[data-section="wardrobe"] .listing .list .item .icon {
+.sections .section[data-section="wardrobe"] .panel .items .item .icon {
   display:inline-block;
   width:48px;
   height:48px;
@@ -475,7 +475,7 @@ body {
   background-repeat:no-repeat;
 }
 
-.sections .section[data-section="wardrobe"] .listing .list .item .text {
+.sections .section[data-section="wardrobe"] .panel .items .item .name {
   display:inline-flex;
   width:calc(100% - 53px);
   height:48px;
@@ -502,6 +502,10 @@ body {
 
 .sections .section[data-section="body"] .spa .link:hover {
   text-decoration:none;
+}
+
+.sections .section[data-section="body"] .panel {
+  display:none;
 }
 
 .footer {
