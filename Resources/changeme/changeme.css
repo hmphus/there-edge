@@ -15,6 +15,13 @@ body {
   top:0px;
   width:200px;
   height:354px;
+  transition-property:opacity;
+  transition-duration:250ms;
+}
+
+.changeme[data-teleporting="1"] {
+  opacity:0;
+  pointer-events:none;
 }
 
 .changeme svg.fill,
@@ -397,6 +404,7 @@ body {
 .changeme[data-section="wardrobe"] .sections .section[data-section="wardrobe"] .tab {
   background-color:#c4f0f8;
   border-bottom:none;
+  pointer-events:none;
 }
 
 .sections .section[data-section="wardrobe"] .panel {
@@ -422,23 +430,14 @@ body {
   border-bottom:1px solid #666;
 }
 
-.sections .section[data-section="wardrobe"] .panel .empty {
-  height:223px;
-  padding:10px 5px;
-  font-size:11px;
-}
-
-.sections .section[data-section="wardrobe"] .panel:not([data-count="0"]) .empty {
-  display:none;
-}
-
 .sections .section[data-section="wardrobe"] .panel .items {
   height:243px;
   overflow-y:scroll;
 }
 
-.sections .section[data-section="wardrobe"] .panel[data-count="0"] .items {
-  display:none;
+.sections .section[data-section="wardrobe"] .panel .items .empty {
+  padding:10px 5px;
+  font-size:11px;
 }
 
 .sections .section[data-section="wardrobe"] .panel .items .item {
@@ -455,7 +454,7 @@ body {
 }
 
 .sections .section[data-section="wardrobe"] .panel .items .item:last-of-type {
-  border-bottom:none;
+  /*border-bottom:none;*/
 }
 
 .sections .section[data-section="wardrobe"] .panel .items .item .icon {
@@ -477,6 +476,250 @@ body {
   overflow:hidden;
 }
 
+.sections .section[data-section="wardrobe"] .panel .items[data-count="0"] {
+  overflow-y:hidden;
+}
+
+.sections .section[data-section="wardrobe"] .panel .items:not([data-count="0"]) .empty {
+  display:none;
+}
+
+.sections .section[data-section="wardrobe"] .panel .items[data-count="0"] .item {
+  display:none;
+}
+
+/*-----------------------------------------------------------------------------*/
+
+.sections .section[data-section="body"] .panel {
+  position:absolute;
+  top:5px;
+  left:4px;
+  width:129px;
+  height:261px;
+  background-color:#fff;
+  border:1px solid #666;
+  border-top-left-radius:4px;
+  border-top-right-radius:4px;
+  overflow:hidden;
+  font-size:0px;
+}
+
+.sections .section[data-section="body"] .panel .title {
+  height:17px;
+  line-height:17px;
+  background-color:#e5f3f8;
+  font-size:11px;
+  text-align:center;
+  color:#333;
+  border-bottom:1px solid #666;
+}
+
+.sections .section[data-section="body"] .panel .editor,
+.sections .section[data-section="body"] .panel .items[data-area="looksets"] {
+  display:none;
+}
+
+.changeme[data-area="head"] .sections .section[data-section="body"] .panel .editor[data-area="head"] {
+  display:block;
+}
+
+.sections .section[data-section="body"] .panel .editor[data-area="head"] .items {
+  height:243px;
+}
+
+.sections .section[data-section="body"] .panel .editor[data-area="head"] .item {
+  position:relative;
+  height:40px;
+}
+
+.sections .section[data-section="body"] .panel .editor[data-area="head"] .item .icon {
+  display:inline-block;
+  width:40px;
+  height:40px;
+  background-color:blue;
+}
+
+.sections .section[data-section="body"] .panel .editor[data-area="head"] .item .slider {
+  position:absolute;
+  margin-left:10px;
+  top:calc(50% - 3px);
+}
+
+.changeme[data-area="face"] .sections .section[data-section="body"] .panel .editor[data-area="face"] {
+  display:block;
+}
+
+.sections .section[data-section="body"] .panel .editor[data-area="face"] .items {
+  height:243px;
+  display:none;
+}
+
+.changeme[data-subarea="eyes-ears"] .sections .section[data-section="body"] .panel .editor[data-area="face"] .items[data-subarea="eyes-ears"],
+.changeme[data-subarea="nose"] .sections .section[data-section="body"] .panel .editor[data-area="face"] .items[data-subarea="nose"],
+.changeme[data-subarea="chin-cheeks"] .sections .section[data-section="body"] .panel .editor[data-area="face"] .items[data-subarea="chin-cheeks"],
+.changeme[data-subarea="mouth"] .sections .section[data-section="body"] .panel .editor[data-area="face"] .items[data-subarea="mouth"] {
+  display:block;
+}
+
+.sections .section[data-section="body"] .panel .editor[data-area="face"] .subareas {
+  position:relative;
+}
+
+.sections .section[data-section="body"] .panel .editor[data-area="face"] .subareas .subarea {
+  font-size:11px;
+}
+
+.sections .section[data-section="body"] .panel .editor[data-area="face"] .subareas .button {
+  position:absolute;
+  top:0px;
+  right:0px;
+  width:10px;
+  height:100%;
+  background-color:orange;
+}
+
+.sections .section[data-section="body"] .panel .editor[data-area="face"] .item {
+  position:relative;
+  height:40px;
+}
+
+.sections .section[data-section="body"] .panel .editor[data-area="face"] .item .icon {
+  display:inline-block;
+  width:40px;
+  height:40px;
+  background-color:blue;
+}
+
+.sections .section[data-section="body"] .panel .editor[data-area="face"] .item .slider {
+  position:absolute;
+  margin-left:10px;
+  top:calc(50% - 3px);
+}
+
+.changeme[data-area="body"] .sections .section[data-section="body"] .panel .editor[data-area="body"] {
+  display:block;
+}
+
+.sections .section[data-section="body"] .panel .editor[data-area="body"] .items {
+  height:243px;
+}
+
+.sections .section[data-section="body"] .panel .editor[data-area="body"] .item {
+  text-align:center;
+}
+
+.sections .section[data-section="body"] .panel .editor[data-area="body"] .item .name {
+  font-size:11px;
+}
+
+.sections .section[data-section="body"] .panel .editor[data-area="body"] .item .slider {
+  position:relative;
+}
+
+.changeme[data-area="skin"] .sections .section[data-section="body"] .panel .editor[data-area="skin"] {
+  display:block;
+}
+
+.sections .section[data-section="body"] .panel .editor[data-area="skin"] .items {
+  height:243px;
+}
+
+.sections .section[data-section="body"] .panel .editor[data-area="skin"] .item {
+  margin-bottom:1px;
+  height:30px;
+}
+
+.sections .section[data-section="body"] .panel .editor[data-area="skin"] .item:hover {
+  background-color:yellow;
+}
+
+.sections .section[data-section="body"] .panel .editor[data-area="skin"] .item[data-selected="1"] {
+  margin-top:-1px;
+  margin-bottom:0px;
+  border-top:1px solid red;
+  border-bottom:1px solid red;
+  background-color:pink;
+  pointer-events:none;
+}
+
+.sections .section[data-section="body"] .panel .editor[data-area="skin"] .item:first-of-type {
+  margin-top:0px;
+  border-top:none;
+}
+
+.sections .section[data-section="body"] .panel .editor[data-area="skin"] .item:last-of-type {
+  margin-bottom:0px
+  border-bottom:none;
+}
+
+.sections .section[data-section="body"] .panel .editor[data-area="skin"] .item .icon {
+  display:inline-block;
+  width:40px;
+  height:30px;
+  background-color:blue;
+  vertical-align:top;
+}
+
+.sections .section[data-section="body"] .panel .editor[data-area="skin"] .item .name {
+  display:inline-block;
+  height:30px;
+  line-height:30px;
+  font-size:11px;
+  vertical-align:top;
+}
+
+.changeme[data-area="looksets"] .sections .section[data-section="body"] .panel .items[data-area="looksets"] {
+  display:block;
+}
+
+.sections .section[data-section="body"] .panel .items[data-area="looksets"] .empty {
+  padding:10px 5px;
+  font-size:11px;
+}
+
+.sections .section[data-section="body"] .panel .items[data-area="looksets"] {
+  height:243px;
+  overflow-y:scroll;
+}
+
+.sections .section[data-section="body"] .panel .items[data-area="looksets"] .item {
+  height:48px;
+  border-bottom:1px dashed #999;
+}
+
+.sections .section[data-section="body"] .panel .items[data-area="looksets"] .item:hover {
+  background-color:#f0f0f0;
+}
+
+.sections .section[data-section="body"] .panel .items[data-area="looksets"] .item[data-selected="1"] {
+  background-color:#c4f0f8;
+}
+
+.sections .section[data-section="body"] .panel .items[data-area="looksets"] .item:last-of-type {
+  /*border-bottom:none;*/
+}
+
+.sections .section[data-section="body"] .panel .items[data-area="looksets"] .item .name {
+  height:48px;
+  padding-right:5px;
+  vertical-align:top;
+  font-size:10px;
+  align-items:center;
+  overflow:hidden;
+}
+
+.sections .section[data-section="body"] .panel .items[data-area="looksets"][data-count="0"] {
+  overflow-y:hidden;
+}
+
+.sections .section[data-section="body"] .panel .items[data-area="looksets"]:not([data-count="0"]) .empty {
+  display:none;
+}
+
+.sections .section[data-section="body"] .panel .items[data-area="looksets"][data-count="0"] .item {
+  display:none;
+}
+
 .sections .section[data-section="body"] .spa {
   position:absolute;
   top:35px;
@@ -495,9 +738,33 @@ body {
   text-decoration:none;
 }
 
-.sections .section[data-section="body"] .panel {
+.changeme[data-spa="1"] .sections .section[data-section="body"] .spa,
+.changeme[data-area="looksets"] .sections .section[data-section="body"] .spa {
   display:none;
 }
+
+.changeme:not([data-spa="1"]):not([data-area="looksets"]) .sections .section[data-section="body"] .panel {
+  display:none;
+}
+
+.slider {
+  display:inline-block;
+  width:60px;
+  height:6px;
+  background-color:red;
+}
+
+.slider .knob {
+  display:inline-block;
+  position:absolute;
+  top:-2px;
+  left:-2px;
+  width:10px;
+  height:10px;
+  background-color:green;
+}
+
+/*-----------------------------------------------------------------------------*/
 
 .footer {
   position:absolute;

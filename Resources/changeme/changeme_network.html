@@ -9,7 +9,7 @@
 <script src="changeme.js"></script>
 </head>
 <body>
-<div class="changeme" data-state="full" data-section="wardrobe" data-gender="male" data-area="hairstyles">
+<div class="changeme" data-state="full" data-section="wardrobe" data-gender="male" data-area="hairstyles" data-spa="1">
 <svg class="fill bar" viewBox="0 0 200 354" width="200" height="354"><path d="M49,6Q49,1 54,1L193,1Q198,1 198,6L198,19Q198,24 193,24L54,24Q49,24 49,19Z"></path></svg>
 <svg class="fill wardrobe body" viewBox="0 0 200 354" width="200" height="354"><path d="M3,52Q3,47 8,47L44,47Q49,47 49,42L49,6Q49,1 54,1L193,1Q198,1 198,6L198,348Q198,353 193,353L54,353Q49,353 49,348L49,303Q49,298 44,298L8,298Q3,298 3,293Z"></path></svg>
 <div class="titlebar">ChangeMe
@@ -49,7 +49,7 @@
 <div class="tab">Body</div>
 <div class="spa">To customize your body, visit a Spa!<br><br><span class="link" data-id="spas">Click here</span> to see a list of Spas.</div>
 <div class="panel">
-<div class="title">Head Shape</div>
+<div class="title"></div>
 <div class="editor" data-area="head">
 <div class="items">
 <div class="item" data-id="1"><div class="icon"></div><div class="slider"><div class="knob"></div></div></div>
@@ -60,12 +60,12 @@
 </div>
 </div>
 <div class="editor" data-area="face">
-<div class="selections">
+<div class="subareas">
 <div class="blank"></div>
-<div class="selection" data-subarea="eyes-ears">Eyes and Ears</div>
-<div class="selection" data-subarea="nose">Nose</div>
-<div class="selection" data-subarea="chin-cheeks">Chin and Cheeks</div>
-<div class="selection" data-subarea="mouth">Mouth</div>
+<div class="subarea" data-subarea="eyes-ears">Eyes and Ears</div>
+<div class="subarea" data-subarea="nose">Nose</div>
+<div class="subarea" data-subarea="chin-cheeks">Chin and Cheeks</div>
+<div class="subarea" data-subarea="mouth">Mouth</div>
 <div class="button"></div>
 </div>
 <div class="items" data-subarea="eyes-ears">
@@ -119,16 +119,18 @@
 </div>
 </div>
 <div class="items" data-area="looksets">
+<div class="empty">You have no items in this category.</div>
 <div class="template item"><div class="name">First Lookset</div></div>
+<div class="template item"><div class="name">Second Lookset</div></div>
 </div>
 </div>
 </div>
 <div class="section" data-section="wardrobe">
 <div class="tab">Wardrobe</div>
-<div class="panel" data-count="8">
-<div class="title">Hairstyles</div>
+<div class="panel">
+<div class="title"></div>
+<div class="items" data-count="0">
 <div class="empty">You have no items in this category.</div>
-<div class="items">
 <div class="template item"><div class="icon" style="background-image:url(iconspng/1003036.png);"></div><div class="name">Male Leather Jacket</div></div>
 <div class="template item"><div class="icon" style="background-image:url(iconspng/1001069sk1whitetshirt.png);"></div><div class="name">Smiley Tee (M)</div></div>
 <div class="template item"><div class="icon" style="background-image:url(iconspng/1002278_mt0_bluewht_letter.png);"></div><div class="name">Welcome Jacket (Male)</div></div>
