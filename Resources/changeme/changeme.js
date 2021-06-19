@@ -70,9 +70,20 @@ $(document).ready(function() {
     }
   });
 
-  $('.subareas .subarea').on('click', function() {
+  $('.subareas .menu').on('mousedown', function() {
+    $('.subareas').attr('data-active', '1');
+  });
+
+  $('.subareas .blank').on('click', function(event) {
+    $('.subareas').attr('data-active', '0');
+    event.stopPropagation();
+  });
+
+  $('.subareas .subarea').on('click', function(event) {
     const subarea = $(this).data('subarea');
     $('.changeme').attr('data-subarea', subarea);
+    $('.subareas').attr('data-active', '0');
+    event.stopPropagation();
   });
 
   $('.sections .section[data-section="body"] .panel .editor[data-area="skin"] .item').on('click', function() {

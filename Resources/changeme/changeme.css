@@ -5,8 +5,6 @@ body {
   color:#000;
   user-select:none;
   text-size-adjust:none;
-  transform:scale(1);
-  transform-origin:top left;
 }
 
 .changeme {
@@ -488,8 +486,6 @@ body {
   display:none;
 }
 
-/*-----------------------------------------------------------------------------*/
-
 .sections .section[data-section="body"] .panel {
   position:absolute;
   top:5px;
@@ -521,6 +517,7 @@ body {
 
 .changeme[data-area="head"] .sections .section[data-section="body"] .panel .editor[data-area="head"] {
   display:block;
+  background-color:#eee;
 }
 
 .sections .section[data-section="body"] .panel .editor[data-area="head"] .items {
@@ -534,23 +531,46 @@ body {
 
 .sections .section[data-section="body"] .panel .editor[data-area="head"] .item .icon {
   display:inline-block;
-  width:40px;
+  width:34px;
   height:40px;
-  background-color:blue;
+  background-image:url(changeme.png);
 }
+
+.sections .section[data-section="body"] .panel .editor[data-area="head"] .item[data-id="1"] .icon {
+  background-position:-3px -680px;
+}
+
+.sections .section[data-section="body"] .panel .editor[data-area="head"] .item[data-id="2"] .icon {
+  background-position:-43px -680px;
+}
+
+.sections .section[data-section="body"] .panel .editor[data-area="head"] .item[data-id="3"] .icon {
+  background-position:-83px -680px;
+}
+
+.sections .section[data-section="body"] .panel .editor[data-area="head"] .item[data-id="4"] .icon {
+  background-position:-123px -680px;
+}
+
+.sections .section[data-section="body"] .panel .editor[data-area="head"] .item[data-id="5"] .icon {
+  background-position:-163px -680px;
+}
+
 
 .sections .section[data-section="body"] .panel .editor[data-area="head"] .item .slider {
   position:absolute;
-  margin-left:10px;
+  right:7px;
   top:calc(50% - 3px);
 }
 
 .changeme[data-area="face"] .sections .section[data-section="body"] .panel .editor[data-area="face"] {
   display:block;
+  background-color:#eee;
 }
 
 .sections .section[data-section="body"] .panel .editor[data-area="face"] .items {
-  height:243px;
+  padding-top:20px;
+  height:223px;
   display:none;
 }
 
@@ -561,21 +581,98 @@ body {
   display:block;
 }
 
-.sections .section[data-section="body"] .panel .editor[data-area="face"] .subareas {
-  position:relative;
+.subareas {
+  display:none;
+  position:absolute;
+  left:63px;
+  top:73px;
+  width:121px;
+  height:16px;
+  z-index:3;
 }
 
-.sections .section[data-section="body"] .panel .editor[data-area="face"] .subareas .subarea {
+.subareas:not([data-active="1"]) {
+  overflow:hidden;
+}
+
+.changeme[data-section="body"][data-area="face"][data-spa="1"][data-state="full"] .subareas {
+  display:block;
+}
+
+.subareas[data-active="1"] .blank {
+  position:fixed;
+  top:0px;
+  left:0px;
+  width:200px;
+  height:354px;
+}
+
+.subareas .menu {
+  position:absolute;
+  z-index:4;
+}
+
+.changeme[data-subarea="eyes-ears"] .subareas .menu {
+  top:1px;
+}
+
+.changeme[data-subarea="nose"] .subareas .menu {
+  top:-14px;
+}
+
+.changeme[data-subarea="chin-cheeks"] .subareas .menu {
+  top:-29px;
+}
+
+.changeme[data-subarea="mouth"] .subareas .menu {
+  top:-44px;
+}
+
+.subareas .subarea {
+  margin-top:-1px;
+  padding-left:6px;
+  width:99px;
+  height:14px;
+  background-color:#fff;
   font-size:11px;
+  border:1px solid #666;
 }
 
-.sections .section[data-section="body"] .panel .editor[data-area="face"] .subareas .button {
+.subareas:not([data-active="1"]) .subarea {
+  pointer-events:none;
+}
+
+.subareas[data-active="1"] .subarea:hover {
+  background-color:#f0f0f0;
+}
+
+.changeme[data-subarea="eyes-ears"] .subareas[data-active="1"] .subarea[data-subarea="eyes-ears"],
+.changeme[data-subarea="nose"] .subareas[data-active="1"] .subarea[data-subarea="nose"],
+.changeme[data-subarea="chin-cheeks"] .subareas[data-active="1"] .subarea[data-subarea="chin-cheeks"],
+.changeme[data-subarea="mouth"] .subareas[data-active="1"] .subarea[data-subarea="mouth"] {
+  background-color:#c4f0f8;
+}
+
+.subareas .button {
   position:absolute;
   top:0px;
   right:0px;
-  width:10px;
-  height:100%;
-  background-color:orange;
+  width:13px;
+  height:14px;
+  background-image:url(changeme.png);
+  background-position:-161px -914px;
+  border:1px solid #666;
+  border-top-right-radius:3px;
+  border-bottom-right-radius:3px;
+}
+
+.subareas menu:hover .button {
+  background-position-x:-174px;
+}
+
+.subareas menu:active .button,
+.subareas[data-active="1"] .button {
+  background-position-x:-187px;
 }
 
 .sections .section[data-section="body"] .panel .editor[data-area="face"] .item {
@@ -585,19 +682,96 @@ body {
 
 .sections .section[data-section="body"] .panel .editor[data-area="face"] .item .icon {
   display:inline-block;
-  width:40px;
+  width:34px;
   height:40px;
-  background-color:blue;
+  background-image:url(changeme.png);
+}
+
+.sections .section[data-section="body"] .panel .editor[data-area="face"] .items[data-subarea="eyes-ears"] .item[data-id="1"] .icon {
+  background-position:-3px -800px;
+}
+
+.sections .section[data-section="body"] .panel .editor[data-area="face"] .items[data-subarea="eyes-ears"] .item[data-id="2"] .icon {
+  background-position:-43px -800px;
+}
+
+.sections .section[data-section="body"] .panel .editor[data-area="face"] .items[data-subarea="eyes-ears"] .item[data-id="3"] .icon {
+  background-position:-83px -800px;
+}
+
+.sections .section[data-section="body"] .panel .editor[data-area="face"] .items[data-subarea="eyes-ears"] .item[data-id="4"] .icon {
+  background-position:-123px -800px;
+}
+
+.sections .section[data-section="body"] .panel .editor[data-area="face"] .items[data-subarea="eyes-ears"] .item[data-id="5"] .icon {
+  background-position:-163px -800px;
+}
+
+.sections .section[data-section="body"] .panel .editor[data-area="face"] .items[data-subarea="eyes-ears"] .item[data-id="6"] .icon {
+  background-position:-3px -840px;
+}
+
+.sections .section[data-section="body"] .panel .editor[data-area="face"] .items[data-subarea="nose"] .item[data-id="1"] .icon {
+  background-position:-3px -720px;
+}
+
+.sections .section[data-section="body"] .panel .editor[data-area="face"] .items[data-subarea="nose"] .item[data-id="2"] .icon {
+  background-position:-43px -720px;
+}
+
+.sections .section[data-section="body"] .panel .editor[data-area="face"] .items[data-subarea="nose"] .item[data-id="3"] .icon {
+  background-position:-83px -720px;
+}
+
+.sections .section[data-section="body"] .panel .editor[data-area="face"] .items[data-subarea="nose"] .item[data-id="4"] .icon {
+  background-position:-123px -720px;
+}
+
+.sections .section[data-section="body"] .panel .editor[data-area="face"] .items[data-subarea="nose"] .item[data-id="5"] .icon {
+  background-position:-163px -720px;
+}
+
+.sections .section[data-section="body"] .panel .editor[data-area="face"] .items[data-subarea="chin-cheeks"] .item[data-id="1"] .icon {
+  background-position:-3px -760px;
+}
+
+.sections .section[data-section="body"] .panel .editor[data-area="face"] .items[data-subarea="chin-cheeks"] .item[data-id="2"] .icon {
+  background-position:-43px -760px;
+}
+
+.sections .section[data-section="body"] .panel .editor[data-area="face"] .items[data-subarea="chin-cheeks"] .item[data-id="3"] .icon {
+  background-position:-83px -760px;
+}
+
+.sections .section[data-section="body"] .panel .editor[data-area="face"] .items[data-subarea="chin-cheeks"] .item[data-id="4"] .icon {
+  background-position:-123px -760px;
+}
+
+.sections .section[data-section="body"] .panel .editor[data-area="face"] .items[data-subarea="chin-cheeks"] .item[data-id="5"] .icon {
+  background-position:-163px -760px;
+}
+
+.sections .section[data-section="body"] .panel .editor[data-area="face"] .items[data-subarea="mouth"] .item[data-id="1"] .icon {
+  background-position:-43px -840px;
+}
+
+.sections .section[data-section="body"] .panel .editor[data-area="face"] .items[data-subarea="mouth"] .item[data-id="2"] .icon {
+  background-position:-83px -840px;
+}
+
+.sections .section[data-section="body"] .panel .editor[data-area="face"] .items[data-subarea="mouth"] .item[data-id="3"] .icon {
+  background-position:-123px -840px;
 }
 
 .sections .section[data-section="body"] .panel .editor[data-area="face"] .item .slider {
   position:absolute;
-  margin-left:10px;
+  right:7px;
   top:calc(50% - 3px);
 }
 
 .changeme[data-area="body"] .sections .section[data-section="body"] .panel .editor[data-area="body"] {
   display:block;
+  background-color:#eee;
 }
 
 .sections .section[data-section="body"] .panel .editor[data-area="body"] .items {
@@ -609,6 +783,8 @@ body {
 }
 
 .sections .section[data-section="body"] .panel .editor[data-area="body"] .item .name {
+  padding-top:10px;
+  height:17px;
   font-size:11px;
 }
 
@@ -618,6 +794,7 @@ body {
 
 .changeme[data-area="skin"] .sections .section[data-section="body"] .panel .editor[data-area="skin"] {
   display:block;
+  background-color:#eee;
 }
 
 .sections .section[data-section="body"] .panel .editor[data-area="skin"] .items {
@@ -626,19 +803,19 @@ body {
 
 .sections .section[data-section="body"] .panel .editor[data-area="skin"] .item {
   margin-bottom:1px;
-  height:30px;
+  height:18px;
 }
 
 .sections .section[data-section="body"] .panel .editor[data-area="skin"] .item:hover {
-  background-color:yellow;
+  background-color:#f9f9f9;
 }
 
 .sections .section[data-section="body"] .panel .editor[data-area="skin"] .item[data-selected="1"] {
   margin-top:-1px;
   margin-bottom:0px;
-  border-top:1px solid red;
-  border-bottom:1px solid red;
-  background-color:pink;
+  border-top:1px solid #666;
+  border-bottom:1px solid #666;
+  background-color:#fff;
   pointer-events:none;
 }
 
@@ -648,22 +825,66 @@ body {
 }
 
 .sections .section[data-section="body"] .panel .editor[data-area="skin"] .item:last-of-type {
-  margin-bottom:0px
+  margin-bottom:0px;
   border-bottom:none;
 }
 
 .sections .section[data-section="body"] .panel .editor[data-area="skin"] .item .icon {
   display:inline-block;
-  width:40px;
-  height:30px;
-  background-color:blue;
+  margin:1px 4px 1px 7px;
+  width:30px;
+  height:14px;
+  background-image:url(changeme.png);
+  border:1px solid #333;
+  border-radius:4px;
+  overflow:hidden;
   vertical-align:top;
+}
+
+.sections .section[data-section="body"] .panel .editor[data-area="skin"] .item[data-id="1"] .icon {
+  background-position:0px -880px;
+}
+
+.sections .section[data-section="body"] .panel .editor[data-area="skin"] .item[data-id="2"] .icon {
+  background-position:-30px -880px;
+}
+
+.sections .section[data-section="body"] .panel .editor[data-area="skin"] .item[data-id="3"] .icon {
+  background-position:-60px -880px;
+}
+
+.sections .section[data-section="body"] .panel .editor[data-area="skin"] .item[data-id="4"] .icon {
+  background-position:-90px -880px;
+}
+
+.sections .section[data-section="body"] .panel .editor[data-area="skin"] .item[data-id="5"] .icon {
+  background-position:-120px -880px;
+}
+
+.sections .section[data-section="body"] .panel .editor[data-area="skin"] .item[data-id="6"] .icon {
+  background-position:0px -894px;
+}
+
+.sections .section[data-section="body"] .panel .editor[data-area="skin"] .item[data-id="7"] .icon {
+  background-position:-30px -894px;
+}
+
+.sections .section[data-section="body"] .panel .editor[data-area="skin"] .item[data-id="8"] .icon {
+  background-position:-60px -894px;
+}
+
+.sections .section[data-section="body"] .panel .editor[data-area="skin"] .item[data-id="9"] .icon {
+  background-position:-90px -894px;
+}
+
+.sections .section[data-section="body"] .panel .editor[data-area="skin"] .item[data-id="10"] .icon {
+  background-position:-120px -894px;
 }
 
 .sections .section[data-section="body"] .panel .editor[data-area="skin"] .item .name {
   display:inline-block;
-  height:30px;
-  line-height:30px;
+  height:18px;
+  line-height:18px;
   font-size:11px;
   vertical-align:top;
 }
@@ -683,7 +904,9 @@ body {
 }
 
 .sections .section[data-section="body"] .panel .items[data-area="looksets"] .item {
-  height:48px;
+  height:17px;
+  line-height:17px;
+  padding:0px 8px;
   border-bottom:1px dashed #999;
 }
 
@@ -749,22 +972,33 @@ body {
 
 .slider {
   display:inline-block;
-  width:60px;
+  width:83px;
   height:6px;
-  background-color:red;
+  background-image:url(changeme.png);
+  background-position:0px -994px;
 }
 
 .slider .knob {
   display:inline-block;
   position:absolute;
+  margin-left:-5px;
+  left:0px;
   top:-2px;
-  left:-2px;
-  width:10px;
-  height:10px;
-  background-color:green;
+  width:8px;
+  height:8px;
+  background-image:url(changeme.png);
+  background-position:-176px -940px;
+  border:1px solid #666;
+  border-radius:5px;
 }
 
-/*-----------------------------------------------------------------------------*/
+.slider .knob:hover {
+  background-position-x:-184px;
+}
+
+.slider .knob:hover:active {
+  background-position-x:-192px;
+}
 
 .footer {
   position:absolute;
