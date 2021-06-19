@@ -82,55 +82,46 @@ body {
 }
 
 .changeme .titlebar .buttons .button {
-  display:none;
+  display:inline-block;
   margin-left:1px;
   width:14px;
   height:13px;
   border:1px solid #666;
   border-radius:3px;
   background-image:url(changeme.png);
+  background-position-x:-158px;
   z-index:2;
 }
 
 .changeme .titlebar .buttons .button[data-id="close"] {
-  display:inline-block;
-  background-position:-172px -840px;
-
+  background-position-y:-948px;
 }
 
 .changeme .titlebar .buttons .button[data-id="help"] {
-  display:inline-block;
-  background-position:-186px -840px;
+  background-position-y:-961px;
+}
+
+.changeme .titlebar .buttons .button[data-id="bar"],
+.changeme .titlebar .buttons .button[data-id="full"] {
+  display:none;
 }
 
 .changeme[data-state="full"] .titlebar .buttons .button[data-id="bar"] {
   display:inline-block;
-  background-position:-172px -879px;
+  background-position-y:-974px;;
 }
 
 .changeme[data-state="bar"] .titlebar .buttons .button[data-id="full"] {
   display:inline-block;
-  background-position:-186px -879px;
+  background-position-y:-987px;
 }
 
-.changeme .titlebar .buttons .button:hover[data-id="close"],
-.changeme .titlebar .buttons .button:hover[data-id="help"] {
-  background-position-y:-853px;
+.changeme .titlebar .buttons .button:hover {
+  background-position-x:-172px;
 }
 
-.changeme .titlebar .buttons .button:hover:active[data-id="close"],
-.changeme .titlebar .buttons .button:hover:active[data-id="help"] {
-  background-position-y:-866px;
-}
-
-.changeme .titlebar .buttons .button:hover[data-id="bar"],
-.changeme .titlebar .buttons .button:hover[data-id="full"] {
-  background-position-y:-892px;
-}
-
-.changeme .titlebar .buttons .button:hover:active[data-id="bar"],
-.changeme .titlebar .buttons .button:hover:active[data-id="full"] {
-  background-position-y:-905px;
+.changeme .titlebar .buttons .button:hover:active {
+  background-position-x:-186px;
 }
 
 .areas {
@@ -293,7 +284,7 @@ body {
   width:12px;
   height:9px;
   background-image:url(changeme.png);
-  background-position:-188px -985px;
+  background-position:-188px -930px;
   border:1px solid #333;
   border-top-left-radius:3px;
   border-bottom-left-radius:3px;
