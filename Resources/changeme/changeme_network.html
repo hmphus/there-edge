@@ -10,8 +10,33 @@
 </head>
 <body>
 <div class="changeme" data-state="full" data-section="wardrobe" data-gender="male" data-area="hairstyles" data-spa="1">
-<svg class="fill bar" viewBox="0 0 200 354" width="200" height="354"><path d="M49,6Q49,1 54,1L193,1Q198,1 198,6L198,19Q198,24 193,24L54,24Q49,24 49,19Z"></path></svg>
-<svg class="fill wardrobe body" viewBox="0 0 200 354" width="200" height="354"><path d="M3,52Q3,47 8,47L44,47Q49,47 49,42L49,6Q49,1 54,1L193,1Q198,1 198,6L198,348Q198,353 193,353L54,353Q49,353 49,348L49,303Q49,298 44,298L8,298Q3,298 3,293Z"></path></svg>
+<svg>
+<defs>
+<path id="bg-path-1" d="M48,7Q48,0 55,0L192,0Q199,0 199,7L199,18Q199,25 192,25L55,25Q48,25 48,18Z"></path>
+<path id="bg-path-2" d="M2,53Q2,46 9,46L43,46Q48,46 48,41L48,7Q48,0 55,0L192,0Q199,0 199,7L199,202L2,202Z"></path>
+<path id="bg-path-3" d="M2,-2L199,-2L199,347Q199,354 192,354L55,354Q48,354 48,347L48,105Q48,100 43,100L9,100Q2,100 2,93Z"></path>
+<path id="bg-path-4" d="M2,-2L199,-2L199,347Q199,354 192,354L9,354Q2,354 2,347Z"></path>
+<clipPath id="bg-clip-1"><use xlink:href="#bg-path-1"></use></clipPath>
+<clipPath id="bg-clip-2"><use xlink:href="#bg-path-2"></use></clipPath>
+<clipPath id="bg-clip-3"><use xlink:href="#bg-path-3"></use></clipPath>
+<clipPath id="bg-clip-4"><use xlink:href="#bg-path-4"></use></clipPath>
+</defs>
+</svg>
+<svg class="background" viewBox="0 0 199 354" width="199" height="354" data-index="1">
+<g clip-path="url(#bg-clip-1)"><use xlink:href="#bg-path-1"></use></g>
+</svg>
+<svg class="background" viewBox="0 0 199 354" width="199" height="354" data-index="2">
+<g clip-path="url(#bg-clip-2)"><use xlink:href="#bg-path-2"></use></g>
+</svg>
+<svg class="background" viewBox="0 0 199 354" width="199" height="354" data-index="3">
+<g clip-path="url(#bg-clip-3)"><use xlink:href="#bg-path-3"></use></g>
+</svg>
+<svg class="background" viewBox="0 0 199 354" width="199" height="354" data-index="4">
+<g clip-path="url(#bg-clip-3)"><use xlink:href="#bg-path-3"></use></g>
+</svg>
+<svg class="background" viewBox="0 0 199 354" width="199" height="354" data-index="5">
+<g clip-path="url(#bg-clip-4)"><use xlink:href="#bg-path-4"></use></g>
+</svg>
 <div class="titlebar">ChangeMe
 <div class="buttons">
 <div class="button" data-id="help"></div>
@@ -20,8 +45,6 @@
 <div class="button" data-id="close"></div>
 </div>
 </div>
-<svg class="border bar" viewBox="0 0 200 354" width="200" height="354"><path d="M49,6Q49,1 54,1L193,1Q198,1 198,6L198,19Q198,24 193,24L54,24Q49,24 49,19Z"></path></svg>
-<svg class="border fill wardrobe body" viewBox="0 0 200 354" width="200" height="354"><path d="M3,52Q3,47 8,47L44,47Q49,47 49,42L49,6Q49,1 54,1L193,1Q198,1 198,6L198,348Q198,353 193,353L54,353Q49,353 49,348L49,303Q49,298 44,298L8,298Q3,298 3,293Z"></path></svg>
 <div class="areas">
 <div class="area" data-section="wardrobe" data-gender="male" data-area="hairstyles" data-title="Hairstyles"></div>
 <div class="area" data-section="wardrobe" data-gender="male" data-area="grooming" data-title="Grooming"></div>
@@ -142,7 +165,6 @@
 <div class="button big" data-id="organize">Organize</div>
 </div>
 <div class="subareas" data-active="0">
-<div class="blank"></div>
 <div class="menu">
 <div class="subarea" data-subarea="eyes-ears">Eyes and Ears</div>
 <div class="subarea" data-subarea="nose">Nose</div>

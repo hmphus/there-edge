@@ -22,37 +22,112 @@ body {
   pointer-events:none;
 }
 
-.changeme svg.fill,
-.changeme svg.border {
+.changeme[data-state="full"][data-section="body"]:not([data-spa="1"]):not([data-area="looksets"]),
+.changeme[data-state="full"][data-section="body"][data-spa="1"][data-area="face"][data-subarea="mouth"],
+.changeme[data-state="full"][data-section="body"][data-spa="1"][data-area="body"] {
+  height:260px;
+}
+
+.changeme[data-state="full"][data-section="body"][data-spa="1"][data-area="head"] {
+  height:311px;
+}
+
+.changeme[data-state="full"][data-section="body"][data-spa="1"][data-area="face"][data-subarea="eyes-ears"] {
+  height:371px;
+}
+
+.changeme[data-state="full"][data-section="body"][data-spa="1"][data-area="face"][data-subarea="nose"],
+.changeme[data-state="full"][data-section="body"][data-spa="1"][data-area="face"][data-subarea="chin-cheeks"] {
+  height:331px;
+}
+
+
+.changeme[data-state="full"][data-section="body"][data-spa="1"][data-area="skin"] {
+  height:300px;
+}
+
+.changeme svg.background {
   position:absolute;
   left:0px;
   top:0px;
-  pointer-events:none;
   display:none;
 }
 
-.changeme[data-state="full"][data-section="body"] svg.fill.body,
-.changeme[data-state="full"][data-section="body"] svg.border.body {
-  display:block;
-}
-
-.changeme[data-state="full"][data-section="wardrobe"] svg.fill.wardrobe,
-.changeme[data-state="full"][data-section="wardrobe"] svg.border.wardrobe {
-  display:block;
-}
-
-.changeme[data-state="bar"] svg.fill.bar,
-.changeme[data-state="bar"] svg.border.bar {
-  display:block;
-}
-
-.changeme svg.fill path {
+.changeme svg.background g {
   fill:#85a7b8c0;
+  stroke:#808080;
+  stroke-width:2px;
 }
 
-.changeme svg.border path {
-  stroke:#808080;
-  fill:none;
+.changeme[data-state="bar"] svg.background[data-index="1"] {
+  display:block;
+}
+
+.changeme[data-state="full"][data-section="wardrobe"] svg.background[data-index="2"] {
+  display:block;
+  clip-path:polygon(0% 0px, 100% 0px, 100% 200px, 0% 200px);
+}
+
+.changeme[data-state="full"][data-section="wardrobe"] svg.background[data-index="3"] {
+  display:block;
+  top:199px;
+  clip-path:polygon(0% 1px, 100% 1px, 100% 111px, 0% 111px);
+}
+
+.changeme[data-state="full"][data-section="wardrobe"] svg.background[data-index="4"] {
+  display:block;
+  clip-path:polygon(0% 310px, 100% 310px, 100% 354px, 0% 354px);
+}
+
+.changeme[data-state="full"][data-section="body"] svg.background[data-index="2"] {
+  display:block;
+  clip-path:polygon(0% 0px, 100% 0px, 100% 200px, 0% 200px);
+}
+
+.changeme[data-state="full"][data-section="body"]:not([data-spa="1"]):not([data-area="looksets"]) svg.background[data-index="5"],
+.changeme[data-state="full"][data-section="body"][data-spa="1"][data-area="face"][data-subarea="mouth"] svg.background[data-index="5"],
+.changeme[data-state="full"][data-section="body"][data-spa="1"][data-area="body"] svg.background[data-index="5"] {
+  display:block;
+  top:-94px;
+  clip-path:polygon(0% 294px, 100% 294px, 100% 354px, 0% 354px);
+}
+
+.changeme[data-state="full"][data-section="body"][data-spa="1"]:not([data-area="body"]):not([data-area="face"][data-subarea="mouth"]) svg.background[data-index="3"],
+.changeme[data-state="full"][data-section="body"][data-area="looksets"] svg.background[data-index="3"] {
+  display:block;
+  top:160px;
+  clip-path:polygon(0% 40px, 100% 40px, 100% 111px, 0% 111px);
+}
+
+.changeme[data-state="full"][data-section="body"][data-spa="1"][data-area="head"] svg.background[data-index="4"] {
+  display:block;
+  top:-43px;
+  clip-path:polygon(0% 314px, 100% 314px, 100% 354px, 0% 354px);
+}
+
+.changeme[data-state="full"][data-section="body"][data-spa="1"][data-area="face"][data-subarea="eyes-ears"] svg.background[data-index="4"] {
+  display:block;
+  top:17px;
+  clip-path:polygon(0% 254px, 100% 254px, 100% 354px, 0% 354px);
+}
+
+.changeme[data-state="full"][data-section="body"][data-spa="1"][data-area="face"][data-subarea="nose"] svg.background[data-index="4"],
+.changeme[data-state="full"][data-section="body"][data-spa="1"][data-area="face"][data-subarea="chin-cheeks"] svg.background[data-index="4"] {
+  display:block;
+  top:-23px;
+  clip-path:polygon(0% 294px, 100% 294px, 100% 354px, 0% 354px);
+}
+
+
+.changeme[data-state="full"][data-section="body"][data-spa="1"][data-area="skin"] svg.background[data-index="4"] {
+  display:block;
+  top:-54px;
+  clip-path:polygon(0% 325px, 100% 325px, 100% 354px, 0% 354px);
+}
+
+.changeme[data-state="full"][data-section="body"][data-area="looksets"] svg.background[data-index="4"] {
+  display:block;
+  clip-path:polygon(0% 271px, 100% 271px, 100% 354px, 0% 354px);
 }
 
 .changeme .titlebar {
@@ -134,10 +209,17 @@ body {
   left:9px;
   top:54px;
   width:36px;
-  height:235px;
   background-color:#fff;
   border:1px solid #666;
   border-radius:4px;
+}
+
+.changeme[data-section="wardrobe"] .areas {
+  height:235px;
+}
+
+.changeme[data-section="body"] .areas {
+  height:196px;
 }
 
 .areas .area {
@@ -224,31 +306,32 @@ body {
 }
 
 .areas .area[data-area="head"] {
-  background-position-y:-558px;
+  background-position-y:-560px;
+  margin-top:2px;
 }
 
 .changeme[data-gender="male"] .areas .area[data-area="face"] {
-  background-position-y:-38px;
+  background-position-y:-40px;
 }
 
 .changeme[data-gender="female"] .areas .area[data-area="face"] {
-  background-position-y:-318px;
+  background-position-y:-320px;
 }
 
 .areas .area[data-area="body"] {
-  background-position-y:-598px;
+  background-position-y:-600px;
 }
 
 .areas .area[data-area="skin"] {
-  background-position-y:-638px;
+  background-position-y:-640px;
 }
 
 .changeme[data-gender="male"] .areas .area[data-area="looksets"] {
-  background-position-y:-238px;
+  background-position-y:-240px;
 }
 
 .changeme[data-gender="female"] .areas .area[data-area="looksets"] {
-  background-position-y:-518px;
+  background-position-y:-520px;
 }
 
 .areas .area {
@@ -351,9 +434,8 @@ body {
 .sections {
   position:absolute;
   left:53px;
-  top:45px;
+  top:46px;
   width:139px;
-  height:272px;
 }
 
 .sections .section {
@@ -403,6 +485,16 @@ body {
   background-color:#c4f0f8;
   border-bottom:none;
   pointer-events:none;
+}
+
+.changeme[data-section="body"] .sections .section[data-section="wardrobe"],
+.changeme[data-section="wardrobe"] .sections .section[data-section="body"] {
+  height:60px;
+}
+
+.changeme[data-section="body"] .sections .section[data-section="wardrobe"] .panel,
+.changeme[data-section="wardrobe"] .sections .section[data-section="body"] .panel {
+  display:none;
 }
 
 .sections .section[data-section="wardrobe"] .panel {
@@ -515,13 +607,21 @@ body {
   display:none;
 }
 
+.changeme[data-area="head"] .sections .section[data-section="body"] {
+  height:229px;
+}
+
+.changeme[data-area="head"] .sections .section[data-section="body"] .panel {
+  height:218px;
+}
+
 .changeme[data-area="head"] .sections .section[data-section="body"] .panel .editor[data-area="head"] {
   display:block;
   background-color:#eee;
 }
 
 .sections .section[data-section="body"] .panel .editor[data-area="head"] .items {
-  height:243px;
+  height:200px;
 }
 
 .sections .section[data-section="body"] .panel .editor[data-area="head"] .item {
@@ -556,7 +656,6 @@ body {
   background-position:-163px -680px;
 }
 
-
 .sections .section[data-section="body"] .panel .editor[data-area="head"] .item .slider {
   position:absolute;
   right:7px;
@@ -570,22 +669,56 @@ body {
 
 .sections .section[data-section="body"] .panel .editor[data-area="face"] .items {
   padding-top:20px;
-  height:223px;
   display:none;
 }
 
-.changeme[data-subarea="eyes-ears"] .sections .section[data-section="body"] .panel .editor[data-area="face"] .items[data-subarea="eyes-ears"],
-.changeme[data-subarea="nose"] .sections .section[data-section="body"] .panel .editor[data-area="face"] .items[data-subarea="nose"],
-.changeme[data-subarea="chin-cheeks"] .sections .section[data-section="body"] .panel .editor[data-area="face"] .items[data-subarea="chin-cheeks"],
-.changeme[data-subarea="mouth"] .sections .section[data-section="body"] .panel .editor[data-area="face"] .items[data-subarea="mouth"] {
+.changeme[data-area="face"][data-subarea="eyes-ears"] .sections .section[data-section="body"] {
+  height:289px;
+}
+
+.changeme[data-area="face"][data-subarea="nose"] .sections .section[data-section="body"],
+.changeme[data-area="face"][data-subarea="chin-cheeks"] .sections .section[data-section="body"] {
+  height:249px;
+}
+
+.changeme[data-area="face"][data-subarea="mouth"] .sections .section[data-section="body"] {
+  height:178px;
+}
+
+.changeme[data-area="face"][data-subarea="eyes-ears"] .sections .section[data-section="body"] .panel {
+  height:278px;
+}
+
+.changeme[data-area="face"][data-subarea="nose"] .sections .section[data-section="body"] .panel,
+.changeme[data-area="face"][data-subarea="chin-cheeks"] .sections .section[data-section="body"] .panel {
+  height:238px;
+}
+
+.changeme[data-area="face"][data-subarea="mouth"] .sections .section[data-section="body"] .panel {
+  height:167px;
+}
+
+.changeme[data-area="face"][data-subarea="eyes-ears"] .sections .section[data-section="body"] .panel .editor[data-area="face"] .items[data-subarea="eyes-ears"] {
   display:block;
+  height:240px;
+}
+
+.changeme[data-area="face"][data-subarea="nose"] .sections .section[data-section="body"] .panel .editor[data-area="face"] .items[data-subarea="nose"],
+.changeme[data-area="face"][data-subarea="chin-cheeks"] .sections .section[data-section="body"] .panel .editor[data-area="face"] .items[data-subarea="chin-cheeks"] {
+  display:block;
+  height:200px;
+}
+
+.changeme[data-area="face"][data-subarea="mouth"] .sections .section[data-section="body"] .panel .editor[data-area="face"] .items[data-subarea="mouth"] {
+  display:block;
+  height:129px;
 }
 
 .subareas {
   display:none;
   position:absolute;
   left:63px;
-  top:73px;
+  top:74px;
   width:121px;
   height:16px;
   z-index:3;
@@ -595,16 +728,8 @@ body {
   overflow:hidden;
 }
 
-.changeme[data-section="body"][data-area="face"][data-spa="1"][data-state="full"] .subareas {
+.changeme[data-state="full"][data-section="body"][data-area="face"][data-spa="1"] .subareas {
   display:block;
-}
-
-.subareas[data-active="1"] .blank {
-  position:fixed;
-  top:0px;
-  left:0px;
-  width:200px;
-  height:354px;
 }
 
 .subareas .menu {
@@ -612,19 +737,19 @@ body {
   z-index:4;
 }
 
-.changeme[data-subarea="eyes-ears"] .subareas .menu {
+.changeme[data-area="face"][data-subarea="eyes-ears"] .subareas .menu {
   top:1px;
 }
 
-.changeme[data-subarea="nose"] .subareas .menu {
+.changeme[data-area="face"][data-subarea="nose"] .subareas .menu {
   top:-14px;
 }
 
-.changeme[data-subarea="chin-cheeks"] .subareas .menu {
+.changeme[data-area="face"][data-subarea="chin-cheeks"] .subareas .menu {
   top:-29px;
 }
 
-.changeme[data-subarea="mouth"] .subareas .menu {
+.changeme[data-area="face"][data-subarea="mouth"] .subareas .menu {
   top:-44px;
 }
 
@@ -646,10 +771,10 @@ body {
   background-color:#f0f0f0;
 }
 
-.changeme[data-subarea="eyes-ears"] .subareas[data-active="1"] .subarea[data-subarea="eyes-ears"],
-.changeme[data-subarea="nose"] .subareas[data-active="1"] .subarea[data-subarea="nose"],
-.changeme[data-subarea="chin-cheeks"] .subareas[data-active="1"] .subarea[data-subarea="chin-cheeks"],
-.changeme[data-subarea="mouth"] .subareas[data-active="1"] .subarea[data-subarea="mouth"] {
+.changeme[data-area="face"][data-subarea="eyes-ears"] .subareas[data-active="1"] .subarea[data-subarea="eyes-ears"],
+.changeme[data-area="face"][data-subarea="nose"] .subareas[data-active="1"] .subarea[data-subarea="nose"],
+.changeme[data-area="face"][data-subarea="chin-cheeks"] .subareas[data-active="1"] .subarea[data-subarea="chin-cheeks"],
+.changeme[data-area="face"][data-subarea="mouth"] .subareas[data-active="1"] .subarea[data-subarea="mouth"] {
   background-color:#c4f0f8;
 }
 
@@ -666,11 +791,11 @@ body {
   border-bottom-right-radius:3px;
 }
 
-.subareas menu:hover .button {
+.subareas:hover .button {
   background-position-x:-174px;
 }
 
-.subareas menu:active .button,
+.subareas:active .button,
 .subareas[data-active="1"] .button {
   background-position-x:-187px;
 }
@@ -769,6 +894,14 @@ body {
   top:calc(50% - 3px);
 }
 
+.changeme[data-area="body"] .sections .section[data-section="body"] {
+  height:178px;
+}
+
+.changeme[data-area="body"] .sections .section[data-section="body"] .panel {
+  height:167px;
+}
+
 .changeme[data-area="body"] .sections .section[data-section="body"] .panel .editor[data-area="body"] {
   display:block;
   background-color:#eee;
@@ -792,13 +925,21 @@ body {
   position:relative;
 }
 
+.changeme[data-area="skin"] .sections .section[data-section="body"] {
+  height:218px;
+}
+
+.changeme[data-area="skin"] .sections .section[data-section="body"] .panel {
+  height:207px;
+}
+
 .changeme[data-area="skin"] .sections .section[data-section="body"] .panel .editor[data-area="skin"] {
   display:block;
   background-color:#eee;
 }
 
 .sections .section[data-section="body"] .panel .editor[data-area="skin"] .items {
-  height:243px;
+  height:189px;
 }
 
 .sections .section[data-section="body"] .panel .editor[data-area="skin"] .item {
@@ -966,6 +1107,10 @@ body {
   display:none;
 }
 
+.changeme:not([data-spa="1"]):not([data-area="looksets"]) .sections .section[data-section="body"] {
+  height:178px;
+}
+
 .changeme:not([data-spa="1"]):not([data-area="looksets"]) .sections .section[data-section="body"] .panel {
   display:none;
 }
@@ -1003,7 +1148,7 @@ body {
 .footer {
   position:absolute;
   left:54px;
-  top:324px;
+  bottom:7px;
   width:138px;
   height:22px;
   font-size:0px;

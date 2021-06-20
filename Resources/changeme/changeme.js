@@ -70,12 +70,8 @@ $(document).ready(function() {
     }
   });
 
-  $('.subareas .menu').on('mousedown', function() {
+  $('.subareas').on('mousedown', function(event) {
     $('.subareas').attr('data-active', '1');
-  });
-
-  $('.subareas .blank').on('click', function(event) {
-    $('.subareas').attr('data-active', '0');
     event.stopPropagation();
   });
 
@@ -84,6 +80,10 @@ $(document).ready(function() {
     $('.changeme').attr('data-subarea', subarea);
     $('.subareas').attr('data-active', '0');
     event.stopPropagation();
+  });
+
+  $('.changeme').on('mousedown', function() {
+    $('.subareas').attr('data-active', '0');
   });
 
   $('.sections .section[data-section="body"] .panel .editor[data-area="skin"] .item').on('click', function() {
