@@ -1,12 +1,12 @@
 There.init({
   onReady: function() {
     There.fsCommand('setStageWidthHeight', {
-      width: Number(There.variables.there_windowwidth || 800),
+      width: Number(There.variables.there_windowwidth ?? 800),
       height: 36,
     });
 
     There.fsCommand('setWidthHeight', {
-      width: Number(There.variables.there_windowwidth || 800),
+      width: Number(There.variables.there_windowwidth ?? 800),
       height: 36,
     });
 

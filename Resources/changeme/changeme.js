@@ -2,17 +2,20 @@ There.init({
   onReady: function() {
     There.fsCommand('setStageWidthHeight', {
       width: 200,
-      height: 354,
-    });
-
-    There.fsCommand('setWidthHeight', {
-      width: 200,
-      height: 354,
+      height: 548,
     });
 
     There.fsCommand('setTextureBitDepth', {
       depth: 32,
     });
+
+    new ResizeObserver(function(entries) {
+      const rect = entries[0].contentRect;
+      There.fsCommand('setWidthHeight', {
+        width: rect.width,
+        height: rect.height,
+      });
+    }).observe($('.changeme')[0]);
   },
 
   onVariable: function(name, value) {
@@ -60,7 +63,9 @@ $(document).ready(function() {
     const area = $(this).data('area');
     $('.changeme').attr('data-area', area);
     $('.sections .section .panel .title').text($(this).data('title'));
-    if (area == 'tops' || area == 'looksets') {
+    if (area == 'tops') {
+      $('.sections .section .panel .items').attr('data-count', '2');
+    } else if (area == 'outfits' || area == 'looksets') {
       $('.sections .section .panel .items').attr('data-count', '1');
     } else {
       $('.sections .section .panel .items').attr('data-count', '0');
