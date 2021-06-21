@@ -71,6 +71,10 @@ There.fsCommand = function(command, query) {
   }
   if (command == 'beginDragWindow') {
     There.private.isDragging = true;
+    if (window.chrome.webview != undefined) {
+      window.chrome.webview.hostObjects.sync.client.onBeginDragWindow();
+    }
+    return;
   }
   if (window.chrome.webview != undefined) {
     window.chrome.webview.postMessage(message);

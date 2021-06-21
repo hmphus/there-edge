@@ -522,6 +522,71 @@ HRESULT STDMETHODCALLTYPE FlashProxyModule::QueryHitPoint(DWORD dwAspect, LPCREC
     return S_OK;
 }
 
+HRESULT STDMETHODCALLTYPE FlashProxyModule::GetTypeInfoCount(UINT *pctinfo)
+{
+    *pctinfo = 0;
+    return S_OK;
+}
+
+HRESULT STDMETHODCALLTYPE FlashProxyModule::GetTypeInfo(UINT iTInfo, LCID lcid, ITypeInfo **ppTInfo)
+{
+    return E_NOTIMPL;
+}
+
+HRESULT STDMETHODCALLTYPE FlashProxyModule::GetIDsOfNames(REFIID riid, LPOLESTR *rgszNames, UINT cNames, LCID lcid, DISPID *rgDispId)
+{
+    if (cNames == 1)
+    {
+        if (wcscmp(rgszNames[0], L"onBeginDragWindow") == 0)
+        {
+            rgDispId[0] = 1;
+            return S_OK;
+        }
+    }
+
+    return DISP_E_UNKNOWNNAME;
+}
+
+HRESULT STDMETHODCALLTYPE FlashProxyModule::Invoke(DISPID dispIdMember, REFIID riid, LCID lcid, WORD wFlags, DISPPARAMS *pDispParams,
+                                                   VARIANT *pVarResult, EXCEPINFO *pExcepInfo, UINT *puArgErr)
+{
+    if (dispIdMember == 1)
+    {
+        if (m_wnd != nullptr)
+        {
+            HWND parentWnd = GetParent(m_wnd);
+
+            POINT point;
+            GetCursorPos(&point);
+            ScreenToClient(parentWnd, &point);
+
+            SetCapture(m_wnd);
+            SendMessage(parentWnd, WM_LBUTTONDOWN, 0, MAKELPARAM(point.x, point.y));
+        }
+
+        CComBSTR bcommand = L"beginDragWindow";
+        CComBSTR bquery = L"";
+
+        VARIANTARG vargs[2];
+        vargs[0].vt = VT_BSTR;
+        vargs[0].bstrVal = bquery;
+        vargs[1].vt = VT_BSTR;
+        vargs[1].bstrVal = bcommand;
+
+        DISPPARAMS params;
+        params.rgvarg = vargs;
+        params.cArgs = _countof(vargs);
+        params.cNamedArgs = 0;
+
+        if (FAILED(InvokeFlashEvent(L"FSCommand", params)))
+            return E_FAIL;
+
+        return S_OK;
+    }
+
+    return E_NOTIMPL;
+}
+
 HRESULT STDMETHODCALLTYPE FlashProxyModule::put_Movie(BSTR pVal)
 {
     if (m_url.Length() > 0)
@@ -629,7 +694,7 @@ HRESULT STDMETHODCALLTYPE FlashProxyModule::Invoke(HRESULT errorCode, ICoreWebVi
     settings->put_IsBuiltInErrorPageEnabled(false);
     settings->put_IsStatusBarEnabled(false);
     settings->put_IsZoomControlEnabled(false);
-    settings->put_AreHostObjectsAllowed(false);
+    settings->put_AreHostObjectsAllowed(true);
     settings->put_IsScriptEnabled(true);
     settings->put_IsWebMessageEnabled(true);
 
@@ -639,6 +704,11 @@ HRESULT STDMETHODCALLTYPE FlashProxyModule::Invoke(HRESULT errorCode, ICoreWebVi
 
     COREWEBVIEW2_COLOR color = {0, 0, 0, 0};
     m_controller->put_DefaultBackgroundColor(color);
+
+    VARIANT hostObject = {};
+    hostObject.vt = VT_DISPATCH;
+    hostObject.pdispVal = static_cast<IDispatch*>(this);
+    m_view->AddHostObjectToScript(L"client", &hostObject);
 
     m_view->AddWebResourceRequestedFilter(L"http://127.0.0.1:9999/*", COREWEBVIEW2_WEB_RESOURCE_CONTEXT_ALL);
     m_view->AddWebResourceRequestedFilter(L"http://localhost:9999/*", COREWEBVIEW2_WEB_RESOURCE_CONTEXT_ALL);
@@ -708,21 +778,6 @@ HRESULT FlashProxyModule::OnWebMessageReceived(ICoreWebView2 *sender, ICoreWebVi
     }
 #endif
 
-    if (_wcsicmp(bcommand, L"beginDragWindow") == 0)
-    {
-        if (m_wnd != nullptr)
-        {
-            HWND parentWnd = GetParent(m_wnd);
-
-            POINT point;
-            GetCursorPos(&point);
-            ScreenToClient(parentWnd, &point);
-
-            SetCapture(m_wnd);
-            SendMessage(parentWnd, WM_LBUTTONDOWN, 0, MAKELPARAM(point.x, point.y));
-        }
-    }
-
     if (_wcsicmp(bcommand, L"setMask") == 0)
     {
         if (FAILED(UrlUnescapeInPlace(bquery, 0)))
@@ -733,6 +788,9 @@ HRESULT FlashProxyModule::OnWebMessageReceived(ICoreWebView2 *sender, ICoreWebVi
 
         return S_OK;
     }
+
+    if (_wcsicmp(bcommand, L"beginDragWindow") == 0)
+        return E_NOTIMPL;
 
     VARIANTARG vargs[2];
     vargs[0].vt = VT_BSTR;
