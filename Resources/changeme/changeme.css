@@ -28,27 +28,27 @@ body {
   height:25px;
 }
 
-.changeme[data-state="full"][data-section="body"]:not([data-spa="1"]):not([data-area="looksets"]),
-.changeme[data-state="full"][data-section="body"][data-spa="1"][data-area="face"][data-subarea="mouth"],
-.changeme[data-state="full"][data-section="body"][data-spa="1"][data-area="body"] {
+.changeme[data-state="full"][data-section="body"]:not([data-treatmentsenabled="1"]):not([data-area="looksets"]),
+.changeme[data-state="full"][data-section="body"][data-treatmentsenabled="1"][data-area="face"][data-subarea="mouth"],
+.changeme[data-state="full"][data-section="body"][data-treatmentsenabled="1"][data-area="body"] {
   height:260px;
 }
 
-.changeme[data-state="full"][data-section="body"][data-spa="1"][data-area="head"] {
+.changeme[data-state="full"][data-section="body"][data-treatmentsenabled="1"][data-area="head"] {
   height:311px;
 }
 
-.changeme[data-state="full"][data-section="body"][data-spa="1"][data-area="face"][data-subarea="eyes-ears"] {
+.changeme[data-state="full"][data-section="body"][data-treatmentsenabled="1"][data-area="face"][data-subarea="eyes-ears"] {
   height:371px;
 }
 
-.changeme[data-state="full"][data-section="body"][data-spa="1"][data-area="face"][data-subarea="nose"],
-.changeme[data-state="full"][data-section="body"][data-spa="1"][data-area="face"][data-subarea="chin-cheeks"] {
+.changeme[data-state="full"][data-section="body"][data-treatmentsenabled="1"][data-area="face"][data-subarea="nose"],
+.changeme[data-state="full"][data-section="body"][data-treatmentsenabled="1"][data-area="face"][data-subarea="chin-cheeks"] {
   height:331px;
 }
 
 
-.changeme[data-state="full"][data-section="body"][data-spa="1"][data-area="skin"] {
+.changeme[data-state="full"][data-section="body"][data-treatmentsenabled="1"][data-area="skin"] {
   height:310px;
 }
 
@@ -90,42 +90,42 @@ body {
   clip-path:polygon(0% 0px, 100% 0px, 100% 200px, 0% 200px);
 }
 
-.changeme[data-state="full"][data-section="body"]:not([data-spa="1"]):not([data-area="looksets"]) svg.background[data-index="5"],
-.changeme[data-state="full"][data-section="body"][data-spa="1"][data-area="face"][data-subarea="mouth"] svg.background[data-index="5"],
-.changeme[data-state="full"][data-section="body"][data-spa="1"][data-area="body"] svg.background[data-index="5"] {
+.changeme[data-state="full"][data-section="body"]:not([data-treatmentsenabled="1"]):not([data-area="looksets"]) svg.background[data-index="5"],
+.changeme[data-state="full"][data-section="body"][data-treatmentsenabled="1"][data-area="face"][data-subarea="mouth"] svg.background[data-index="5"],
+.changeme[data-state="full"][data-section="body"][data-treatmentsenabled="1"][data-area="body"] svg.background[data-index="5"] {
   display:block;
   top:-94px;
   clip-path:polygon(0% 294px, 100% 294px, 100% 354px, 0% 354px);
 }
 
-.changeme[data-state="full"][data-section="body"][data-spa="1"]:not([data-area="body"]):not([data-area="face"][data-subarea="mouth"]) svg.background[data-index="3"],
+.changeme[data-state="full"][data-section="body"][data-treatmentsenabled="1"]:not([data-area="body"]):not([data-area="face"][data-subarea="mouth"]) svg.background[data-index="3"],
 .changeme[data-state="full"][data-section="body"][data-area="looksets"] svg.background[data-index="3"] {
   display:block;
   top:160px;
   clip-path:polygon(0% 40px, 100% 40px, 100% 111px, 0% 111px);
 }
 
-.changeme[data-state="full"][data-section="body"][data-spa="1"][data-area="head"] svg.background[data-index="4"] {
+.changeme[data-state="full"][data-section="body"][data-treatmentsenabled="1"][data-area="head"] svg.background[data-index="4"] {
   display:block;
   top:-43px;
   clip-path:polygon(0% 314px, 100% 314px, 100% 354px, 0% 354px);
 }
 
-.changeme[data-state="full"][data-section="body"][data-spa="1"][data-area="face"][data-subarea="eyes-ears"] svg.background[data-index="4"] {
+.changeme[data-state="full"][data-section="body"][data-treatmentsenabled="1"][data-area="face"][data-subarea="eyes-ears"] svg.background[data-index="4"] {
   display:block;
   top:17px;
   clip-path:polygon(0% 254px, 100% 254px, 100% 354px, 0% 354px);
 }
 
-.changeme[data-state="full"][data-section="body"][data-spa="1"][data-area="face"][data-subarea="nose"] svg.background[data-index="4"],
-.changeme[data-state="full"][data-section="body"][data-spa="1"][data-area="face"][data-subarea="chin-cheeks"] svg.background[data-index="4"] {
+.changeme[data-state="full"][data-section="body"][data-treatmentsenabled="1"][data-area="face"][data-subarea="nose"] svg.background[data-index="4"],
+.changeme[data-state="full"][data-section="body"][data-treatmentsenabled="1"][data-area="face"][data-subarea="chin-cheeks"] svg.background[data-index="4"] {
   display:block;
   top:-23px;
   clip-path:polygon(0% 294px, 100% 294px, 100% 354px, 0% 354px);
 }
 
 
-.changeme[data-state="full"][data-section="body"][data-spa="1"][data-area="skin"] svg.background[data-index="4"] {
+.changeme[data-state="full"][data-section="body"][data-treatmentsenabled="1"][data-area="skin"] svg.background[data-index="4"] {
   display:block;
   top:-44px;
   clip-path:polygon(0% 315px, 100% 315px, 100% 354px, 0% 354px);
@@ -528,6 +528,7 @@ body {
 
 .sections .section[data-section="wardrobe"] .panel .items {
   height:243px;
+  overflow-x:auto;
   overflow-y:scroll;
 }
 
@@ -537,6 +538,7 @@ body {
 }
 
 .sections .section[data-section="wardrobe"] .panel .items .item {
+  width:100%;
   height:48px;
   border-bottom:1px dashed #999;
 }
@@ -575,17 +577,18 @@ body {
 .changeme[data-area="outfits"] .sections .section[data-section="wardrobe"] .panel .items .item {
   height:17px;
   line-height:17px;
-  padding:0px 8px;
-}
-
-.changeme[data-area="outfits"] .sections .section[data-section="wardrobe"] .panel .items .item .name {
-  width:100%;
-  height:100%;
-  align-items:unset;
 }
 
 .changeme[data-area="outfits"] .sections .section[data-section="wardrobe"] .panel .items .item .icon {
-  display:none;
+  width:17px;
+  height:17px;
+}
+
+.changeme[data-area="outfits"] .sections .section[data-section="wardrobe"] .panel .items .item .name {
+  width:calc(100% - 27px);
+  height:17px;
+  padding-left:5px;
+  white-space:nowrap;
 }
 
 .sections .section[data-section="wardrobe"] .panel .items[data-count="0"] {
@@ -750,7 +753,7 @@ body {
   overflow:hidden;
 }
 
-.changeme[data-state="full"][data-section="body"][data-area="face"][data-spa="1"] .subareas {
+.changeme[data-state="full"][data-section="body"][data-area="face"][data-treatmentsenabled="1"] .subareas {
   display:block;
 }
 
@@ -1127,16 +1130,16 @@ body {
   text-decoration:none;
 }
 
-.changeme[data-spa="1"] .sections .section[data-section="body"] .spa,
+.changeme[data-treatmentsenabled="1"] .sections .section[data-section="body"] .spa,
 .changeme[data-area="looksets"] .sections .section[data-section="body"] .spa {
   display:none;
 }
 
-.changeme:not([data-spa="1"]):not([data-area="looksets"]) .sections .section[data-section="body"] {
+.changeme:not([data-treatmentsenabled="1"]):not([data-area="looksets"]) .sections .section[data-section="body"] {
   height:178px;
 }
 
-.changeme:not([data-spa="1"]):not([data-area="looksets"]) .sections .section[data-section="body"] .panel {
+.changeme:not([data-treatmentsenabled="1"]):not([data-area="looksets"]) .sections .section[data-section="body"] .panel {
   display:none;
 }
 
@@ -1166,7 +1169,7 @@ body {
   background-position-x:-184px;
 }
 
-.slider .knob:hover:active {
+.slider .knob:active {
   background-position-x:-192px;
 }
 
@@ -1244,12 +1247,12 @@ body {
   background-position-x:-114px;
 }
 
-.changeme:not([data-spa="1"][data-section="body"]) .footer .button[data-id="undo"],
+.changeme:not([data-treatmentsenabled="1"][data-section="body"]) .footer .button[data-id="undo"],
 .changeme[data-section="body"][data-area="looksets"] .footer .button[data-id="undo"] {
   display:none;
 }
 
-.changeme[data-spa="1"][data-section="body"]:not([data-area="looksets"]) .footer .button[data-id="organize"] {
+.changeme[data-treatmentsenabled="1"][data-section="body"]:not([data-area="looksets"]) .footer .button[data-id="organize"] {
   display:none;
 }
 

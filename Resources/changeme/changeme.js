@@ -1,4 +1,51 @@
+class ChangeMeSlider {
+  constructor(element) {
+    let self = this;
+    self.element = element;
+    self.knob = $(self.element).find('.knob');
+    self.width = $(self.element).width();
+    self.minimum = $(self.element).data('minimum') ?? 0;
+    self.maximum = $(self.element).data('maximum') ?? 100;
+    self.value = $(self.element).data('value') ?? self.minimum;
+    self.active = false;
+    $(self.knob).on('mousedown', function(event) {
+      if (event.which == 1) {
+        self.active = true;
+        self.offsetX = event.pageX - $(self.knob).position().left;
+      }
+    });
+    $(document).on('mousemove', function(event) {
+      if (self.active) {
+        $(self.knob).css({
+          left: Math.min(Math.max(0, event.pageX - self.offsetX), self.width),
+        });
+      }
+    }).on('mouseup', function() {
+      if (self.active) {
+        self.active = false;
+        console.log(self.value);
+      }
+    });
+  }
+
+  get value() {
+    let self = this;
+    return $(self.knob).position().left / self.width * (self.maximum - self.minimum) + self.minimum;
+  }
+
+  set value(value) {
+    let self = this;
+    $(self.knob).css({
+      left: (value - self.minimum) / (self.maximum - self.minimum) * self.width,
+    });
+  }
+}
+
 There.init({
+  data: {
+    sliders: [],
+  },
+
   onReady: function() {
     There.fsCommand('setStageWidthHeight', {
       width: 200,
@@ -19,13 +66,32 @@ There.init({
   },
 
   onVariable: function(name, value) {
-    if (name == 'there_teleporting') {
+    if (name == 'there_treatmentsenabled') {
+      if (value != $('.changeme').attr('there_treatmentsenabled')) {
+        if (value == 0) {
+          if ($('.changeme').attr('data-section') != 'wardrobe' && $('.changeme').attr('data-area') != 'looksets') {
+            $('.sections .section[data-section="wardrobe"] .tab').trigger('click');
+          }
+        } else {
+          if ($('.changeme').attr('data-section') != 'body') {
+            $('.sections .section[data-section="body"] .tab').trigger('click');
+          }
+        }
+      }
+    }
+    if (name == 'there_teleporting' || name == 'there_treatmentsenabled') {
       $('.changeme').attr(name.replace('there_', 'data-'), value);
     }
   },
 });
 
 $(document).ready(function() {
+  $('.titlebar').on('mousedown', function(event) {
+    There.fsCommand('beginDragWindow');
+    event.preventDefault();
+    event.stopPropagation();
+  });
+
   $('.titlebar .buttons .button[data-id="bar"]').on('click', function() {
     $('.changeme').attr('data-state', 'bar');
   }).on('mousedown', function(event) {
@@ -96,6 +162,15 @@ $(document).ready(function() {
     $(this).attr('data-selected', '1');
   });
 
+  $('.sections .section[data-section="wardrobe"] .tab').trigger('click');
+
+  $('.slider').each(function(index, element) {
+    There.data.sliders.push(new ChangeMeSlider(element));
+  });
+
+  $('.footer .button[data-id="undo"]').on('click', function() {
+  });
+
   $('.footer .button[data-id="save"]').on('click', function() {
   });
 
@@ -104,12 +179,4 @@ $(document).ready(function() {
 
   $('.footer .button[data-id="organize"]').on('click', function() {
   });
-
-  $('.titlebar').on('mousedown', function(event) {
-    There.fsCommand('beginDragWindow');
-    event.preventDefault();
-    event.stopPropagation();
-  });
-
-  $('.sections .section[data-section="wardrobe"] .tab').trigger('click');
 });
