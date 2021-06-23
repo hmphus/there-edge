@@ -275,7 +275,7 @@ body {
   background-position-y:-163px;
 }
 
-.areas .area[data-gender="male"][data-area="footware"] {
+.areas .area[data-gender="male"][data-area="footwear"] {
   background-position-y:-203px;
 }
 
@@ -303,7 +303,7 @@ body {
   background-position-y:-443px;
 }
 
-.areas .area[data-gender="female"][data-area="footware"] {
+.areas .area[data-gender="female"][data-area="footwear"] {
   background-position-y:-483px;
 }
 
@@ -361,7 +361,7 @@ body {
 .changeme[data-area="accessories"] .areas .area[data-area="accessories"],
 .changeme[data-area="tops"] .areas .area[data-area="tops"],
 .changeme[data-area="bottoms"] .areas .area[data-area="bottoms"],
-.changeme[data-area="footware"] .areas .area[data-area="footware"],
+.changeme[data-area="footwear"] .areas .area[data-area="footwear"],
 .changeme[data-area="outfits"] .areas .area[data-area="outfits"],
 .changeme[data-area="head"] .areas .area[data-area="head"],
 .changeme[data-area="face"] .areas .area[data-area="face"],
@@ -409,7 +409,7 @@ body {
   top:143px;
 }
 
-.changeme[data-section="wardrobe"][data-area="footware"] .areas .arrow {
+.changeme[data-section="wardrobe"][data-area="footwear"] .areas .arrow {
   top:176px;
 }
 
@@ -538,9 +538,11 @@ body {
 }
 
 .sections .section[data-section="wardrobe"] .panel .items .item {
-  width:100%;
+  width:calc(100% + 7px * (var(--max-indent, 0) - var(--indent, 0)));
   height:48px;
   border-bottom:1px dashed #999;
+  background-clip:padding-box;
+  padding-left:calc(7px * var(--indent, 0));
 }
 
 .sections .section[data-section="wardrobe"] .panel .items .item:hover {
@@ -563,6 +565,22 @@ body {
   background-repeat:no-repeat;
 }
 
+.sections .section[data-section="wardrobe"] .panel .items .item[data-drawer] .icon {
+  padding:11px 7px;
+  box-sizing:border-box;
+  background-image:url(changeme.png);
+  background-clip:content-box;
+  background-position-x:-152px;
+}
+
+.sections .section[data-section="wardrobe"] .panel .items .item[data-drawer="closed"] .icon {
+  background-position-y:-828px;
+}
+
+.sections .section[data-section="wardrobe"] .panel .items .item[data-drawer="open"] .icon {
+  background-position-y:-854px;
+}
+
 .sections .section[data-section="wardrobe"] .panel .items .item .name {
   display:inline-flex;
   width:calc(100% - 53px);
@@ -582,6 +600,23 @@ body {
 .changeme[data-area="outfits"] .sections .section[data-section="wardrobe"] .panel .items .item .icon {
   width:17px;
   height:17px;
+}
+
+.changeme[data-area="outfits"] .sections .section[data-section="wardrobe"] .panel .items .item .icon:not([data-drawer]) {
+  visibility:hidden;
+}
+
+.changeme[data-area="outfits"] .sections .section[data-section="wardrobe"] .panel .items .item[data-drawer] .icon {
+  padding:0px;
+  background-position-y:-896px;
+}
+
+.changeme[data-area="outfits"] .sections .section[data-section="wardrobe"] .panel .items .item[data-drawer="closed"] .icon {
+  background-position-x:-161px;
+}
+
+.changeme[data-area="outfits"] .sections .section[data-section="wardrobe"] .panel .items .item[data-drawer="open"] .icon {
+  background-position-x:-181px;
 }
 
 .changeme[data-area="outfits"] .sections .section[data-section="wardrobe"] .panel .items .item .name {
@@ -1077,6 +1112,7 @@ body {
   line-height:17px;
   padding:0px 8px;
   border-bottom:1px dashed #999;
+  background-clip:padding-box;
 }
 
 .sections .section[data-section="body"] .panel .items[data-area="looksets"] .item:hover {
@@ -1089,6 +1125,10 @@ body {
 
 .sections .section[data-section="body"] .panel .items[data-area="looksets"][data-count="2"] .item:last-of-type {
   border-bottom:none;
+}
+
+.sections .section[data-section="body"] .panel .items[data-area="looksets"] .item .icon {
+  display:none;
 }
 
 .sections .section[data-section="body"] .panel .items[data-area="looksets"] .item .name {
@@ -1271,8 +1311,7 @@ body {
 
 .submenu .item {
   margin-top:-1px;
-  padding-left:6px;
-  width:62px;
+  width:68px;
   height:14px;
   background-color:#fff;
   font-size:11px;
@@ -1295,10 +1334,19 @@ body {
   background-color:#c4f0f8;
 }
 
+.submenu .item[data-enabled="0"]:hover,
+.submenu .item[data-enabled="0"]:active,
 .submenu .item[data-enabled="0"] {
   color:#666;
   background-color:#fff;
   pointer-events:none;
+}
+
+.submenu .item .sound {
+  padding-left:6px;
+  width:62px;
+  height:14px;
+  pointer-events:auto;
 }
 
 .changeme[data-state="bar"] .areas,

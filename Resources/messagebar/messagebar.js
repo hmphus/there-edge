@@ -21,7 +21,7 @@ There.init({
   },
 
   onVariable: function(name, value) {
-    if (name == 'there_ready') {
+    if (name == 'there_ready' && value == 1) {
       There.fetchMessagesXml();
     }
 
@@ -38,7 +38,7 @@ There.init({
     let query = {
       Oid: 0,
       request: There.data.ident,
-    }
+    };
     if (There.data.version != undefined) {
       query.lastVer = There.data.version;
     }

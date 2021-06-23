@@ -44,6 +44,8 @@ class ChangeMeSlider {
 There.init({
   data: {
     sliders: [],
+    versions: {},
+    wardrobe: {},
   },
 
   onReady: function() {
@@ -63,6 +65,8 @@ There.init({
         height: rect.height,
       });
     }).observe($('.changeme')[0]);
+
+    There.fsCommand('devtools');
   },
 
   onVariable: function(name, value) {
@@ -82,6 +86,252 @@ There.init({
     if (name == 'there_teleporting' || name == 'there_treatmentsenabled') {
       $('.changeme').attr(name.replace('there_', 'data-'), value);
     }
+    if (name == 'there_ready' && value == 1) {
+      There.fetchWardrobeXml('head');
+      There.fetchWardrobeXml('face');
+      There.fetchWardrobeXml('tops');
+      There.fetchWardrobeXml('bottoms');
+      There.fetchWardrobeXml('accessories');
+      There.fetchWardrobeXml('footwear');
+      There.fetchWardrobeXml('outfits');
+      There.fetchWardrobeXml('looksets');
+    }
+  },
+
+  fetchWardrobeXml: async function(area) {
+    await There.fetchWardrobeContentsXml(area);
+    await There.fetchWardrobeWearsetXml(area);
+    if (There.getWardrobeAreaKey($('.changeme').attr('data-area')) == area) {
+      There.setupWardrobe();
+    }
+    There.setNamedTimer(`fetch-wardrobe-${area}`, 1000, function() {
+      There.fetchWardrobeXml(area);
+    });
+  },
+
+  getWardrobeAreaKey: function(area) {
+    switch (area) {
+      case 'hairstyles':
+        return 'head';
+      case 'grooming':
+      case 'cosmetics':
+        return 'face';
+      default:
+        return area;
+    }
+  },
+
+
+  getWardrobeContentsKey: function(area, folder) {
+    return `wardrobe_contents_${There.getWardrobeAreaKey(area)}_${folder ?? 1}`;
+  },
+
+  fetchWardrobeContentsXml: async function(area, folder) {
+    let query = {
+      Oid: folder ?? 1,
+    };
+    const key = There.getWardrobeContentsKey(area, folder);
+    if (There.data.versions[key] != undefined) {
+      query.LastVer = There.data.versions[key];
+    }
+    let promises = [];
+    await There.fetchAsync({
+      path: `/VersionedXmlSvc/${area.charAt(0).toUpperCase()}${area.slice(1)}Contents`,
+      query: query,
+      dataType: 'xml',
+      success: function(xml) {
+        promises = There.onWardrobeContentsXml(xml, key, area);
+      },
+      complete: async function() {
+        await Promise.all(promises);
+      },
+    });
+  },
+
+  onWardrobeContentsXml: function(xml, key, area) {
+    let promises = [];
+    let wardrobe = {
+      menus: [],
+      entries: [],
+    };
+    const xmlAnswer = xml.getElementsByTagName('Answer')[0];
+    const xmlResult = xmlAnswer.getElementsByTagName('Result')[0];
+    if (xmlResult.childNodes[0].nodeValue != 1) {
+      return promises;
+    }
+    const xmlVersion = xmlAnswer.getElementsByTagName('version')[0];
+    There.data.versions[key] = xmlVersion.childNodes[0].nodeValue;
+    const xmlContents = xmlAnswer.getElementsByTagName('contents')[0];
+    for (let xmlChild of xmlContents.childNodes) {
+      switch (xmlChild.nodeName) {
+        case 'menu': {
+          for (let xmlMenu of xmlChild.getElementsByTagName('item')) {
+            let menu = {
+              text: xmlMenu.getElementsByTagName('text')[0].childNodes[0].nodeValue,
+              behavior: Number(xmlMenu.getElementsByTagName('behavior')[0].childNodes[0].nodeValue),
+            };
+            wardrobe.menus.push(menu);
+          }
+          break;
+        }
+        case 'status_strings': {
+          break;
+        }
+        case 'item': {
+          let entry = {
+            type: 'item',
+            poid: Number(xmlChild.getElementsByTagName('poid')[0].childNodes[0].nodeValue),
+            name: xmlChild.getElementsByTagName('name')[0].childNodes[0].nodeValue,
+            icon: xmlChild.getElementsByTagName('icon')[0].childNodes[0].nodeValue.replace(/^ChangeMe\/Icons\/(.*)\.(swf|png)$/i, '$1'),
+            unmenus: [],
+            unwearable: false,
+          };
+          for (let xmlDisabled of xmlChild.getElementsByTagName('disabled')) {
+            entry.unmenus.push(Number(xmlDisabled.childNodes[0].nodeValue));
+          }
+          let xmlUnwearable = xmlChild.getElementsByTagName('unwearable')[0];
+          if (xmlUnwearable != undefined && xmlUnwearable.childNodes[0].nodeValue == 1) {
+            entry.unwearable = true;
+          }
+          wardrobe.entries.push(entry);
+          break;
+        }
+        case 'drawer': {
+          let entry = {
+            type: 'drawer',
+            uid: Number(xmlChild.getElementsByTagName('uid')[0].childNodes[0].nodeValue),
+            name: xmlChild.getElementsByTagName('name')[0].childNodes[0].nodeValue,
+            count: Number(xmlChild.getElementsByTagName('num_items')[0].childNodes[0].nodeValue ?? 0),
+            open: false,
+          };
+          wardrobe.entries.push(entry);
+          if (There.data.wardrobe[There.getWardrobeContentsKey(area, entry.uid)] == undefined) {
+            promises.push(There.fetchWardrobeContentsXml(area, entry.uid));
+          }
+          break;
+        }
+      }
+    }
+    There.data.wardrobe[key] = wardrobe;
+    return promises;
+  },
+
+  getWardrobeWearsetKey: function(area) {
+    return `wardrobe_wearset_${There.getWardrobeAreaKey(area)}`;
+  },
+
+  fetchWardrobeWearsetXml: async function(area) {
+    let query = {
+      Oid: 1,
+    };
+    const key = There.getWardrobeWearsetKey(area);
+    if (There.data.versions[key] != undefined) {
+      query.LastVer = There.data.versions[key];
+    }
+    await There.fetchAsync({
+      path: `/VersionedXmlSvc/${area.charAt(0).toUpperCase()}${area.slice(1)}Wearset`,
+      query: query,
+      dataType: 'xml',
+      success: function(xml) {
+        There.onWardrobeWearsetXml(xml, key, area);
+      },
+    });
+  },
+
+  onWardrobeWearsetXml: function(xml, key, area) {
+    let wardrobe = There.data.wardrobe[There.getWardrobeContentsKey(area)];
+    wardrobe.poids = [];
+    const xmlAnswer = xml.getElementsByTagName('Answer')[0];
+    const xmlResult = xmlAnswer.getElementsByTagName('Result')[0];
+    if (xmlResult.childNodes[0].nodeValue != 1) {
+      return;
+    }
+    const xmlVersion = xmlAnswer.getElementsByTagName('version')[0];
+    There.data.versions[key] = xmlVersion.childNodes[0].nodeValue;
+    const xmlWearset = xmlAnswer.getElementsByTagName('wearset')[0];
+    for (let xmlItem of xmlWearset.getElementsByTagName('item')) {
+      wardrobe.poids.push(Number(xmlItem.getElementsByTagName('poid')[0].childNodes[0].nodeValue));
+    }
+  },
+
+  setupWardrobe: function() {
+    const section = $('.changeme').attr('data-section');
+    const area = $('.changeme').attr('data-area');
+    let divItems;
+    if (section == 'wardrobe') {
+      divItems = $('.section[data-section="wardrobe"] .items');
+    } else if (area == 'looksets') {
+      divItems = $('.section[data-section="body"] .items[data-area="looksets"]');
+    } else {
+      return;
+    }
+    $(divItems).attr('data-count', '0').find('.item').remove();
+    const wardrobe = There.data.wardrobe[There.getWardrobeContentsKey(area)];
+    if (wardrobe == undefined) {
+      return;
+    }
+    let maxIndent = 0;
+    for (let entry of wardrobe.entries) {
+      maxIndent = Math.max(There.setupWardrobeEntry(divItems, section, area, wardrobe, entry, 0), maxIndent);
+    }
+    $(divItems).find('.item').css('--max-indent', maxIndent);
+    const count = $(divItems).find('.item').length;
+    if (area == 'outfits' || area == 'looksets') {
+      $(divItems).attr('data-count', count < 14 ? '1' : '2');
+    } else {
+      $(divItems).attr('data-count', count < 5 ? '1' : '2');
+    }
+  },
+
+  setupWardrobeEntry: function(divItems, section, area, wardrobe, entry, indent) {
+    let maxIndent = indent;
+    let divItem = $('<div class="item"></div>');
+    let divIcon = $('<div class="icon"></div>');
+    let divName = $('<div class="name"></div>');
+    switch (entry.type) {
+      case 'item': {
+        $(divItem).attr('data-id', entry.poid);
+        $(divItem).attr('data-selected', wardrobe.poids.includes(entry.poid) ? '1' : '0');
+        $(divItem).attr('data-unwearable', entry.unwearable ? '1' : '0');
+        $(divItem).data('unmenus', entry.unmenus);
+        $(divIcon).css('background-image', `url(iconspng/${entry.icon}.png)`);
+        $(divName).text(entry.name);
+        break;
+      }
+      case 'drawer': {
+        $(divItem).attr('data-id', entry.uid);
+        $(divItem).attr('data-drawer', entry.open ? 'open' : 'closed');
+        $(divName).text(entry.name);
+        break;
+      }
+    }
+    $(divItem).css('--indent', indent);
+    $(divItem).append($(divIcon)).append($(divName)).appendTo($(divItems));
+    switch (entry.type) {
+      case 'item': {
+        $(divItem).on('click', function() {
+          There.playSound('menu item activate');
+        });
+        break;
+      }
+      case 'drawer': {
+        $(divItem).on('click', function() {
+          There.playSound('control down');
+          entry.open = !entry.open;
+          There.setupWardrobe();
+        });
+        if (entry.open) {
+          const drawerWardrobe = There.data.wardrobe[There.getWardrobeContentsKey(area, entry.uid)];
+          if (drawerWardrobe != undefined) {
+            for (let drawerEntry of drawerWardrobe.entries) {
+              maxIndent = Math.max(There.setupWardrobeEntry(divItems, section, area, wardrobe, drawerEntry, indent + 1), maxIndent);
+            }
+          }
+        }
+        break;
+      }
+    }
+    return maxIndent;
   },
 });
 
@@ -90,6 +340,38 @@ $(document).ready(function() {
     There.fsCommand('beginDragWindow');
     event.preventDefault();
     event.stopPropagation();
+  });
+
+  $('.titlebar .button, .footer .button').on('mouseover', function(event) {
+    if ($(this).attr('data-id') == 'save') {
+      There.playSound('save button');
+    } else {
+      There.playSound('control rollover');
+    }
+  }).on('mousedown', function(event) {
+    There.playSound('control down');
+    event.stopPropagation();
+  }).on('mouseup', function(event) {
+    There.playSound('control up');
+  });
+
+  $('.areas .area, .sections .section .tab').on('mouseover', function(event) {
+    There.playSound('control rollover');
+  }).on('mousedown', function(event) {
+    There.playSound('control down');
+    event.stopPropagation();
+  });
+
+  $('.subareas .subarea').on('mouseover', function(event) {
+    There.playSound('enabled menu item rollover');
+  });
+
+  $('.submenu .item .sound').on('mouseover', function(event) {
+    if ($(this).parent().attr('data-enabled') == '0') {
+      There.playSound('disabled menu item rollover');
+    } else {
+      There.playSound('enabled menu item rollover');
+    }
   });
 
   $('.titlebar .buttons .button[data-id="bar"]').on('click', function() {
@@ -129,16 +411,10 @@ $(document).ready(function() {
     const area = $(this).data('area');
     $('.changeme').attr('data-area', area);
     $('.sections .section .panel .title').text($(this).data('title'));
-    if (area == 'tops') {
-      $('.sections .section .panel .items').attr('data-count', '2');
-    } else if (area == 'outfits' || area == 'looksets') {
-      $('.sections .section .panel .items').attr('data-count', '1');
-    } else {
-      $('.sections .section .panel .items').attr('data-count', '0');
-    }
     if (area == 'face') {
       $('.changeme').attr('data-subarea', 'eyes-ears');
     }
+    There.setupWardrobe();
   });
 
   $('.subareas').on('mousedown', function(event) {
@@ -150,6 +426,7 @@ $(document).ready(function() {
     const subarea = $(this).data('subarea');
     $('.changeme').attr('data-subarea', subarea);
     $('.subareas').attr('data-active', '0');
+    There.playSound('menu item activate');
     event.stopPropagation();
   });
 

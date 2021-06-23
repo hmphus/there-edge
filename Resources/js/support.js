@@ -110,6 +110,19 @@ There.fetch = function(settings) {
   });
 };
 
+There.fetchAsync = async function(settings) {
+  return new Promise(function(resolve) {
+    There.fetch(Object.assign({}, settings, {
+      complete: async function(xhr, status) {
+        if (settings.complete != undefined) {
+          await settings.complete(xhr, status);
+        }
+        resolve(status);
+      },
+    }));
+  });
+};
+
 There.playSound = function(name) {
   const names = {
     'dialog appear': 0,
