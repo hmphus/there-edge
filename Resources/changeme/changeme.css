@@ -560,18 +560,18 @@ body {
 
 .sections .section[data-section="wardrobe"] .panel .items .item .icon {
   display:inline-block;
-  width:48px;
+  width:40px;
   height:48px;
   background-position:center;
   background-repeat:no-repeat;
 }
 
 .sections .section[data-section="wardrobe"] .panel .items .item[data-drawer] .icon {
-  padding:11px 7px;
+  padding:11px 2px;
   box-sizing:border-box;
   background-image:url(changeme.png);
   background-clip:content-box;
-  background-position-x:-152px;
+  background-position-x:-155px;
 }
 
 .sections .section[data-section="wardrobe"] .panel .items .item[data-drawer="closed"] .icon {
@@ -582,15 +582,27 @@ body {
   background-position-y:-854px;
 }
 
-.sections .section[data-section="wardrobe"] .panel .items .item .name {
+.sections .section[data-section="wardrobe"] .panel .items .item .text {
   display:inline-flex;
-  width:calc(100% - 53px);
-  height:48px;
-  padding-right:5px;
+  width:calc(100% - 40px);
+  height:42px;
+  padding:3px 0px;
   vertical-align:top;
   font-size:10px;
-  align-items:center;
+  line-height:10px;
   overflow:hidden;
+  flex-direction:column;
+  align-items:flex-start;
+  justify-content:space-between;
+}
+
+.sections .section[data-section="wardrobe"] .panel .items .item .text .name {
+  padding-right:5px;
+  height:38px;
+}
+
+.sections .section[data-section="wardrobe"] .panel .items .item .text .status {
+  height:10px;
 }
 
 .changeme[data-area="outfits"] .sections .section[data-section="wardrobe"] .panel .items .item {
@@ -620,11 +632,21 @@ body {
   background-position-x:-181px;
 }
 
-.changeme[data-area="outfits"] .sections .section[data-section="wardrobe"] .panel .items .item .name {
-  width:calc(100% - 27px);
+.changeme[data-area="outfits"] .sections .section[data-section="wardrobe"] .panel .items .item .text {
+  width:calc(100% - 17px);
   height:17px;
-  padding-left:5px;
+  line-height:17px;
+  padding:0px;
   white-space:nowrap;
+}
+
+.changeme[data-area="outfits"] .sections .section[data-section="wardrobe"] .panel .items .item .text .name {
+  padding-left:5px;
+  height:17px;
+}
+
+.changeme[data-area="outfits"] .sections .section[data-section="wardrobe"] .panel .items .item .text .status {
+  display:none;
 }
 
 .sections .section[data-section="wardrobe"] .panel .items[data-count="0"] {
@@ -1133,13 +1155,29 @@ body {
   display:none;
 }
 
-.sections .section[data-section="body"] .panel .items[data-area="looksets"] .item .name {
-  height:48px;
-  padding-right:5px;
+.sections .section[data-section="body"] .panel .items[data-area="looksets"] .item .text {
+  display:inline-flex;
+  width:100%;
+  height:17px;
+  line-height:17px;
+  padding:0px;
+  white-space:nowrap;
   vertical-align:top;
   font-size:10px;
-  align-items:center;
   overflow:hidden;
+  flex-direction:column;
+  align-items:flex-start;
+  justify-content:space-between;
+}
+
+.sections .section[data-section="body"] .panel .items[data-area="looksets"] .item .text .name {
+  padding-left:5px;
+  padding-right:5px;
+  height:17px;
+}
+
+.sections .section[data-section="body"] .panel .items[data-area="looksets"] .item .text .status {
+  display:none;
 }
 
 .sections .section[data-section="body"] .panel .items[data-area="looksets"][data-count="0"] {

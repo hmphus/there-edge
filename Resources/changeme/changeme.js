@@ -45,7 +45,9 @@ There.init({
   data: {
     sliders: [],
     versions: {},
-    wardrobe: {},
+    contents: {},
+    wearsets: {},
+    menu: {},
   },
 
   onReady: function() {
@@ -87,26 +89,20 @@ There.init({
       $('.changeme').attr(name.replace('there_', 'data-'), value);
     }
     if (name == 'there_ready' && value == 1) {
-      There.fetchWardrobeXml('head');
-      There.fetchWardrobeXml('face');
-      There.fetchWardrobeXml('tops');
-      There.fetchWardrobeXml('bottoms');
-      There.fetchWardrobeXml('accessories');
-      There.fetchWardrobeXml('footwear');
-      There.fetchWardrobeXml('outfits');
-      There.fetchWardrobeXml('looksets');
+      There.fetchWardrobeXml('wardrobe', 'head');
+      There.fetchWardrobeXml('wardrobe', 'face');
+      There.fetchWardrobeXml('wardrobe', 'tops');
+      There.fetchWardrobeXml('wardrobe', 'bottoms');
+      There.fetchWardrobeXml('wardrobe', 'accessories');
+      There.fetchWardrobeXml('wardrobe', 'footwear');
+      There.fetchWardrobeXml('wardrobe', 'outfits');
+      There.fetchWardrobeXml('body', 'looksets');
     }
   },
 
-  fetchWardrobeXml: async function(area) {
-    await There.fetchWardrobeContentsXml(area);
-    await There.fetchWardrobeWearsetXml(area);
-    if (There.getWardrobeAreaKey($('.changeme').attr('data-area')) == area) {
-      There.setupWardrobe();
-    }
-    There.setNamedTimer(`fetch-wardrobe-${area}`, 1000, function() {
-      There.fetchWardrobeXml(area);
-    });
+  fetchWardrobeXml: function(section, area) {
+    There.fetchWardrobeContentsXml(section, area);
+    There.fetchWardrobeWearsetXml(section, area);
   },
 
   getWardrobeAreaKey: function(area) {
@@ -121,12 +117,11 @@ There.init({
     }
   },
 
-
   getWardrobeContentsKey: function(area, folder) {
     return `wardrobe_contents_${There.getWardrobeAreaKey(area)}_${folder ?? 1}`;
   },
 
-  fetchWardrobeContentsXml: async function(area, folder) {
+  fetchWardrobeContentsXml: async function(section, area, folder) {
     let query = {
       Oid: folder ?? 1,
     };
@@ -140,17 +135,23 @@ There.init({
       query: query,
       dataType: 'xml',
       success: function(xml) {
-        promises = There.onWardrobeContentsXml(xml, key, area);
+        promises = There.onWardrobeContentsXml(xml, key, section, area);
       },
       complete: async function() {
         await Promise.all(promises);
       },
     });
+    if (folder == undefined) {
+      There.updateWardrobe(section, area);
+      There.setNamedTimer(`fetch-wardrobe-contents-${area}`, 1000, function() {
+        There.fetchWardrobeContentsXml(section, area);
+      });
+    }
   },
 
-  onWardrobeContentsXml: function(xml, key, area) {
+  onWardrobeContentsXml: function(xml, key, section, area) {
     let promises = [];
-    let wardrobe = {
+    let contents = {
       menus: [],
       entries: [],
     };
@@ -171,7 +172,7 @@ There.init({
               behavior: Number(xmlMenu.getElementsByTagName('behavior')[0].childNodes[0].nodeValue),
             };
             menu.key = menu.text.toLowerCase();
-            wardrobe.menus.push(menu);
+            contents.menus.push(menu);
           }
           break;
         }
@@ -194,7 +195,7 @@ There.init({
           if (xmlUnwearable != undefined && xmlUnwearable.childNodes[0].nodeValue == 1) {
             entry.unwearable = true;
           }
-          wardrobe.entries.push(entry);
+          contents.entries.push(entry);
           break;
         }
         case 'drawer': {
@@ -205,15 +206,18 @@ There.init({
             count: Number(xmlChild.getElementsByTagName('num_items')[0].childNodes[0].nodeValue ?? 0),
             open: false,
           };
-          wardrobe.entries.push(entry);
-          if (There.data.wardrobe[There.getWardrobeContentsKey(area, entry.uid)] == undefined) {
-            promises.push(There.fetchWardrobeContentsXml(area, entry.uid));
+          contents.entries.push(entry);
+          if (There.data.contents[There.getWardrobeContentsKey(area, entry.uid)] == undefined) {
+            promises.push(There.fetchWardrobeContentsXml(section, area, entry.uid));
           }
           break;
         }
       }
     }
-    There.data.wardrobe[key] = wardrobe;
+    for (let entry of contents.entries) {
+      entry.menus = contents.menus;
+    }
+    There.data.contents[key] = contents;
     return promises;
   },
 
@@ -221,7 +225,7 @@ There.init({
     return `wardrobe_wearset_${There.getWardrobeAreaKey(area)}`;
   },
 
-  fetchWardrobeWearsetXml: async function(area) {
+  fetchWardrobeWearsetXml: async function(section, area) {
     let query = {
       Oid: 1,
     };
@@ -234,14 +238,19 @@ There.init({
       query: query,
       dataType: 'xml',
       success: function(xml) {
-        There.onWardrobeWearsetXml(xml, key, area);
+        There.onWardrobeWearsetXml(xml, key);
       },
+    });
+    There.updateWardrobe(section, area);
+    There.setNamedTimer(`fetch-wardrobe-wearset-${area}`, 1000, function() {
+      There.fetchWardrobeWearsetXml(section, area);
     });
   },
 
-  onWardrobeWearsetXml: function(xml, key, area) {
-    let wardrobe = There.data.wardrobe[There.getWardrobeContentsKey(area)];
-    wardrobe.poids = [];
+  onWardrobeWearsetXml: function(xml, key) {
+    let wearset = {
+      poids: [],
+    };
     const xmlAnswer = xml.getElementsByTagName('Answer')[0];
     const xmlResult = xmlAnswer.getElementsByTagName('Result')[0];
     if (xmlResult.childNodes[0].nodeValue != 1) {
@@ -251,13 +260,28 @@ There.init({
     There.data.versions[key] = xmlVersion.childNodes[0].nodeValue;
     const xmlWearset = xmlAnswer.getElementsByTagName('wearset')[0];
     for (let xmlItem of xmlWearset.getElementsByTagName('item')) {
-      wardrobe.poids.push(Number(xmlItem.getElementsByTagName('poid')[0].childNodes[0].nodeValue));
+      wearset.poids.push(Number(xmlItem.getElementsByTagName('poid')[0].childNodes[0].nodeValue));
     }
+    There.data.wearsets[key] = wearset;
+  },
+
+  updateWardrobe: function(section, area) {
+    if ($('.changeme').attr('data-section') != section) {
+      return;
+    }
+    if (There.getWardrobeAreaKey($('.changeme').attr('data-area')) != area) {
+      return;
+    }
+    There.setupWardrobe();
   },
 
   setupWardrobe: function() {
     const section = $('.changeme').attr('data-section');
     const area = $('.changeme').attr('data-area');
+    const menu = Object.assign({}, There.data.menu);
+    if (menu.section == section && menu.area == area) {
+      There.clearContextMenu();
+    }
     let divItems;
     if (section == 'wardrobe') {
       divItems = $('.section[data-section="wardrobe"] .items');
@@ -267,13 +291,17 @@ There.init({
       return;
     }
     $(divItems).attr('data-count', '0').find('.item').remove();
-    const wardrobe = There.data.wardrobe[There.getWardrobeContentsKey(area)];
-    if (wardrobe == undefined) {
+    const contents = There.data.contents[There.getWardrobeContentsKey(area)];
+    if (contents == undefined) {
+      return;
+    }
+    const wearset = There.data.wearsets[There.getWardrobeWearsetKey(area)];
+    if (wearset == undefined) {
       return;
     }
     let maxIndent = 0;
-    for (let entry of wardrobe.entries) {
-      maxIndent = Math.max(There.setupWardrobeEntry(divItems, section, area, wardrobe, wardrobe.menus, entry, 0), maxIndent);
+    for (let entry of contents.entries) {
+      maxIndent = Math.max(There.setupWardrobeEntry(divItems, section, area, contents, wearset, entry, 0), maxIndent);
     }
     $(divItems).find('.item').css('--max-indent', maxIndent);
     const count = $(divItems).find('.item').length;
@@ -282,44 +310,81 @@ There.init({
     } else {
       $(divItems).attr('data-count', count < 5 ? '1' : '2');
     }
+    if (menu.section == section && menu.area == area) {
+      const divItem = $(divItems).find(`.item[data-id=${menu.poid}]`).first();
+      if ($(divItem).length > 0) {
+        const top = $(divItem).offset().top;
+        if (menu.top == top) {
+          There.setupContextMenu(divItem, section, area, $(divItem).data('entry'));
+        }
+      }
+    }
   },
 
-  setupWardrobeEntry: function(divItems, section, area, wardrobe, menus, entry, indent) {
+  setupWardrobeEntry: function(divItems, section, area, contents, wearset, entry, indent) {
     let maxIndent = indent;
     let divItem = $('<div class="item"></div>');
     let divIcon = $('<div class="icon"></div>');
+    let divText = $('<div class="text"></div>');
     let divName = $('<div class="name"></div>');
+    let divStatus = $('<div class="status"></div>');
+    $(divText).append($(divName)).append($(divStatus));
+    entry.wearing = false;
     switch (entry.type) {
       case 'item': {
+        entry.wearing = wearset.poids.includes(entry.poid);
         $(divItem).attr('data-id', entry.poid);
-        $(divItem).attr('data-selected', wardrobe.poids.includes(entry.poid) ? '1' : '0');
+        $(divItem).attr('data-selected', entry.wearing ? '1' : '0');
         $(divItem).attr('data-unwearable', entry.unwearable ? '1' : '0');
         $(divIcon).css('background-image', `url(iconspng/${entry.icon}.png)`);
         $(divName).text(entry.name);
+        if (entry.unwearable) {
+          $(divStatus).text('Cannot be worn');
+        } else if (entry.wearing) {
+          $(divStatus).text('Wearing');
+        } else {
+          $(divStatus).text('In gear');
+        }
         break;
       }
       case 'drawer': {
         $(divItem).attr('data-id', entry.uid);
         $(divItem).attr('data-drawer', entry.open ? 'open' : 'closed');
         $(divName).text(entry.name);
+        $(divStatus).text(`${entry.count.toLocaleString('en-us')} ${entry.count == 1 ? 'item' : 'items'}`);
         break;
       }
     }
+    $(divItem).data('entry', entry);
     $(divItem).css('--indent', indent);
-    $(divItem).append($(divIcon)).append($(divName)).appendTo($(divItems));
+    $(divItem).append($(divIcon)).append($(divText)).appendTo($(divItems));
     switch (entry.type) {
       case 'item': {
         $(divItem).on('mouseover', function() {
           const timeout = $('.contextmenu').attr('data-active') == 1 ? 500 : 350;
           There.setNamedTimer('context-menu', timeout, function() {
-            if ($('.contextmenu').attr('data-id') != entry.poid) {
-              There.setupContextMenu(divItem, section, area, menus, entry);
+            if (There.data.menu.poid != entry.poid) {
+              There.setupContextMenu(divItem, section, area, entry);
             }
           });
         }).on('mousemove', function(event) {
           event.stopPropagation();
         }).on('click', function() {
-          There.playSound('menu item activate');
+          if (!entry.unwearable) {
+            let index = -1;
+            if (entry.wearing) {
+              index = entry.menus.findIndex(e => e.behavior == 3);
+            } else {
+              index = entry.menus.findIndex(e => e.behavior == 2);
+            }
+            if (index >= 0 && !entry.unmenus.includes(index)) {
+              There.playSound('menu item activate');
+              There.fsCommand('activePobAction', {
+                poid: entry.poid,
+                action: entry.menus[index].text,
+              });
+            }
+          }
         });
         break;
       }
@@ -331,10 +396,10 @@ There.init({
           There.setupWardrobe();
         });
         if (entry.open) {
-          const drawerWardrobe = There.data.wardrobe[There.getWardrobeContentsKey(area, entry.uid)];
-          if (drawerWardrobe != undefined) {
-            for (let drawerEntry of drawerWardrobe.entries) {
-              maxIndent = Math.max(There.setupWardrobeEntry(divItems, section, area, wardrobe, drawerWardrobe.menus, drawerEntry, indent + 1), maxIndent);
+          const drawerContents = There.data.contents[There.getWardrobeContentsKey(area, entry.uid)];
+          if (drawerContents != undefined) {
+            for (let drawerEntry of drawerContents.entries) {
+              maxIndent = Math.max(There.setupWardrobeEntry(divItems, section, area, contents, wearset, drawerEntry, indent + 1), maxIndent);
             }
           }
         }
@@ -346,26 +411,26 @@ There.init({
 
   clearContextMenu: function() {
     There.clearNamedTimer('context-menu');
-    $('.contextmenu').attr('data-active', '0').attr('data-id', '');
+    $('.contextmenu').attr('data-active', '0');
     $('.sections .section .panel .items .item').attr('data-hover', '0');
+    There.data.menu = {};
   },
 
-  setupContextMenu: function(divItem, section, area, menus, entry) {
+  setupContextMenu: function(divItem, section, area, entry) {
     let divContextMenu = $('.contextmenu');
     $(divContextMenu).find('.item').remove();
     $('.sections .section .panel .items .item').attr('data-hover', '0');
-    for (let index in menus) {
-      let menu = menus[index];
+    for (let index in entry.menus) {
+      const menu = entry.menus[index];
       let enabled = !entry.unmenus.includes(Number(index));
       if (enabled && entry.unwearable && (menu.behavior == 2 || menu.behavior == 3)) {
         enabled = false;
       }
       if (enabled) {
-        const selected = $(divItem).attr('data-selected') == 1;
-        if (selected && menu.behavior == 2) {
+        if (entry.wearing && menu.behavior == 2) {
           enabled = false;
         }
-        if (!selected && menu.behavior == 3) {
+        if (!entry.wearing && menu.behavior == 3) {
           enabled = false;
         }
       }
@@ -385,8 +450,13 @@ There.init({
           There.playSound('enabled menu item rollover');
         });
         $(divMenuItem).on('mousedown', function(event) {
-          There.playSound('menu item activate');
           event.stopPropagation();
+        }).on('click', function() {
+          There.playSound('menu item activate');
+          There.fsCommand('activePobAction', {
+            poid: entry.poid,
+            action: menu.text,
+          });
         });
       } else {
         $(divSound).on('mouseover', function() {
@@ -394,10 +464,17 @@ There.init({
         });
       }
     }
-    let maxY = $('.changeme').height() - $(divContextMenu).height() - 4;
-    let y = Math.min($(divItem).offset().top + 4, maxY);
-    $(divContextMenu).css('top', y).attr('data-active', '1').attr('data-id', entry.poid);
+    const maxY = $('.changeme').height() - $(divContextMenu).height() - 4;
+    const top = $(divItem).offset().top;
+    const y = Math.min(top + 4, maxY);
+    $(divContextMenu).css('top', y).attr('data-active', '1');
     $(divItem).attr('data-hover', '1');
+    There.data.menu = {
+      section: section,
+      area: area,
+      poid: entry.poid,
+      top: top,
+    };
   },
 });
 
