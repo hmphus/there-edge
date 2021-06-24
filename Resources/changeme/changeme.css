@@ -545,6 +545,7 @@ body {
   padding-left:calc(7px * var(--indent, 0));
 }
 
+.sections .section[data-section="wardrobe"] .panel .items .item[data-hover="1"],
 .sections .section[data-section="wardrobe"] .panel .items .item:hover {
   background-color:#f0f0f0;
 }
@@ -1115,6 +1116,7 @@ body {
   background-clip:padding-box;
 }
 
+.sections .section[data-section="body"] .panel .items[data-area="looksets"] .item[data-hover="1"],
 .sections .section[data-section="body"] .panel .items[data-area="looksets"] .item:hover {
   background-color:#f0f0f0;
 }
@@ -1296,7 +1298,7 @@ body {
   display:none;
 }
 
-.submenu {
+.contextmenu {
   display:none;
   position:absolute;
   left:125px;
@@ -1305,11 +1307,11 @@ body {
   z-index:5;
 }
 
-.changeme[data-state="full"] .submenu[data-active="1"] {
+.changeme[data-state="full"] .contextmenu[data-active="1"] {
   display:block;
 }
 
-.submenu .item {
+.contextmenu .item {
   margin-top:-1px;
   width:68px;
   height:14px;
@@ -1318,31 +1320,27 @@ body {
   border:1px solid #666;
 }
 
-.submenu .item:first-of-type {
+.contextmenu .item:first-of-type {
   margin-top:0px;
 }
 
-.submenu .item[data-id=""] {
-  display:none;
-}
-
-.submenu .item:hover {
+.contextmenu .item:hover {
   background-color:#f0f0f0;
 }
 
-.submenu .item:hover:active {
+.contextmenu .item:hover:active {
   background-color:#c4f0f8;
 }
 
-.submenu .item[data-enabled="0"]:hover,
-.submenu .item[data-enabled="0"]:active,
-.submenu .item[data-enabled="0"] {
-  color:#666;
+.contextmenu .item[data-enabled="0"]:hover,
+.contextmenu .item[data-enabled="0"]:active,
+.contextmenu .item[data-enabled="0"] {
+  color:#ccc;
   background-color:#fff;
   pointer-events:none;
 }
 
-.submenu .item .sound {
+.contextmenu .item .sound {
   padding-left:6px;
   width:62px;
   height:14px;

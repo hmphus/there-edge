@@ -170,6 +170,7 @@ There.init({
               text: xmlMenu.getElementsByTagName('text')[0].childNodes[0].nodeValue,
               behavior: Number(xmlMenu.getElementsByTagName('behavior')[0].childNodes[0].nodeValue),
             };
+            menu.key = menu.text.toLowerCase();
             wardrobe.menus.push(menu);
           }
           break;
@@ -272,7 +273,7 @@ There.init({
     }
     let maxIndent = 0;
     for (let entry of wardrobe.entries) {
-      maxIndent = Math.max(There.setupWardrobeEntry(divItems, section, area, wardrobe, entry, 0), maxIndent);
+      maxIndent = Math.max(There.setupWardrobeEntry(divItems, section, area, wardrobe, wardrobe.menus, entry, 0), maxIndent);
     }
     $(divItems).find('.item').css('--max-indent', maxIndent);
     const count = $(divItems).find('.item').length;
@@ -283,7 +284,7 @@ There.init({
     }
   },
 
-  setupWardrobeEntry: function(divItems, section, area, wardrobe, entry, indent) {
+  setupWardrobeEntry: function(divItems, section, area, wardrobe, menus, entry, indent) {
     let maxIndent = indent;
     let divItem = $('<div class="item"></div>');
     let divIcon = $('<div class="icon"></div>');
@@ -293,7 +294,6 @@ There.init({
         $(divItem).attr('data-id', entry.poid);
         $(divItem).attr('data-selected', wardrobe.poids.includes(entry.poid) ? '1' : '0');
         $(divItem).attr('data-unwearable', entry.unwearable ? '1' : '0');
-        $(divItem).data('unmenus', entry.unmenus);
         $(divIcon).css('background-image', `url(iconspng/${entry.icon}.png)`);
         $(divName).text(entry.name);
         break;
@@ -309,13 +309,23 @@ There.init({
     $(divItem).append($(divIcon)).append($(divName)).appendTo($(divItems));
     switch (entry.type) {
       case 'item': {
-        $(divItem).on('click', function() {
+        $(divItem).on('mouseover', function() {
+          const timeout = $('.contextmenu').attr('data-active') == 1 ? 500 : 350;
+          There.setNamedTimer('context-menu', timeout, function() {
+            if ($('.contextmenu').attr('data-id') != entry.poid) {
+              There.setupContextMenu(divItem, section, area, menus, entry);
+            }
+          });
+        }).on('mousemove', function(event) {
+          event.stopPropagation();
+        }).on('click', function() {
           There.playSound('menu item activate');
         });
         break;
       }
       case 'drawer': {
         $(divItem).on('click', function() {
+          There.clearContextMenu();
           There.playSound('control down');
           entry.open = !entry.open;
           There.setupWardrobe();
@@ -324,7 +334,7 @@ There.init({
           const drawerWardrobe = There.data.wardrobe[There.getWardrobeContentsKey(area, entry.uid)];
           if (drawerWardrobe != undefined) {
             for (let drawerEntry of drawerWardrobe.entries) {
-              maxIndent = Math.max(There.setupWardrobeEntry(divItems, section, area, wardrobe, drawerEntry, indent + 1), maxIndent);
+              maxIndent = Math.max(There.setupWardrobeEntry(divItems, section, area, wardrobe, drawerWardrobe.menus, drawerEntry, indent + 1), maxIndent);
             }
           }
         }
@@ -333,16 +343,73 @@ There.init({
     }
     return maxIndent;
   },
+
+  clearContextMenu: function() {
+    There.clearNamedTimer('context-menu');
+    $('.contextmenu').attr('data-active', '0').attr('data-id', '');
+    $('.sections .section .panel .items .item').attr('data-hover', '0');
+  },
+
+  setupContextMenu: function(divItem, section, area, menus, entry) {
+    let divContextMenu = $('.contextmenu');
+    $(divContextMenu).find('.item').remove();
+    $('.sections .section .panel .items .item').attr('data-hover', '0');
+    for (let index in menus) {
+      let menu = menus[index];
+      let enabled = !entry.unmenus.includes(Number(index));
+      if (enabled && entry.unwearable && (menu.behavior == 2 || menu.behavior == 3)) {
+        enabled = false;
+      }
+      if (enabled) {
+        const selected = $(divItem).attr('data-selected') == 1;
+        if (selected && menu.behavior == 2) {
+          enabled = false;
+        }
+        if (!selected && menu.behavior == 3) {
+          enabled = false;
+        }
+      }
+      if (enabled && area == 'looksets') {
+        if (menu.key == 'give' || menu.key == 'delete') {
+          enabled = false;
+        }
+      }
+      let divMenuItem = $('<div class="item"></div>');
+      let divSound = $('<div class="sound"></div>');
+      $(divMenuItem).attr('data-index', index);
+      $(divMenuItem).attr('data-enabled', enabled ? '1' : '0');
+      $(divSound).text(menu.text);
+      $(divMenuItem).append($(divSound)).appendTo($(divContextMenu));
+      if (enabled) {
+        $(divSound).on('mouseover', function() {
+          There.playSound('enabled menu item rollover');
+        });
+        $(divMenuItem).on('mousedown', function(event) {
+          There.playSound('menu item activate');
+          event.stopPropagation();
+        });
+      } else {
+        $(divSound).on('mouseover', function() {
+          There.playSound('disabled menu item rollover');
+        });
+      }
+    }
+    let maxY = $('.changeme').height() - $(divContextMenu).height() - 4;
+    let y = Math.min($(divItem).offset().top + 4, maxY);
+    $(divContextMenu).css('top', y).attr('data-active', '1').attr('data-id', entry.poid);
+    $(divItem).attr('data-hover', '1');
+  },
 });
 
 $(document).ready(function() {
   $('.titlebar').on('mousedown', function(event) {
     There.fsCommand('beginDragWindow');
+    There.clearContextMenu();
     event.preventDefault();
     event.stopPropagation();
   });
 
-  $('.titlebar .button, .footer .button').on('mouseover', function(event) {
+  $('.titlebar .button, .footer .button').on('mouseover', function() {
     if ($(this).attr('data-id') == 'save') {
       There.playSound('save button');
     } else {
@@ -351,27 +418,19 @@ $(document).ready(function() {
   }).on('mousedown', function(event) {
     There.playSound('control down');
     event.stopPropagation();
-  }).on('mouseup', function(event) {
+  }).on('mouseup', function() {
     There.playSound('control up');
   });
 
-  $('.areas .area, .sections .section .tab').on('mouseover', function(event) {
+  $('.areas .area, .sections .section .tab').on('mouseover', function() {
     There.playSound('control rollover');
   }).on('mousedown', function(event) {
     There.playSound('control down');
     event.stopPropagation();
   });
 
-  $('.subareas .subarea').on('mouseover', function(event) {
+  $('.subareas .subarea').on('mouseover', function() {
     There.playSound('enabled menu item rollover');
-  });
-
-  $('.submenu .item .sound').on('mouseover', function(event) {
-    if ($(this).parent().attr('data-enabled') == '0') {
-      There.playSound('disabled menu item rollover');
-    } else {
-      There.playSound('enabled menu item rollover');
-    }
   });
 
   $('.titlebar .buttons .button[data-id="bar"]').on('click', function() {
@@ -439,7 +498,30 @@ $(document).ready(function() {
     $(this).attr('data-selected', '1');
   });
 
-  $('.sections .section[data-section="wardrobe"] .tab').trigger('click');
+  $('.titlebar .buttons .button, .sections .section .tab, .footer .button, .areas .area').on('mousedown', function() {
+      There.clearContextMenu();
+  });
+
+  $('.contextmenu').on('mousemove', function(event) {
+    There.clearNamedTimer('context-menu');
+    event.stopPropagation();
+  });
+
+  $('.changeme').on('mouseleave', function(event) {
+    There.setNamedTimer('context-menu', 500, function() {
+      There.clearContextMenu();
+    });
+  }).on('mousemove', function() {
+    There.setNamedTimer('context-menu', 350, function() {
+      There.clearContextMenu();
+    });
+  });
+
+  $('.section[data-section="wardrobe"] .items, .section[data-section="body"] .items[data-area="looksets"]').on('scroll', function() {
+    There.clearContextMenu();
+  });
+
+  $('.section[data-section="wardrobe"] .tab').trigger('click');
 
   $('.slider').each(function(index, element) {
     There.data.sliders.push(new ChangeMeSlider(element));
