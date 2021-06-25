@@ -136,6 +136,25 @@ body {
   clip-path:polygon(0% 271px, 100% 271px, 100% 354px, 0% 354px);
 }
 
+.changeme[data-state="full"][data-gender=""] svg.background[data-index="2"],
+.changeme[data-state="full"][data-section=""] svg.background[data-index="2"],
+.changeme[data-state="full"][data-area=""] svg.background[data-index="2"] {
+  display:block;
+  clip-path:polygon(0% 0px, 100% 0px, 100% 25px, 0% 25px);
+}
+
+.changeme[data-state="full"][data-gender=""] svg.background[data-index="3"],
+.changeme[data-state="full"][data-gender=""] svg.background[data-index="4"],
+.changeme[data-state="full"][data-gender=""] svg.background[data-index="5"],
+.changeme[data-state="full"][data-section=""] svg.background[data-index="3"],
+.changeme[data-state="full"][data-section=""] svg.background[data-index="4"],
+.changeme[data-state="full"][data-section=""] svg.background[data-index="5"],
+.changeme[data-state="full"][data-area=""] svg.background[data-index="3"],
+.changeme[data-state="full"][data-area=""] svg.background[data-index="4"],
+.changeme[data-state="full"][data-area=""] svg.background[data-index="5"] {
+  display:none;
+}
+
 .changeme .titlebar {
   position:absolute;
   left:49px;
@@ -259,7 +278,7 @@ body {
   background-position-y:-3px;
 }
 
-.areas .area[data-gender="male"][data-area="grooming"] {
+.areas .area[data-gender="male"][data-area="facial"] {
   background-position-y:-43px;
 }
 
@@ -287,7 +306,7 @@ body {
   background-position-y:-283px;
 }
 
-.areas .area[data-gender="female"][data-area="cosmetics"] {
+.areas .area[data-gender="female"][data-area="facial"] {
   background-position-y:-323px;
 }
 
@@ -357,7 +376,7 @@ body {
 }
 
 .changeme[data-area="hairstyles"] .areas .area[data-area="hairstyles"],
-.changeme[data-area="grooming"] .areas .area[data-area="grooming"],
+.changeme[data-area="facial"] .areas .area[data-area="facial"],
 .changeme[data-area="accessories"] .areas .area[data-area="accessories"],
 .changeme[data-area="tops"] .areas .area[data-area="tops"],
 .changeme[data-area="bottoms"] .areas .area[data-area="bottoms"],
@@ -392,8 +411,7 @@ body {
   top:11px;
 }
 
-.changeme[data-section="wardrobe"][data-area="grooming"] .areas .arrow,
-.changeme[data-section="wardrobe"][data-area="cosmetics"] .areas .arrow {
+.changeme[data-section="wardrobe"][data-area="facial"] .areas .arrow {
   top:44px;
 }
 
@@ -1387,6 +1405,15 @@ body {
 
 .changeme[data-state="bar"] .areas,
 .changeme[data-state="bar"] .sections,
-.changeme[data-state="bar"] .footer {
+.changeme[data-state="bar"] .footer,
+.changeme[data-gender=""] .areas,
+.changeme[data-gender=""] .sections,
+.changeme[data-gender=""] .footer,
+.changeme[data-section=""] .areas,
+.changeme[data-section=""] .sections,
+.changeme[data-section=""] .footer,
+.changeme[data-area=""] .areas,
+.changeme[data-area=""] .sections,
+.changeme[data-area=""] .footer {
   display:none;
 }

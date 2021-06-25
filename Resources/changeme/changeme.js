@@ -1,12 +1,15 @@
 class ChangeMeSlider {
-  constructor(element) {
+  constructor(element, callback) {
     let self = this;
     self.element = element;
     self.knob = $(self.element).find('.knob');
     self.width = $(self.element).width();
-    self.minimum = $(self.element).data('minimum') ?? 0;
-    self.maximum = $(self.element).data('maximum') ?? 100;
-    self.value = $(self.element).data('value') ?? self.minimum;
+    self.ids = $(self.element).data('id').split('/');
+    self.minimum = $(self.element).data('minimum') ?? 0.0;
+    self.maximum = $(self.element).data('maximum') ?? 1.0;
+    self.values = self.ids.map(e => 0);
+    self.refresh();
+    self.callback = callback;
     self.active = false;
     $(self.knob).on('mousedown', function(event) {
       if (event.which == 1) {
@@ -23,18 +26,49 @@ class ChangeMeSlider {
     }).on('mouseup', function() {
       if (self.active) {
         self.active = false;
-        console.log(self.value);
+        self.splitValues();
+        self.callback(self);
       }
     });
   }
 
-  get value() {
+  setValue(id, value) {
     let self = this;
-    return $(self.knob).position().left / self.width * (self.maximum - self.minimum) + self.minimum;
+    const index = self.ids.indexOf(id);
+    if (index < 0) {
+      return;
+    }
+    self.values[index] = value;
+    self.refresh();
   }
 
-  set value(value) {
+  splitValues() {
     let self = this;
+    let value = $(self.knob).position().left / self.width * (self.maximum - self.minimum) + self.minimum;
+    if (self.values.length == 1) {
+      self.values[0] = value;
+    } else if (self.values.length == 2) {
+      value = (value - 0.5) * 2.0;
+      self.values[0] = value < 0.0 ? -value : 0.0;
+      self.values[1] = value > 0.0 ? value : 0.0;
+    }
+  }
+
+  refresh() {
+    let self = this;
+    let value = 0.0;
+    if (self.values.length == 1) {
+      value = self.values[0];
+    } else if (self.values.length == 2) {
+      if (self.values.filter(e => e != 0.0).length > 1) {
+        return;
+      }
+      value = 0.5;
+      value -= self.values[0] / 2.0;
+      value += self.values[1] / 2.0;
+    } else {
+      return;
+    }
     $(self.knob).css({
       left: (value - self.minimum) / (self.maximum - self.minimum) * self.width,
     });
@@ -43,11 +77,13 @@ class ChangeMeSlider {
 
 There.init({
   data: {
-    sliders: [],
+    sliders: {},
     versions: {},
+    looks: {},
     contents: {},
     wearsets: {},
     menu: {},
+    undo: [],
   },
 
   onReady: function() {
@@ -68,7 +104,20 @@ There.init({
       });
     }).observe($('.changeme')[0]);
 
-    There.fsCommand('devtools');
+    $('.slider').each(function(index, element) {
+      const slider = new ChangeMeSlider(element, function(slider) {
+        There.handleAvatarLooks();
+      });
+      for (let id of slider.ids) {
+        There.data.sliders[id] = slider;
+      }
+    });
+
+    $('.section[data-section="body"] .editor[data-area="skin"] .items .item').on('click', function() {
+      There.handleAvatarLooks();
+    });
+
+    //There.fsCommand('devtools');
   },
 
   onVariable: function(name, value) {
@@ -78,6 +127,7 @@ There.init({
           if ($('.changeme').attr('data-section') != 'wardrobe' && $('.changeme').attr('data-area') != 'looksets') {
             $('.sections .section[data-section="wardrobe"] .tab').trigger('click');
           }
+          There.clearUndo();
         } else {
           if ($('.changeme').attr('data-section') != 'body') {
             $('.sections .section[data-section="body"] .tab').trigger('click');
@@ -85,10 +135,13 @@ There.init({
         }
       }
     }
+
     if (name == 'there_teleporting' || name == 'there_treatmentsenabled') {
       $('.changeme').attr(name.replace('there_', 'data-'), value);
     }
+
     if (name == 'there_ready' && value == 1) {
+      There.fetchAvatarLooksXml();
       There.fetchWardrobeXml('wardrobe', 'head');
       There.fetchWardrobeXml('wardrobe', 'face');
       There.fetchWardrobeXml('wardrobe', 'tops');
@@ -100,21 +153,120 @@ There.init({
     }
   },
 
+  getAvatarLooksKey: function() {
+    return 'avatar_looks';
+  },
+
+  fetchAvatarLooksXml: async function() {
+    const gender = $('.changeme').attr('data-gender');
+    let query = {
+      Oid: There.variables.there_pilotdoid,
+    };
+    const key = There.getAvatarLooksKey();
+    if (There.data.versions[key] != undefined) {
+      query.LastVer = There.data.versions[key];
+    }
+    await There.fetchAsync({
+      path: `/VersionedXmlSvc/avatarLooks`,
+      query: query,
+      dataType: 'xml',
+      success: function(xml) {
+        There.onAvatarLooksXml(xml, key);
+      },
+    });
+    There.setupAvatarLooks();
+    if (gender == undefined) {
+      There.setupWardrobe();
+    }
+    There.setNamedTimer('fetch-avatar-looks', 1000, function() {
+      There.fetchAvatarLooksXml();
+    });
+  },
+
+  onAvatarLooksXml: function(xml, key) {
+    let promises = [];
+    let looks = {
+      doid: null,
+      skeleton: null,
+      phenomorphs: {},
+      siblings: {},
+    };
+    const xmlAnswer = xml.getElementsByTagName('Answer')[0];
+    const xmlResult = xmlAnswer.getElementsByTagName('Result')[0];
+    if (xmlResult.childNodes[0].nodeValue != 1) {
+      return promises;
+    }
+    const xmlVersion = xmlAnswer.getElementsByTagName('version')[0];
+    There.data.versions[key] = xmlVersion.childNodes[0].nodeValue;
+    const xmlLooks = xmlAnswer.getElementsByTagName('AvatarLooks')[0];
+    for (let xmlChild of xmlLooks.childNodes) {
+      switch (xmlChild.nodeName) {
+        case 'Doid': {
+          looks.doid = Number(xmlChild.childNodes[0].nodeValue);
+          break;
+        }
+        case 'Skeleton': {
+          looks.skeleton = xmlChild.childNodes[0].nodeValue;
+          break;
+        }
+        case 'FeatureColorIndex': {
+          looks.featureColorIndex = Number(xmlChild.childNodes[0].nodeValue);
+          break;
+        }
+        case 'Phenomorph': {
+          const name = xmlChild.getElementsByTagName('Name')[0].childNodes[0].nodeValue;
+          const value = xmlChild.getElementsByTagName('Value')[0].childNodes[0].nodeValue;
+          looks.phenomorphs[name] = value;
+          break;
+        }
+        case 'Sibling': {
+          const name = xmlChild.getElementsByTagName('Name')[0].childNodes[0].nodeValue;
+          const value = xmlChild.getElementsByTagName('Value')[0].childNodes[0].nodeValue;
+          looks.siblings[name] = value;
+          break;
+        }
+      }
+    }
+    There.data.looks[key] = looks;
+  },
+
+  setupAvatarLooks: function() {
+    const looks = There.data.looks[There.getAvatarLooksKey()];
+    switch (looks.skeleton) {
+      case 'ft0': {
+        $('.changeme').attr('data-gender', 'female');
+        break;
+      }
+      case 'mt0': {
+        $('.changeme').attr('data-gender', 'male');
+        break;
+      }
+    }
+    let divSkinItems = $('.section[data-section="body"] .editor[data-area="skin"] .items');
+    $(divSkinItems).find('.item').attr('data-selected', '0');
+    $(divSkinItems).find(`.item[data-index="${looks.featureColorIndex}"]`).attr('data-selected', '1');
+    for (let name in looks.phenomorphs) {
+      const slider = There.data.sliders[name];
+      if (slider != undefined) {
+        slider.setValue(name, looks.phenomorphs[name]);
+      }
+    }
+  },
+
+  handleAvatarLooks: function() {
+    // TODO: Handle the value changes with undo.
+  },
+
   fetchWardrobeXml: function(section, area) {
     There.fetchWardrobeContentsXml(section, area);
     There.fetchWardrobeWearsetXml(section, area);
   },
 
   getWardrobeAreaKey: function(area) {
-    switch (area) {
-      case 'hairstyles':
-        return 'head';
-      case 'grooming':
-      case 'cosmetics':
-        return 'face';
-      default:
-        return area;
-    }
+    return {
+      'hairstyles': 'head',
+      'facial': 'face',
+    }[area] ?? area;
   },
 
   getWardrobeContentsKey: function(area, folder) {
@@ -276,8 +428,18 @@ There.init({
   },
 
   setupWardrobe: function() {
+    const gender = $('.changeme').attr('data-gender');
+    if (gender == '') {
+      return;
+    }
     const section = $('.changeme').attr('data-section');
+    if (section == '') {
+      return;
+    }
     const area = $('.changeme').attr('data-area');
+    if (area == '') {
+      return;
+    }
     const menu = Object.assign({}, There.data.menu);
     if (menu.section == section && menu.area == area) {
       There.clearContextMenu();
@@ -351,7 +513,13 @@ There.init({
         $(divItem).attr('data-id', entry.uid);
         $(divItem).attr('data-drawer', entry.open ? 'open' : 'closed');
         $(divName).text(entry.name);
-        $(divStatus).text(`${entry.count.toLocaleString('en-us')} ${entry.count == 1 ? 'item' : 'items'}`);
+        if (entry.count == 0) {
+          $(divStatus).text('Empty');
+        } else if (entry.count == 1) {
+          $(divStatus).text('1 item');
+        } else {
+          $(divStatus).text(`${entry.count.toLocaleString('en-us')} items`);
+        }
         break;
       }
     }
@@ -476,6 +644,19 @@ There.init({
       top: top,
     };
   },
+
+  clearUndo: function() {
+    There.data.undo = [];
+    $('.footer .button[data-id="undo"]').attr('data-enabled', '0');
+  },
+
+  pushUndo: function() {
+    // TODO: Push an undo.
+  },
+
+  popUndo: function() {
+    // TODO: Pop an undo.
+  },
 });
 
 $(document).ready(function() {
@@ -523,6 +704,10 @@ $(document).ready(function() {
   });
 
   $('.titlebar .buttons .button[data-id="help"]').on('click', function() {
+    There.fsCommand('browser', {
+      target: 'There_Help',
+      urlGen: 'HelpChangeMeUrl',
+    });
   }).on('mousedown', function(event) {
     event.stopPropagation();
   });
@@ -598,21 +783,49 @@ $(document).ready(function() {
     There.clearContextMenu();
   });
 
-  $('.section[data-section="wardrobe"] .tab').trigger('click');
-
-  $('.slider').each(function(index, element) {
-    There.data.sliders.push(new ChangeMeSlider(element));
+  $('.section[data-section="body"] .spa .link').on('click', function() {
+    There.fsCommand('browser', {
+      urlGen: 'SpaListUrl',
+    });
   });
 
+  if ($('.changeme').attr('data-section') == '') {
+    $('.section[data-section="wardrobe"] .tab').trigger('click');
+  }
+
   $('.footer .button[data-id="undo"]').on('click', function() {
+    There.popUndo();
   });
 
   $('.footer .button[data-id="save"]').on('click', function() {
   });
 
   $('.footer .button[data-id="shop"]').on('click', function() {
+    let gender = {
+      'male': 'Men',
+      'female': 'Women',
+    }[$('.changeme').attr('data-gender')];
+    if (gender == undefined) {
+      return;
+    }
+    let area = {
+      'hairstyles': 'Head',
+      'facial': 'Face',
+      'accessories': 'Accessories',
+      'tops': 'Tops',
+      'bottoms': 'Bottoms',
+      'footwear': 'Footwear',
+    }[$('.changeme').attr('data-area')] ?? '';
+    There.fsCommand('browser', {
+      target: 'There_Catalog',
+      urlGen: `Catalog${gender}${area}Url`,
+    });
   });
 
   $('.footer .button[data-id="organize"]').on('click', function() {
+    There.guiCommand({
+      action: 'organizer',
+      folder: 'wardrobe',
+    });
   });
 });

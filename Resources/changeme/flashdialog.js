@@ -6,13 +6,13 @@ There.init({
 
   onReady: function() {
     There.fsCommand('setStageWidthHeight', {
-      width: 800,
-      height: 89,
+      width: 260,
+      height: 192,
     });
 
     There.fsCommand('setWidthHeight', {
-      width: 800,
-      height: 89,
+      width: 260,
+      height: 192,
     });
 
     There.fsCommand('setTextureBitDepth', {
@@ -23,10 +23,9 @@ There.init({
   onVariable: function(name, value) {
     There.data.queue.push({name: name, value: value});
     if (There.data.player == undefined) {
-      if (name != 'dataversion') {
+      if (name != 'there_ready') {
         return;
       }
-      const movie = $('body').data('movie');
       const ruffle = window.RufflePlayer.newest();
       There.data.player = ruffle.createPlayer();
       There.data.player.config = {
@@ -36,9 +35,6 @@ There.init({
         backgroundColor: '#0000',
       };
       There.data.player.onFSCommand = function(command, query) {
-        if (command == 'beginDragWindow') {
-          return;
-        }
         There.fsCommand(command, query);
         if (There.data.isReady == false) {
           There.data.isReady = true;
@@ -47,7 +43,7 @@ There.init({
       };
       $('body').append(There.data.player);
       There.data.player.load({
-        url: `http://${There.variables.there_resourceshost}/resources/sg/${movie}.swf`,
+        url: `http://${There.variables.there_resourceshost}/resources/changeme/flashdialog.swf`,
         allowScriptAccess: true,
       }).then(function() {
         $('ruffle-player').attr('data-ready', '1');

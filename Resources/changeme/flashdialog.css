@@ -1,0 +1,18 @@
+body {
+  margin:0px;
+  font-family:sans-serif;
+  font-size:16px;
+  color:#000;
+  user-select:none;
+  text-size-adjust:none;
+  overflow:hidden;
+}
+
+ruffle-player {
+  width: 260px;
+  height: 192px;
+}
+
+ruffle-player:not([data-ready="1"]) {
+  display:none;
+}
