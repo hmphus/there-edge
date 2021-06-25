@@ -5,6 +5,7 @@ class ChangeMeSlider {
     self.knob = $(self.element).find('.knob');
     self.width = $(self.element).width();
     self.ids = $(self.element).data('id').split('/');
+    self.categories = $(self.element).data('category').split('/');
     self.minimum = $(self.element).data('minimum') ?? 0.0;
     self.maximum = $(self.element).data('maximum') ?? 1.0;
     self.values = self.ids.map(e => 0);
@@ -26,8 +27,9 @@ class ChangeMeSlider {
     }).on('mouseup', function() {
       if (self.active) {
         self.active = false;
+        const previousValues = self.values.slice();
         self.splitValues();
-        self.callback(self);
+        self.callback(self, previousValues);
       }
     });
   }
@@ -105,8 +107,54 @@ There.init({
     }).observe($('.changeme')[0]);
 
     $('.slider').each(function(index, element) {
-      const slider = new ChangeMeSlider(element, function(slider) {
-        There.handleAvatarLooks();
+      const slider = new ChangeMeSlider(element, function(slider, previousValues) {
+        let commands = [];
+        for (let category of slider.categories) {
+          switch (category) {
+            case 'head': {
+              commands.push(...slider.ids.map(function(id, index) {
+                return {
+                  command: 'setPhenomorphWeight',
+                  query: {
+                    name: id,
+                    weight: slider.values[index],
+                    bodyChangeCategory: category,
+                  },
+                  undoQuery: {
+                    name: id,
+                    weight: previousValues[index],
+                    bodyChangeCategory: category,
+                  },
+                };
+              }));
+              break;
+            }
+            case 'hair': {
+              commands.push(...slider.ids.map(function(id, index) {
+                return {
+                  command: 'setPhenomorphWeight',
+                  query: {
+                    name: `hair_${id}`,
+                    weight: slider.values[index],
+                    bodyChangeCategory: category,
+                  },
+                  undoQuery: {
+                    name: `hair_${id}`,
+                    weight: previousValues[index],
+                    bodyChangeCategory: category,
+                  },
+                };
+              }));
+              break;
+            }
+            case 'body': {
+              break;
+            }
+          }
+        }
+        if (commands.length > 0) {
+          There.handleAvatarLooks(slider.ids.join('/'), commands);
+        }
       });
       for (let id of slider.ids) {
         There.data.sliders[id] = slider;
@@ -114,7 +162,21 @@ There.init({
     });
 
     $('.section[data-section="body"] .editor[data-area="skin"] .items .item').on('click', function() {
-      There.handleAvatarLooks();
+      There.playSound('control down');
+      const previousIndex = Number($(this).parent().find('.item[data-selected="1"]').attr('data-index') ?? 1);
+      $(this).parent().find('.item').attr('data-selected', '0');
+      $(this).attr('data-selected', '1');
+      There.handleAvatarLooks('featurecolor', [{
+        command: 'setFeatureColorIndex',
+        query: {
+          index: $(this).attr('data-index'),
+          bodyChangeCategory: 'skincolor',
+        },
+        undoQuery: {
+          index: previousIndex,
+          bodyChangeCategory: 'skincolor',
+        },
+      }]);
     });
 
     //There.fsCommand('devtools');
@@ -253,8 +315,18 @@ There.init({
     }
   },
 
-  handleAvatarLooks: function() {
-    // TODO: Handle the value changes with undo.
+  handleAvatarLooks: function(key, commands) {
+    There.pushUndo(key, commands.map(function(command) {
+      return {
+        command: command.command,
+        query: command.undoQuery,
+      };
+    }));
+    There.fsCommand('beginChangingAvatarLooks');
+    for (let command of commands) {
+      There.fsCommand(command.command, command.query);
+    }
+    There.fsCommand('endChangingAvatarLooks');
   },
 
   fetchWardrobeXml: function(section, area) {
@@ -625,6 +697,9 @@ There.init({
             poid: entry.poid,
             action: menu.text,
           });
+          if (area == 'looksets') {
+            There.clearUndo();
+          }
         });
       } else {
         $(divSound).on('mouseover', function() {
@@ -650,12 +725,42 @@ There.init({
     $('.footer .button[data-id="undo"]').attr('data-enabled', '0');
   },
 
-  pushUndo: function() {
-    // TODO: Push an undo.
+  pushUndo: function(key, commands) {
+    const section = $('.changeme').attr('data-section');
+    const area = $('.changeme').attr('data-area');
+    const subarea = $('.changeme').attr('data-subarea');
+    if (section != 'body' || area == '') {
+      return;
+    }
+    if (There.data.undo.length > 0 && There.data.undo[There.data.undo.length - 1].key == key) {
+      return;
+    }
+    There.data.undo.push({
+      key: key,
+      commands: commands,
+      section: section,
+      area: area,
+      subarea: subarea,
+    });
+    $('.footer .button[data-id="undo"]').attr('data-enabled', '1');
   },
 
   popUndo: function() {
-    // TODO: Pop an undo.
+    let undo = There.data.undo.pop();
+    if (undo == undefined) {
+      return;
+    }
+    $('.changeme').attr('data-section', undo.section);
+    $('.changeme').attr('data-area', undo.area);
+    $('.changeme').attr('data-subarea', undo.subarea);
+    There.fsCommand('beginChangingAvatarLooks');
+    for (let command of undo.commands) {
+      There.fsCommand(command.command, command.query);
+    }
+    There.fsCommand('endChangingAvatarLooks');
+    if (There.data.undo.length == 0) {
+      $('.footer .button[data-id="undo"]').attr('data-enabled', '0');
+    }
   },
 });
 
@@ -685,6 +790,15 @@ $(document).ready(function() {
   }).on('mousedown', function(event) {
     There.playSound('control down');
     event.stopPropagation();
+  });
+
+  $('.slider .knob').on('mouseover', function() {
+    There.playSound('control rollover');
+  }).on('mousedown', function(event) {
+    There.playSound('control down');
+    event.stopPropagation();
+  }).on('mouseup', function() {
+    There.playSound('control up');
   });
 
   $('.subareas .subarea').on('mouseover', function() {
@@ -753,11 +867,6 @@ $(document).ready(function() {
 
   $('.changeme').on('mousedown', function() {
     $('.subareas').attr('data-active', '0');
-  });
-
-  $('.sections .section[data-section="body"] .panel .editor[data-area="skin"] .item').on('click', function() {
-    $(this).parent().find('.item').attr('data-selected', '0');
-    $(this).attr('data-selected', '1');
   });
 
   $('.titlebar .buttons .button, .sections .section .tab, .footer .button, .areas .area').on('mousedown', function() {
