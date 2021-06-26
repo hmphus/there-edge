@@ -180,14 +180,12 @@ There.init({
     });
 
     There.variables.welcometreatmentsdialog = '1';
-    There.keys['welcometreatmentsdialog'] = 'welcomeTreatmentsDialog';
     There.fsCommand('registerFlashProp', {
       var: 'welcomeTreatmentsDialog',
       val: There.variables.welcometreatmentsdialog,
     });
 
     There.variables.leavetreatmentsdialog = '1';
-    There.keys['leavetreatmentsdialog'] = 'leaveTreatmentsDialog';
     There.fsCommand('registerFlashProp', {
       var: 'leaveTreatmentsDialog',
       val: There.variables.leavetreatmentsdialog,
@@ -212,22 +210,15 @@ There.init({
         if (There.data.startup == undefined) {
           There.data.startup = $('.changeme').attr('data-section');
         }
-        if (value == 1 && !There.data.helpOpened && There.variables.welcometreatmentsdialog == 1) {
-          There.data.helpOpened = true;
-          There.fsCommand('newChildPluginWindow', {
-            id: 'There_welcomeDialog',
-            url: `http://${There.variables.there_resourceshost}/Resources/ChangeMe/flashDialog.swf`,
-            type: 'cameracontrolhelp',
-          });
+        if (value == 1 && There.variables.welcometreatmentsdialog == 1) {
+          There.createChildWindow('helpopened', 'There_welcomeDialog', 'cameracontrolhelp');
         }
         if (value == 0) {
           if (There.data.startup == 'body') {
             There.fsCommand('closeWindow');
           }
           if (There.variables.there_savelooksetdialogopened == 1) {
-            There.fsCommand('closeChildPluginWindow', {
-              id: 'There_saveDialogResult',
-            });
+            There.closeChildWindow('There_saveDialogResult');
           }
         }
       }
@@ -236,6 +227,17 @@ There.init({
     if (name == 'there_userrequestsleave' && value == 1) {
       There.variables.there_userrequestsleave = '0';
       There.requestLeaveSpa();
+    }
+
+    if (name == 'there_savedialogresult') {
+      if (value == 'saveLooksetResult_1') {
+        There.variables.there_savelooksetdialogopened = '0';
+        There.variables.there_savedialogresult = '';
+        There.clearUndo();
+      } else if (value == 'saveLooksetResult_0') {
+        There.variables.there_savelooksetdialogopened = '0';
+        There.variables.there_savedialogresult = '';
+      }
     }
 
     if (name == 'there_teleporting' || name == 'there_treatmentsenabled') {
@@ -803,16 +805,30 @@ There.init({
     }
   },
 
+  createChildWindow: function(name, id, type, query) {
+    if (name != null) {
+      name = name.toLowerCase();
+      if (There.variables[name] == 1) {
+        return;
+      }
+      There.variables[name] = '1';
+    }
+    There.fsCommand('newChildPluginWindow', Object.assign({}, {
+      id: id,
+      url: `http://${There.variables.there_resourceshost}/Resources/ChangeMe/flashDialog.swf`,
+      type: type,
+    }, query ?? {}));
+  },
+
+  closeChildWindow: function(id) {
+    There.fsCommand('closeChildPluginWindow', {
+      id: id,
+    });
+  },
+
   requestLeaveSpa: function() {
     if (There.data.undo.length > 0 && There.variables.leavetreatmentsdialog == 1) {
-      if (There.variables.there_leavetreatmentsdialogopened != 1) {
-        There.variables.there_leavetreatmentsdialogopened = '1';
-        There.fsCommand('newChildPluginWindow', {
-          id: 'There_leaveTreatmentsDialogOpened',
-          url: `http://${There.variables.there_resourceshost}/Resources/ChangeMe/flashDialog.swf`,
-          type: 'leavetreatments',
-        });
-      }
+      There.createChildWindow('there_leavetreatmentsdialogopened', 'There_leaveTreatmentsDialogOpened', 'leavetreatments');
     } else {
       There.fsCommand('requestChangeMeLeave');
       There.fsCommand('closeWindow');
@@ -968,6 +984,24 @@ $(document).ready(function() {
   });
 
   $('.footer .button[data-id="save"]').on('click', function() {
+    const section = $('.changeme').attr('data-section');
+    if (section == 'wardrobe') {
+      There.createChildWindow(null, 'There_ignored', 'saveOutfitChangeMe', {
+        pilotDOID: There.variables.there_pilotdoid,
+      });
+    } else if (section == 'body' && There.variables.there_treatmentsenabled == 1) {
+      const contents = There.data.contents[There.getWardrobeContentsKey('looksets')];
+      const wearset = There.data.wearsets[There.getWardrobeWearsetKey('looksets')];
+      if (contents != undefined && wearset != undefined) {
+        const entry = contents.entries.find(e => e.type == 'item' && wearset.poids.includes(e.poid));
+        if (entry != undefined) {
+          There.createChildWindow('there_savelooksetdialogopened', 'There_saveDialogResult', 'saveLooksetChangeMe', {
+            looksetToUpdate: entry.name,
+            looksetToUpdatePOID: entry.poid,
+          });
+        }
+      }
+    }
   });
 
   $('.footer .button[data-id="shop"]').on('click', function() {
