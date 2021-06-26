@@ -1305,6 +1305,9 @@ body {
   padding:2px 0px 0px 2px;
 }
 
+.changeme[data-section="body"]:not([data-treatmentsenabled="1"]) .footer .button[data-id="save"],
+.changeme[data-section="body"]:not([data-treatmentsenabled="1"]) .footer .button[data-id="save"]:hover,
+.changeme[data-section="body"]:not([data-treatmentsenabled="1"]) .footer .button[data-id="save"]:active,
 .footer .button[data-enabled="0"],
 .footer .button[data-enabled="0"]:hover,
 .footer .button[data-enabled="0"]:active {
@@ -1326,6 +1329,9 @@ body {
   background-position-x:-72px;
 }
 
+.changeme[data-section="body"]:not([data-treatmentsenabled="1"]) .footer .button.medium[data-id="save"],
+.changeme[data-section="body"]:not([data-treatmentsenabled="1"]) .footer .button.medium[data-id="save"]:hover,
+.changeme[data-section="body"]:not([data-treatmentsenabled="1"]) .footer .button.medium[data-id="save"]:active,
 .footer .button.medium[data-enabled="0"],
 .footer .button.medium[data-enabled="0"]:hover,
 .footer .button.medium[data-enabled="0"]:active {

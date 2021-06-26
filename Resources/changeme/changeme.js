@@ -190,11 +190,14 @@ There.init({
       var: 'leaveTreatmentsDialog',
       val: There.variables.leavetreatmentsdialog,
     });
-
-    //There.fsCommand('devtools');
   },
 
   onVariable: function(name, value) {
+    if (value.endsWith('=')) {
+      value = value.slice(0, -1);
+      There.variables[name] = value;
+    }
+
     if (name == 'there_treatmentsenabled') {
       if (value != $('.changeme').attr('there_treatmentsenabled')) {
         if (value == 0) {
