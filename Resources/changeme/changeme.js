@@ -179,6 +179,20 @@ There.init({
       }]);
     });
 
+    There.variables.welcometreatmentsdialog = '1';
+    There.keys['welcometreatmentsdialog'] = 'welcomeTreatmentsDialog';
+    There.fsCommand('registerFlashProp', {
+      var: 'welcomeTreatmentsDialog',
+      val: There.variables.welcometreatmentsdialog,
+    });
+
+    There.variables.leavetreatmentsdialog = '1';
+    There.keys['leavetreatmentsdialog'] = 'leaveTreatmentsDialog';
+    There.fsCommand('registerFlashProp', {
+      var: 'leaveTreatmentsDialog',
+      val: There.variables.leavetreatmentsdialog,
+    });
+
     //There.fsCommand('devtools');
   },
 
@@ -195,6 +209,44 @@ There.init({
             $('.sections .section[data-section="body"] .tab').trigger('click');
           }
         }
+        if (There.data.startup == undefined) {
+          There.data.startup = $('.changeme').attr('data-section');
+        }
+        if (value == 1 && !There.data.helpOpened && There.variables.welcometreatmentsdialog == 1) {
+          There.data.helpOpened = true;
+          There.fsCommand('newChildPluginWindow', {
+            id: 'There_welcomeDialog',
+            url: `http://${There.variables.there_resourceshost}/Resources/ChangeMe/flashDialog.swf`,
+            type: 'cameracontrolhelp',
+          });
+        }
+        if (value == 0) {
+          if (There.data.startup == 'body') {
+            There.fsCommand('closeWindow');
+          }
+          if (There.variables.there_savelooksetdialogopened == 1) {
+            There.fsCommand('closeChildPluginWindow', {
+              id: 'There_saveDialogResult',
+            });
+          }
+        }
+      }
+    }
+
+    if (name == 'there_userrequestsleave' && value == 1) {
+      There.variables.there_userrequestsleave = '0';
+      if (There.data.undo.length > 0 && There.variables.leavetreatmentsdialog == 1) {
+        if (There.variables.there_leavetreatmentsdialogopened != 1) {
+          There.variables.there_leavetreatmentsdialogopened = '1';
+          There.fsCommand('newChildPluginWindow', {
+            id: 'There_leaveTreatmentsDialogOpened',
+            url: `http://${There.variables.there_resourceshost}/Resources/ChangeMe/flashDialog.swf`,
+            type: 'leavetreatments',
+          });
+        }
+      } else {
+        There.fsCommand('requestChangeMeLeave');
+        There.fsCommand('closeWindow');
       }
     }
 
