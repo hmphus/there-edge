@@ -235,19 +235,7 @@ There.init({
 
     if (name == 'there_userrequestsleave' && value == 1) {
       There.variables.there_userrequestsleave = '0';
-      if (There.data.undo.length > 0 && There.variables.leavetreatmentsdialog == 1) {
-        if (There.variables.there_leavetreatmentsdialogopened != 1) {
-          There.variables.there_leavetreatmentsdialogopened = '1';
-          There.fsCommand('newChildPluginWindow', {
-            id: 'There_leaveTreatmentsDialogOpened',
-            url: `http://${There.variables.there_resourceshost}/Resources/ChangeMe/flashDialog.swf`,
-            type: 'leavetreatments',
-          });
-        }
-      } else {
-        There.fsCommand('requestChangeMeLeave');
-        There.fsCommand('closeWindow');
-      }
+      There.requestLeaveSpa();
     }
 
     if (name == 'there_teleporting' || name == 'there_treatmentsenabled') {
@@ -814,6 +802,22 @@ There.init({
       $('.footer .button[data-id="undo"]').attr('data-enabled', '0');
     }
   },
+
+  requestLeaveSpa: function() {
+    if (There.data.undo.length > 0 && There.variables.leavetreatmentsdialog == 1) {
+      if (There.variables.there_leavetreatmentsdialogopened != 1) {
+        There.variables.there_leavetreatmentsdialogopened = '1';
+        There.fsCommand('newChildPluginWindow', {
+          id: 'There_leaveTreatmentsDialogOpened',
+          url: `http://${There.variables.there_resourceshost}/Resources/ChangeMe/flashDialog.swf`,
+          type: 'leavetreatments',
+        });
+      }
+    } else {
+      There.fsCommand('requestChangeMeLeave');
+      There.fsCommand('closeWindow');
+    }
+  },
 });
 
 $(document).ready(function() {
@@ -879,6 +883,11 @@ $(document).ready(function() {
   });
 
   $('.titlebar .buttons .button[data-id="close"]').on('click', function() {
+    if (There.variables.there_treatmentsenabled == 1) {
+      There.requestLeaveSpa();
+    } else {
+      There.fsCommand('closeWindow');
+    }
   }).on('mousedown', function(event) {
     event.stopPropagation();
   });
