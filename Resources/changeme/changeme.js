@@ -4,10 +4,11 @@ class ChangeMeSlider {
     self.element = element;
     self.knob = $(self.element).find('.knob');
     self.width = $(self.element).width();
-    self.ids = $(self.element).data('id').split('/');
-    self.categories = $(self.element).data('category').split('/');
-    self.minimum = $(self.element).data('minimum') ?? 0.0;
-    self.maximum = $(self.element).data('maximum') ?? 1.0;
+    self.ids = $(self.element).data('id').split(',');
+    self.categories = $(self.element).data('category').split(',');
+    self.reverse = $(self.element).data('reverse') == 1;
+    self.envelopes = $(self.element).data('envelope');
+    self.multipliers = $(self.element).data('multiplier');
     self.values = self.ids.map(e => 0);
     self.refresh();
     self.callback = callback;
@@ -46,8 +47,22 @@ class ChangeMeSlider {
 
   splitValues() {
     let self = this;
-    let value = $(self.knob).position().left / self.width * (self.maximum - self.minimum) + self.minimum;
-    if (self.values.length == 1) {
+    let value = $(self.knob).position().left / self.width;
+    if (self.reverse) {
+      value = 1.0 - value;
+    }
+    if (self.envelopes != undefined) {
+      for (let index in self.envelopes) {
+        const envelope = self.envelopes[index];
+        const count = envelope.length - 1;
+        const step = 1.0 / count;
+        const i0 = Math.floor(value * count);
+        const i1 = Math.min(i0 + 1, count);
+        const t1 = (value - i0 * step) / step;
+        const t0 = 1.0 - t1;
+        self.values[index] = (envelope[i0] * t0 + envelope[i1] * t1) * self.multipliers[index];
+      }
+    } else if (self.values.length == 1) {
       self.values[0] = value;
     } else if (self.values.length == 2) {
       value = (value - 0.5) * 2.0;
@@ -59,7 +74,27 @@ class ChangeMeSlider {
   refresh() {
     let self = this;
     let value = 0.0;
-    if (self.values.length == 1) {
+    if (self.envelopes != undefined) {
+      const envelope = self.envelopes[0];
+      const count = envelope.length - 1;
+      const step = 1.0 / count;
+      value = self.values[0] * self.multipliers[0];
+      var i0, i1;
+      for (let i = 0; i <= count; i++) {
+        i0 = i;
+        i1 = Math.min(i + 1, count);
+        if (value >= envelope[i0] && value < envelope[i1]) {
+          break;
+        }
+      }
+      var t;
+      if (i0 == i1) {
+        t = 0.0;
+      } else {
+        t = (value - envelope[i0]) / (envelope[i1] - envelope[i0]);
+      }
+      value = (i0 + t) * step;
+    } else if (self.values.length == 1) {
       value = self.values[0];
     } else if (self.values.length == 2) {
       if (self.values.filter(e => e != 0.0).length > 1) {
@@ -71,8 +106,11 @@ class ChangeMeSlider {
     } else {
       return;
     }
+    if (self.reverse) {
+      value = 1.0 - value;
+    }
     $(self.knob).css({
-      left: (value - self.minimum) / (self.maximum - self.minimum) * self.width,
+      left: value * self.width,
     });
   }
 }
@@ -105,61 +143,6 @@ There.init({
         height: rect.height,
       });
     }).observe($('.changeme')[0]);
-
-    $('.slider').each(function(index, element) {
-      const slider = new ChangeMeSlider(element, function(slider, previousValues) {
-        let commands = [];
-        for (let category of slider.categories) {
-          switch (category) {
-            case 'head': {
-              commands.push(...slider.ids.map(function(id, index) {
-                return {
-                  command: 'setPhenomorphWeight',
-                  query: {
-                    name: id,
-                    weight: slider.values[index],
-                    bodyChangeCategory: category,
-                  },
-                  undoQuery: {
-                    name: id,
-                    weight: previousValues[index],
-                    bodyChangeCategory: category,
-                  },
-                };
-              }));
-              break;
-            }
-            case 'hair': {
-              commands.push(...slider.ids.map(function(id, index) {
-                return {
-                  command: 'setPhenomorphWeight',
-                  query: {
-                    name: `hair_${id}`,
-                    weight: slider.values[index],
-                    bodyChangeCategory: category,
-                  },
-                  undoQuery: {
-                    name: `hair_${id}`,
-                    weight: previousValues[index],
-                    bodyChangeCategory: category,
-                  },
-                };
-              }));
-              break;
-            }
-            case 'body': {
-              break;
-            }
-          }
-        }
-        if (commands.length > 0) {
-          There.handleAvatarLooks(slider.ids.join('/'), commands);
-        }
-      });
-      for (let id of slider.ids) {
-        There.data.sliders[id] = slider;
-      }
-    });
 
     $('.section[data-section="body"] .editor[data-area="skin"] .items .item').on('click', function() {
       There.playSound('control down');
@@ -265,7 +248,6 @@ There.init({
   },
 
   fetchAvatarLooksXml: async function() {
-    const gender = $('.changeme').attr('data-gender');
     let query = {
       Oid: There.variables.there_pilotdoid,
     };
@@ -281,8 +263,9 @@ There.init({
         There.onAvatarLooksXml(xml, key);
       },
     });
-    There.setupAvatarLooks();
-    if (gender == undefined) {
+    const init = $('.changeme').attr('data-gender') == '';
+    There.setupAvatarLooks(init);
+    if (init) {
       There.setupWardrobe();
     }
     There.setNamedTimer('fetch-avatar-looks', 1000, function() {
@@ -295,8 +278,7 @@ There.init({
     let looks = {
       doid: null,
       skeleton: null,
-      phenomorphs: {},
-      siblings: {},
+      attributes: {},
     };
     const xmlAnswer = xml.getElementsByTagName('Answer')[0];
     const xmlResult = xmlAnswer.getElementsByTagName('Result')[0];
@@ -322,40 +304,88 @@ There.init({
         }
         case 'Phenomorph': {
           const name = xmlChild.getElementsByTagName('Name')[0].childNodes[0].nodeValue;
-          const value = xmlChild.getElementsByTagName('Value')[0].childNodes[0].nodeValue;
-          looks.phenomorphs[name] = value;
+          const value = Number(xmlChild.getElementsByTagName('Value')[0].childNodes[0].nodeValue);
+          looks.attributes[name.toLowerCase()] = {
+            name: name,
+            value: value,
+            setter: 'setPhenomorphWeight',
+          };
           break;
         }
         case 'Sibling': {
           const name = xmlChild.getElementsByTagName('Name')[0].childNodes[0].nodeValue;
-          const value = xmlChild.getElementsByTagName('Value')[0].childNodes[0].nodeValue;
-          looks.siblings[name] = value;
+          const value = Number(xmlChild.getElementsByTagName('Value')[0].childNodes[0].nodeValue);
+          looks.attributes[name.toLowerCase()] = {
+            name: name,
+            value: value,
+            setter: 'setSiblingWeight',
+          };
           break;
         }
       }
     }
-    There.data.looks[key] = looks;
+    There.data.looks = looks;
   },
 
-  setupAvatarLooks: function() {
-    const looks = There.data.looks[There.getAvatarLooksKey()];
-    switch (looks.skeleton) {
-      case 'ft0': {
-        $('.changeme').attr('data-gender', 'female');
-        break;
+  setupAvatarLooks: function(init) {
+    const looks = There.data.looks;
+    if (init) {
+      if (looks.skeleton == 'ft0') {
+        $('.slider[data-category="upperbody"]').attr('data-id', 'phenod,phenoa').data('envelope', [
+          [0.0, 0.01, 0.02, 0.03, 0.08, 0.1, 0.2, 0.4, 0.6, 0.8, 1.0],
+          [-1.0, -0.8, -0.6, -0.4, -0.3, -0.1, -0.04, -0.03, -0.02, -0.01, -0.0],
+        ]).data('multiplier', [1, -1]);
       }
-      case 'mt0': {
-        $('.changeme').attr('data-gender', 'male');
-        break;
+      if (looks.skeleton == 'mt0') {
+        $('.slider[data-category="upperbody"]').attr('data-id', 'phenod').data('envelope', [
+          [0.0, 0.01, 0.02, 0.03, 0.08, 0.1, 0.2, 0.4, 0.6, 0.8, 1.0],
+        ]).data('multiplier', [1]);
       }
+      $('.slider[data-category="muscularity"]').attr('data-id', 'sibc').data('envelope', [
+        [-0.5, -0.4, -0.3, -0.2, -0.1, 0.0, 0.2, 0.4, 0.6, 0.8, 1.0],
+      ]).data('multiplier', [1]);
+      $('.slider').each(function(index, element) {
+        const slider = new ChangeMeSlider(element, function(slider, previousValues) {
+          let commands = [];
+          for (let category of slider.categories) {
+            commands.push(...slider.ids.map(function(id, index) {
+              let attribute = There.data.looks.attributes[`${category == 'hair' ? 'hair_' : ''}${id}`];
+              attribute.value = slider.values[index];
+              return {
+                command: attribute.setter,
+                query: {
+                  name: attribute.name,
+                  weight: attribute.value,
+                  bodyChangeCategory: category,
+                },
+                undoQuery: {
+                  name: attribute.name,
+                  weight: previousValues[index],
+                  bodyChangeCategory: category,
+                },
+              };
+            }));
+          }
+          if (commands.length > 0) {
+            There.handleAvatarLooks(slider.ids.join(','), commands);
+          }
+        });
+        for (let id of slider.ids) {
+          There.data.sliders[id] = slider;
+        }
+      });
     }
+    $('.changeme').attr('data-gender', {
+      'ft0': 'female',
+      'mt0': 'male',
+    }[looks.skeleton]);
     let divSkinItems = $('.section[data-section="body"] .editor[data-area="skin"] .items');
     $(divSkinItems).find('.item').attr('data-selected', '0');
     $(divSkinItems).find(`.item[data-index="${looks.featureColorIndex}"]`).attr('data-selected', '1');
-    for (let name in looks.phenomorphs) {
+    for (let name in looks.attributes) {
       const slider = There.data.sliders[name];
       if (slider != undefined) {
-        slider.setValue(name, looks.phenomorphs[name]);
+        slider.setValue(name, looks.attributes[name].value);
       }
     }
   },
