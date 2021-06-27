@@ -1409,6 +1409,22 @@ body {
   pointer-events:auto;
 }
 
+::-webkit-scrollbar {
+  background-color:#e5f3f8;
+  width:14px;
+  height:14px;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color:#c4f0f8;
+  border:1px solid #89a8ad;
+}
+
+::-webkit-scrollbar-thumb:hover,
+::-webkit-scrollbar-thumb:active {
+  background-color:#b2dce5;
+}
+
 .changeme[data-state="bar"] .areas,
 .changeme[data-state="bar"] .sections,
 .changeme[data-state="bar"] .footer,

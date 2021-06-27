@@ -350,6 +350,9 @@ There.init({
           for (let category of slider.categories) {
             commands.push(...slider.ids.map(function(id, index) {
               let attribute = There.data.looks.attributes[`${category == 'hair' ? 'hair_' : ''}${id}`];
+              if (attribute == undefined) {
+                return null;
+              }
               attribute.value = slider.values[index];
               return {
                 command: attribute.setter,
@@ -364,7 +367,7 @@ There.init({
                   bodyChangeCategory: category,
                 },
               };
-            }));
+            }).filter(e => e != null));
           }
           if (commands.length > 0) {
             There.handleAvatarLooks(slider.ids.join(','), commands);
@@ -574,7 +577,7 @@ There.init({
     There.setupWardrobe();
   },
 
-  setupWardrobe: function() {
+  setupWardrobe: function(resetScroll) {
     const gender = $('.changeme').attr('data-gender');
     if (gender == '') {
       return;
@@ -600,6 +603,9 @@ There.init({
       return;
     }
     $(divItems).attr('data-count', '0').find('.item').remove();
+    if (resetScroll) {
+      $(divItems).scrollLeft(0).scrollTop(0);
+    }
     const contents = There.data.contents[There.getWardrobeContentsKey(area)];
     if (contents == undefined) {
       return;
@@ -959,7 +965,7 @@ $(document).ready(function() {
     if (area == 'face') {
       $('.changeme').attr('data-subarea', 'eyes-ears');
     }
-    There.setupWardrobe();
+    There.setupWardrobe(true);
   });
 
   $('.subareas').on('mousedown', function(event) {
