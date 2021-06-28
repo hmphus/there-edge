@@ -114,7 +114,8 @@ FlashProxyModule::FlashProxyModule():
     m_qaControl(),
     m_pos(),
     m_size(),
-    m_wnd(nullptr),
+    m_proxyWnd(nullptr),
+    m_clientWnd(nullptr),
     m_maskRects(),
     m_maskRectCount(0),
     m_identity(Identity::Unknown),
@@ -162,8 +163,8 @@ FlashProxyModule::~FlashProxyModule()
     if (m_controller != nullptr)
         m_controller->Close();
 
-    if (m_wnd != nullptr)
-        DestroyWindow(m_wnd);
+    if (m_proxyWnd != nullptr)
+        DestroyWindow(m_proxyWnd);
 }
 
 HRESULT STDMETHODCALLTYPE FlashProxyModule::QueryInterface(REFIID riid, void **object)
@@ -389,8 +390,8 @@ HRESULT STDMETHODCALLTYPE FlashProxyModule::Close(DWORD dwSaveOption)
     if (m_identity == Identity::Teleport)
         BroadcastMessage(WM_FLASHPROXY_SET_TELEPORTING, 0, 0);
 
-    if (m_wnd != nullptr)
-        SetWindowLongPtr(m_wnd, GWL_USERDATA, 0);
+    if (m_proxyWnd != nullptr)
+        SetWindowLongPtr(m_proxyWnd, GWL_USERDATA, 0);
 
     if (m_controller != nullptr)
         m_controller->Close();
@@ -405,7 +406,7 @@ HRESULT STDMETHODCALLTYPE FlashProxyModule::DoVerb(LONG iVerb, LPMSG lpmsg, IOle
     {
         case OLEIVERB_INPLACEACTIVATE:
         {
-            if (m_wnd != nullptr)
+            if (m_proxyWnd != nullptr)
                 return S_OK;
 
             if (m_environment != nullptr)
@@ -428,8 +429,10 @@ HRESULT STDMETHODCALLTYPE FlashProxyModule::DoVerb(LONG iVerb, LPMSG lpmsg, IOle
             if (hwndParent == nullptr)
                 return E_FAIL;
 
+            m_clientWnd = hwndParent;
+
             RECT bounds;
-            GetClientRect(hwndParent, &bounds);
+            GetClientRect(m_clientWnd, &bounds);
 
             WCHAR value[25];
             _ltow_s(bounds.right - bounds.left, value, _countof(value), 10);
@@ -437,14 +440,14 @@ HRESULT STDMETHODCALLTYPE FlashProxyModule::DoVerb(LONG iVerb, LPMSG lpmsg, IOle
             _ltow_s(bounds.bottom - bounds.top, value, _countof(value), 10);
             SetVariable(L"There_WindowHeight", value);
 
-            m_wnd = CreateWindowEx(WS_EX_TRANSPARENT, g_WindowClassName, L"",
-                                   WS_CHILD | WS_CLIPCHILDREN | WS_CLIPSIBLINGS,
-                                   m_pos.cx, m_pos.cy, m_size.cx, m_size.cy,
-                                   hwndParent, nullptr, GetModuleHandle(nullptr), nullptr);
-            if (m_wnd == nullptr)
+            m_proxyWnd = CreateWindowEx(WS_EX_TRANSPARENT, g_WindowClassName, L"",
+                                        WS_CHILD | WS_CLIPCHILDREN | WS_CLIPSIBLINGS,
+                                        m_pos.cx, m_pos.cy, m_size.cx, m_size.cy,
+                                        m_clientWnd, nullptr, GetModuleHandle(nullptr), nullptr);
+            if (m_proxyWnd == nullptr)
                 return E_FAIL;
 
-            SetWindowLongPtr(m_wnd, GWL_USERDATA, (LPARAM)this);
+            SetWindowLongPtr(m_proxyWnd, GWL_USERDATA, (LPARAM)this);
 
             if (FAILED(CreateCoreWebView2Environment(this)))
                 return E_FAIL;
@@ -462,7 +465,7 @@ HRESULT STDMETHODCALLTYPE FlashProxyModule::GetWindow(HWND *phwnd)
     if (phwnd == nullptr)
         return E_INVALIDARG;
 
-    *phwnd = m_wnd;
+    *phwnd = m_proxyWnd;
     return S_OK;
 }
 
@@ -552,16 +555,14 @@ HRESULT STDMETHODCALLTYPE FlashProxyModule::Invoke(DISPID dispIdMember, REFIID r
 {
     if (dispIdMember == 1)
     {
-        if (m_wnd != nullptr)
+        if (m_proxyWnd != nullptr)
         {
-            HWND parentWnd = GetParent(m_wnd);
-
             POINT point;
             GetCursorPos(&point);
-            ScreenToClient(parentWnd, &point);
+            ScreenToClient(m_clientWnd, &point);
 
-            SetCapture(m_wnd);
-            SendMessage(parentWnd, WM_LBUTTONDOWN, 0, MAKELPARAM(point.x, point.y));
+            SetCapture(m_proxyWnd);
+            SendMessage(m_clientWnd, WM_LBUTTONDOWN, 0, MAKELPARAM(point.x, point.y));
         }
 
         CComBSTR bcommand = L"beginDragWindow";
@@ -667,7 +668,7 @@ HRESULT STDMETHODCALLTYPE FlashProxyModule::Invoke(HRESULT errorCode, ICoreWebVi
         return E_INVALIDARG;
 
     m_environment = environment;
-    m_environment->CreateCoreWebView2Controller(m_wnd, this);
+    m_environment->CreateCoreWebView2Controller(m_proxyWnd, this);
     return S_OK;
 }
 
@@ -699,7 +700,7 @@ HRESULT STDMETHODCALLTYPE FlashProxyModule::Invoke(HRESULT errorCode, ICoreWebVi
     settings->put_IsWebMessageEnabled(true);
 
     RECT bounds;
-    GetClientRect(m_wnd, &bounds);
+    GetClientRect(m_proxyWnd, &bounds);
     m_controller->put_Bounds(bounds);
 
     COREWEBVIEW2_COLOR color = {0, 0, 0, 0};
@@ -992,10 +993,10 @@ HRESULT FlashProxyModule::SetRect(const RECT &rect)
     m_size.cx = width;
     m_size.cy = height;
 
-    if (m_wnd == nullptr)
+    if (m_proxyWnd == nullptr)
         return S_OK;
 
-    SetWindowPos(m_wnd, nullptr, m_pos.cx, m_pos.cy, m_size.cx, m_size.cy, flags | SWP_NOZORDER | SWP_NOACTIVATE);
+    SetWindowPos(m_proxyWnd, nullptr, m_pos.cx, m_pos.cy, m_size.cx, m_size.cy, flags | SWP_NOZORDER | SWP_NOACTIVATE);
 
     GuessToolbarVisibility();
 
@@ -1007,7 +1008,7 @@ HRESULT FlashProxyModule::SetRect(const RECT &rect)
         if ((flags & SWP_NOSIZE) == 0)
         {
             RECT bounds;
-            GetClientRect(m_wnd, &bounds);
+            GetClientRect(m_proxyWnd, &bounds);
             m_controller->put_Bounds(bounds);
         }
     }
@@ -1051,7 +1052,7 @@ void FlashProxyModule::GuessToolbarVisibility()
         return;
 
     RECT bounds;
-    GetClientRect(GetParent(m_wnd), &bounds);
+    GetClientRect(m_clientWnd, &bounds);
 
     LONG y = bounds.bottom - m_pos.cy - 56;
     UINT32 visibilityMask = 0;
@@ -1191,10 +1192,10 @@ void FlashProxyModule::SetVisibility(UINT32 visibilityMask)
 
     m_visible = visible;
 
-    if (m_wnd == nullptr)
+    if (m_proxyWnd == nullptr)
         return;
 
-    ShowWindow(m_wnd, visible ? SW_SHOWNA : SW_HIDE);
+    ShowWindow(m_proxyWnd, visible ? SW_SHOWNA : SW_HIDE);
 
     if (m_controller != NULL)
         m_controller->put_IsVisible(visible);
@@ -1211,11 +1212,9 @@ LRESULT FlashProxyModule::BroadcastMessage(UINT Msg, WPARAM wParam, LPARAM lPara
 {
     LRESULT result = 0;
 
-    if (m_wnd != nullptr)
+    if (m_proxyWnd != nullptr)
     {
-        HWND parentWnd = GetParent(m_wnd);
-
-        for (HWND wnd = FindWindowEx(parentWnd, nullptr, g_WindowClassName, nullptr); wnd != nullptr; wnd = FindWindowEx(parentWnd, wnd, g_WindowClassName, nullptr))
+        for (HWND wnd = FindWindowEx(m_clientWnd, nullptr, g_WindowClassName, nullptr); wnd != nullptr; wnd = FindWindowEx(m_clientWnd, wnd, g_WindowClassName, nullptr))
             result |= SendMessage(wnd, Msg, wParam, lParam);
     }
 
@@ -1262,15 +1261,15 @@ LRESULT APIENTRY FlashProxyModule::ChildWndProc(HWND hWnd, UINT Msg, WPARAM wPar
 
         case WM_MOUSEMOVE:
         {
-            if (GetCapture() == hWnd)
+            if (flashProxy != nullptr && GetCapture() == hWnd)
             {
-                HWND parentWnd = GetParent(hWnd);
+                HWND clientWnd = flashProxy->m_clientWnd;
 
                 POINT point = {GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam)};
                 ClientToScreen(hWnd, &point);
-                ScreenToClient(parentWnd, &point);
+                ScreenToClient(clientWnd, &point);
 
-                SendMessage(parentWnd, WM_MOUSEMOVE, 0, MAKELPARAM(point.x, point.y));
+                SendMessage(clientWnd, WM_MOUSEMOVE, 0, MAKELPARAM(point.x, point.y));
 
                 return 0;
             }
@@ -1278,16 +1277,16 @@ LRESULT APIENTRY FlashProxyModule::ChildWndProc(HWND hWnd, UINT Msg, WPARAM wPar
 
         case WM_LBUTTONUP:
         {
-            if (GetCapture() == hWnd)
+            if (flashProxy != nullptr && GetCapture() == hWnd)
             {
-                HWND parentWnd = GetParent(hWnd);
+                HWND clientWnd = flashProxy->m_clientWnd;
 
                 POINT point = {GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam)};
                 ClientToScreen(hWnd, &point);
-                ScreenToClient(parentWnd, &point);
+                ScreenToClient(clientWnd, &point);
 
                 ReleaseCapture();
-                SendMessage(parentWnd, WM_LBUTTONUP, 0, MAKELPARAM(point.x, point.y));
+                SendMessage(clientWnd, WM_LBUTTONUP, 0, MAKELPARAM(point.x, point.y));
 
                 return 0;
             }

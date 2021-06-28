@@ -232,7 +232,8 @@ protected:
     QACONTROL                                m_qaControl;
     SIZE                                     m_pos;
     SIZE                                     m_size;
-    HWND                                     m_wnd;
+    HWND                                     m_proxyWnd;
+    HWND                                     m_clientWnd;
     RECT                                     m_maskRects[10];
     LONG                                     m_maskRectCount;
     Identity                                 m_identity;
