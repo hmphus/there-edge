@@ -1,6 +1,6 @@
 body {
   margin:0px;
-  font-family:sans-serif;
+  font-family:tahoma, sans-serif;
   font-size:16px;
   color:#000;
   user-select:none;
@@ -8,11 +8,173 @@ body {
   overflow:hidden;
 }
 
-ruffle-player {
-  width: 800px;
-  height: 89px;
+.hud {
+  position:absolute;
+  left:0px;
+  top:0px;
+  width:800px;
+  height:88px;
+  overflow:hidden;
+  border-top:1px solid #000;
+  display:flex;
+  flex-direction:row;
+  justify-content:space-between;
 }
 
-ruffle-player:not([data-ready="1"]) {
-  display:none;
+.hud::before {
+  position:absolute;
+  left:0px;
+  right:0px;
+  height:100%;
+  background-image:var(--image);
+  content:' ';
+}
+
+.hud[data-alpha="1"]::before {
+  opacity:0.25;
+}
+
+.hud[data-alpha="2"]::before {
+  opacity:0.50;
+}
+
+.hud[data-alpha="3"]::before {
+  opacity:0.75;
+}
+
+.left {
+  position:relative;
+  width:206px;
+  height:100%;
+  border-left:1px solid #000;
+  border-right:1px solid #000;
+  background-color:rgba(0, 0, 0, 0.15);
+}
+
+.left .tabs {
+  width:100%;
+  height:24px;
+  display:flex;
+  flex-direction:row;
+  justify-content:space-around;
+}
+
+.left .tabs .tab {
+  position:relative;
+  flex:2 1 auto;
+  height:24px;
+  box-sizing:border-box;
+  border-bottom:1px solid #000;
+  border-right:1px solid #000;
+  background-color:rgba(0, 0, 0, 0.15);
+  line-height:22px;
+  font-size:11px;
+  text-align:center;
+  color:rgba(255, 255, 255, 0.5);
+}
+
+.left .tabs .tab::before {
+  position:absolute;
+  left:0px;
+  right:0px;
+  height:100%;
+  border-left:1px solid rgba(255, 255, 255, 0.25);
+  border-right:1px solid rgba(0, 0, 0, 0.5);
+  content:' ';
+  pointer-events:none;
+}
+
+.left .tabs .tab:last-of-type {
+  border-right:none;
+}
+
+.left .tabs .tab:hover {
+  color:rgba(255, 255, 255, 0.75);
+  text-shadow:1px 1px 1px rgba(0, 0, 0, 0.4);
+}
+
+.left .tabs .tab[data-selected="1"] {
+  border-bottom:none;
+  background-color:transparent;
+  color:#fff;
+  text-shadow:none;
+}
+
+.left .panels {
+  width:205px;
+  height:64px;
+  border-right:1px solid rgba(0, 0, 0, 0.5);
+}
+
+.middle {
+  position:relative;
+  height:100%;
+}
+
+.right {
+  position:relative;
+  width:43px;
+  height:100%;
+  border-left:1px solid #000;
+  border-right:1px solid #000;
+  background-color:rgba(0, 0, 0, 0.15);
+}
+
+.right::before {
+  position:absolute;
+  left:0px;
+  right:0px;
+  height:100%;
+  border-left:1px solid rgba(255, 255, 255, 0.25);
+  content:' ';
+  pointer-events:none;
+}
+
+.right .buttons {
+  margin-left:5px;
+  margin-top:4px;
+  font-size:0px;
+  height:15px;
+}
+
+.right .buttons .button {
+  display:inline-block;
+  margin-left:1px;
+  width:14px;
+  height:13px;
+  border:1px solid #000;
+  border-radius:3px;
+  background-image:url(hud.png);
+  background-position-y:0px;
+}
+
+.right .buttons .button:hover {
+  background-position-y:-13px;
+}
+
+.right .buttons .button:hover:active {
+  background-position-y:-26px;
+}
+
+.right .buttons .button[data-enabled="0"],
+.right .buttons .button[data-enabled="0"]:hover,
+.right .buttons .button[data-enabled="0"]:active {
+  background-position-y:-39px;
+  pointer-events:none;
+}
+
+.right .buttons .button[data-id="close"] {
+  background-position-x:-14px;
+}
+
+.right .buttons .button[data-id="help"] {
+  background-position-x:-28px;
+}
+
+.right .buttons .button[data-id="drag"] {
+  background-position-x:-42px;
+}
+
+.right .buttons .button[data-id="alpha"] {
+  background-position-x:-56px;
 }
