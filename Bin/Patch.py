@@ -26,9 +26,6 @@ if __name__ == '__main__':
         if data.find(uuid_pair[2].bytes_le) >= 0:
             print('The patch has already been applied.')
             sys.exit(1)
-    if not os.path.exists('There-Original.exe'):
-        with open('There.orig', 'wb') as file:
-            file.write(data)
     for uuid_pair in uuid_pairs:
         index = 0
         for i in range(uuid_pair[0]):
@@ -42,6 +39,6 @@ if __name__ == '__main__':
         if data[index:].find(uuid_pair[1].bytes_le) >= 0:
             print('The patch cannot be used with this version of There.')
             sys.exit(1)
-    with open('There.exe', 'wb') as file:
+    with open('There-Patched.exe', 'wb') as file:
         file.write(data)
     print('The patch was applied successfully.')
