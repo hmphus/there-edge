@@ -27,6 +27,7 @@ body {
   right:0px;
   height:100%;
   background-image:var(--image);
+  background-size:100% 100%;
   content:' ';
 }
 
@@ -40,6 +41,142 @@ body {
 
 .hud[data-alpha="3"]::before {
   opacity:0.75;
+}
+
+.button.small {
+  display:inline-block;
+  width:14px;
+  height:13px;
+  border:1px solid #000;
+  border-radius:3px;
+  background-image:url(hud.png);
+  background-position:0px 0px;
+}
+
+.button.small:hover {
+  background-position-y:-13px;
+}
+
+.button.small:hover:active {
+  background-position-y:-26px;
+}
+
+.button.small[data-enabled="0"],
+.button.small[data-enabled="0"]:hover,
+.button.small[data-enabled="0"]:active {
+  background-position-y:-39px;
+  pointer-events:none;
+}
+
+.button.short {
+  display:inline-block;
+  width:19px;
+  height:14px;
+  padding:1px;
+  border:1px solid #000;
+  border-radius:4px;
+  background-image:url(hud.png);
+  background-position:0px -52px;
+  vertical-align:top;
+  text-align:center;
+  line-height:14px;
+  font-size:11px;
+  color:#fff;
+}
+
+.button.short:hover {
+  background-position-y:-68px;
+  text-shadow:1px 1px 1px #0006;
+}
+
+.button.short:hover:active {
+  background-position-y:-84px;
+  text-shadow:0px 0px 2px #0006;
+  padding:2px 0px 0px 2px;
+}
+
+.button.short[data-enabled="0"],
+.button.short[data-enabled="0"]:hover,
+.button.short[data-enabled="0"]:active {
+  background-position-y:-100px;
+  pointer-events:none;
+  padding:1px;
+  color:rgba(0, 0, 0, 0.5);
+  text-shadow:1px 1px 0px rgba(255, 255, 255, 0.4);
+}
+
+.button.medium {
+  display:inline-block;
+  width:48px;
+  height:14px;
+  padding:1px;
+  border:1px solid #000;
+  border-radius:6px;
+  background-image:url(hud.png);
+  background-position:-21px -52px;
+  vertical-align:top;
+  text-align:center;
+  line-height:14px;
+  font-size:11px;
+  color:#fff;
+}
+
+.button.medium:hover {
+  background-position-y:-68px;
+  text-shadow:1px 1px 1px #0006;
+}
+
+.button.medium:hover:active {
+  background-position-y:-84px;
+  text-shadow:0px 0px 2px #0006;
+  padding:2px 0px 0px 2px;
+}
+
+.button.medium[data-enabled="0"],
+.button.medium[data-enabled="0"]:hover,
+.button.medium[data-enabled="0"]:active {
+  background-position-y:-100px;
+  pointer-events:none;
+  padding:1px;
+  color:rgba(0, 0, 0, 0.5);
+  text-shadow:1px 1px 0px rgba(255, 255, 255, 0.4);
+}
+
+.button.large {
+  display:inline-block;
+  width:62px;
+  height:18px;
+  padding:1px;
+  border:1px solid #000;
+  border-radius:8px;
+  background-image:url(hud.png);
+  background-position:0px -116px;
+  vertical-align:top;
+  text-align:center;
+  line-height:18px;
+  font-size:11px;
+  color:#fff;
+}
+
+.button.large:hover {
+  background-position-y:-136px;
+  text-shadow:1px 1px 1px #0006;
+}
+
+.button.large:hover:active {
+  background-position-y:-156px;
+  text-shadow:0px 0px 2px #0006;
+  padding:2px 0px 0px 2px;
+}
+
+.button.large[data-enabled="0"],
+.button.large[data-enabled="0"]:hover,
+.button.large[data-enabled="0"]:active {
+  background-position-y:-176px;
+  pointer-events:none;
+  padding:1px;
+  color:rgba(0, 0, 0, 0.5);
+  text-shadow:1px 1px 0px rgba(255, 255, 255, 0.4);
 }
 
 .left {
@@ -102,7 +239,7 @@ body {
 
 .left .panels {
   width:205px;
-  height:64px;
+  height:calc(100% - 24px);
   border-right:1px solid rgba(0, 0, 0, 0.5);
 }
 
@@ -137,44 +274,22 @@ body {
   height:15px;
 }
 
-.right .buttons .button {
-  display:inline-block;
+.right .button.small {
   margin-left:1px;
-  width:14px;
-  height:13px;
-  border:1px solid #000;
-  border-radius:3px;
-  background-image:url(hud.png);
-  background-position-y:0px;
 }
 
-.right .buttons .button:hover {
-  background-position-y:-13px;
-}
-
-.right .buttons .button:hover:active {
-  background-position-y:-26px;
-}
-
-.right .buttons .button[data-enabled="0"],
-.right .buttons .button[data-enabled="0"]:hover,
-.right .buttons .button[data-enabled="0"]:active {
-  background-position-y:-39px;
-  pointer-events:none;
-}
-
-.right .buttons .button[data-id="close"] {
+.right .button.small[data-id="close"] {
   background-position-x:-14px;
 }
 
-.right .buttons .button[data-id="help"] {
+.right .button.small[data-id="help"] {
   background-position-x:-28px;
 }
 
-.right .buttons .button[data-id="drag"] {
+.right .button.small[data-id="drag"] {
   background-position-x:-42px;
 }
 
-.right .buttons .button[data-id="alpha"] {
+.right .button.small[data-id="alpha"] {
   background-position-x:-56px;
 }

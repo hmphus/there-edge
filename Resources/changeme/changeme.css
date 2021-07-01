@@ -1313,7 +1313,7 @@ body {
 .footer .button[data-enabled="0"]:active {
   pointer-events:none;
   color:#7dbbca;
-  text-shadow:1px 1px 1px #fff;
+  text-shadow:1px 1px 0px #fff;
 }
 
 .footer .button.medium {

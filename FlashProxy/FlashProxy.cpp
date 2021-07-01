@@ -1116,54 +1116,63 @@ void FlashProxyModule::GuessToolbarVisibility()
             }
 
             case 88:  // Hidden SocialGame
+            case 99:
             {
                 visibilityMask = 0;
                 break;
             }
 
             case 112: // MenuBar SocialGame MessageBar
+            case 123:
             {
                 visibilityMask = (UINT32)Identity::MessageBar;
                 break;
             }
 
             case 136: // MenuBar ShortcutBar SocialGame MessageBar
+            case 147:
             {
                 visibilityMask = (UINT32)Identity::ShortcutBar | (UINT32)Identity::MessageBar;
                 break;
             }
 
             case 146: // MenuBar FunFinder SocialGame MessageBar
+            case 157:
             {
                 visibilityMask = (UINT32)Identity::FunFinder | (UINT32)Identity::MessageBar;
                 break;
             }
 
             case 134: // MenuBar EmotionsBar SocialGame MessageBar
+            case 145:
             {
                 visibilityMask = (UINT32)Identity::EmotionsBar | (UINT32)Identity::MessageBar;
                 break;
             }
 
             case 170: // MenuBar ShortcutBar FunFinder SocialGame MessageBar
+            case 181:
             {
                 visibilityMask = (UINT32)Identity::ShortcutBar | (UINT32)Identity::FunFinder | (UINT32)Identity::MessageBar;
                 break;
             }
 
             case 158: // MenuBar ShortcutBar EmotionsBar SocialGame MessageBar
+            case 169:
             {
                 visibilityMask = (UINT32)Identity::ShortcutBar | (UINT32)Identity::EmotionsBar | (UINT32)Identity::MessageBar;
                 break;
             }
 
             case 168: // MenuBar FunFinder EmotionsBar SocialGame MessageBar
+            case 179:
             {
                 visibilityMask = (UINT32)Identity::FunFinder | (UINT32)Identity::EmotionsBar | (UINT32)Identity::MessageBar;
                 break;
             }
 
             case 192: // MenuBar ShortcutBar FunFinder EmotionsBar SocialGame MessageBar
+            case 203:
             {
                 visibilityMask = (UINT32)Identity::ShortcutBar | (UINT32)Identity::FunFinder | (UINT32)Identity::EmotionsBar | (UINT32)Identity::MessageBar;
                 break;
