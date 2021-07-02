@@ -142,10 +142,16 @@ There.playSound = function(name) {
     'typing crlf': 8193,
     'typing any character': 8194,
     'message recieved': 4103,
+    'message received': 4103,
     'system message': 4104,
     'avatar message': 4105,
     'system message one': 4108,
     'avatar message one': 4109,
+    'cards game over': 12288,
+    'cards new hand': 12289,
+    'cards lose trick': 12290,
+    'cards take trick': 12291,
+    'cards your turn': 12292,
   };
   const id = typeof(name) == 'string' ? names[name] : name;
   if (id != undefined) {

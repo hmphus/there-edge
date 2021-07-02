@@ -179,6 +179,45 @@ body {
   text-shadow:1px 1px 0px rgba(255, 255, 255, 0.4);
 }
 
+.button.mood {
+  margin-left:12px;
+  margin-top:8px;
+  display:inline-block;
+  width:19px;
+  height:19px;
+  border:1px solid #000;
+  border-radius:6px;
+  background-image:url(hud.png);
+  background-position-y:-196px;
+}
+
+.button.mood[data-state="normal"] {
+  background-position-x:0px;
+}
+
+.button.mood[data-state="strong"] {
+  background-position-x:-19px;
+}
+
+.button.mood[data-state="tentative"] {
+  background-position-x:-38px;
+}
+
+.button.mood:hover {
+  background-position-y:-215px;
+}
+
+.button.mood:hover:active {
+  background-position-y:-234px;
+}
+
+.button.mood[data-enabled="0"],
+.button.mood[data-enabled="0"]:hover,
+.button.mood[data-enabled="0"]:active {
+  background-position-y:-253px;
+  pointer-events:none;
+}
+
 .left {
   position:relative;
   width:206px;
@@ -241,6 +280,46 @@ body {
   width:205px;
   height:calc(100% - 24px);
   border-right:1px solid rgba(0, 0, 0, 0.5);
+}
+
+.left .panel {
+  position:relative;
+  display:none;
+}
+
+.left .panel[data-selected="1"] {
+  display:block;
+  height:100%;
+}
+
+.left .panel .messages {
+  position:absolute;
+  left:5px;
+  right:5px;
+  top:3px;
+  bottom:3px;
+  border:1px solid #000;
+  background-color:rgba(255, 255, 255, 0.4);
+  overflow-y:scroll;
+  font-size:11px;
+  color:#000;
+}
+
+.left .panel .messages::-webkit-scrollbar {
+  background-color:transparent;
+  width:14px;
+  height:14px;
+  border-left:1px solid #000;
+}
+
+.left .panel .messages::-webkit-scrollbar-thumb {
+  background-color:rgba(255, 255, 255, 0.7);
+  border-left:1px solid #000;
+}
+
+.left .panel .messages::-webkit-scrollbar-thumb:hover,
+.left .panel .messages::-webkit-scrollbar-thumb:active {
+  background-color:rgba(255, 255, 255, 0.9);
 }
 
 .middle {

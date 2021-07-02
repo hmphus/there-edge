@@ -148,7 +148,7 @@ $(document).ready(function() {
     $(leftDiv).find(`.panel[data-id="${id}"]`).attr('data-selected', '1');
   });
 
-  $('.right .button').on('mouseover', function() {
+  $('.button').on('mouseover', function() {
     There.playSound('control rollover');
   }).on('mousedown', function(event) {
     There.playSound('control down');
@@ -182,5 +182,11 @@ $(document).ready(function() {
 
   $('.right .button[data-id="alpha"').on('click', function() {
     $('.hud').attr('data-alpha', (Number($('.hud').attr('data-alpha') ?? 0) + 1) % 4);
+  });
+
+  $('.right .button[data-id="mood"').on('click', function() {
+    const states = ['normal', 'strong', 'tentative'];
+    let state = states[(states.indexOf($(this).attr('data-state')) + 1) % states.length];
+    $(this).attr('data-state', state);
   });
 });
