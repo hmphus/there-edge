@@ -70,3 +70,8 @@
 .hud[data-gamestate="endgame"] .left .panel[data-id="game"] .button[data-id="taketrick"] {
   display:inline-block;
 }
+
+.middle .message {
+  font-size:11px;
+  color:#fff;
+}

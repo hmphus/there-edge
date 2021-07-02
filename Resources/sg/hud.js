@@ -73,15 +73,103 @@ class Background {
   }
 
   onVariable(name, value) {
+    let self = this;
     if (name == 'hudbg') {
       $('.hud').css('--image', `url(../${value.replace('.swf', '.png')})`);
     }
   }
 
   onData(name, data) {
+    let self = this;
     if (name == 'hudconfig') {
       $('.right .button[data-id="alpha"]').attr('data-enabled', data.allowbgtog == 1 ? '1' : '0');
       $('.right .button[data-id="drag"]').attr('data-enabled', data.allowdrag == 1 ? '1' : '0');
+    }
+  }
+}
+
+class MessageManager {
+  constructor() {
+    let self = this;
+    self.queue = [];
+    self.history = [];
+    self.lastId = -1;
+    self.timer = null;
+    self.timestamp = null;
+    There.data.listeners.push(self);
+  }
+
+  addMessage(id, text) {
+    let self = this;
+    let index = self.queue.findIndex(e => e.id == id);
+    if (index < 0) {
+      if (id == 0 || id > self.lastId) {
+        self.queue.push({
+          id: id,
+          text: text,
+        });
+        self.queue.sort((a, b) => a.id - b.id);
+      }
+    } else {
+      self.queue[index].text = text;
+    }
+    self.displayMessage();
+  }
+
+  displayMessage() {
+    let self = this;
+    if (self.timestamp == null) {
+      const message = self.queue.shift();
+      if (message == undefined) {
+        $('.message').text('');
+        return;
+      }
+      self.lastId = message.id;
+      $('.message').text(message.text);
+      self.updateHistory(`** ${message.text}`);
+      self.timestamp = Date.now();
+      self.timer = setTimeout(function() {
+        self.timer = null;
+        self.timestamp = null;
+        self.displayMessage();
+      }, self.queue.length > 0 ? 2000 : 5000);
+    } else if (Date.now() - self.timestamp > 2000) {
+      clearTimeout(self.timer);
+      self.timer = null;
+      self.timestamp = null;
+      self.displayMessage();
+    }
+  }
+
+  updateHistory(message) {
+    let self = this;
+    self.history.push(message);
+    while (self.history.length > 25) {
+      self.history.shift();
+    }
+    let divMessage = $('.messages');
+    let scroll = ($(divMessage).height() - $(divMessage).prop('scrollHeight') + $(divMessage).prop('scrollTop'));
+    $(divMessage).empty();
+    for (let entry of self.history) {
+      $('<div/>').text(entry).appendTo($(divMessage));
+    }
+    if (scroll >= 0) {
+      $(divMessage).animate({
+        scrollTop: $(divMessage).prop('scrollHeight'),
+      }, 400);
+    }
+  }
+
+  onData(name, data) {
+    let self = this;
+    if (name == 'message') {
+      let firstId = Number(data.firstmessage ?? -1);
+      for (let message of data.message) {
+        let id = Number(message.serialnum);
+        if (id >= firstId) {
+          self.addMessage(id, message.text);
+        }
+      }
     }
   }
 }
@@ -112,6 +200,7 @@ There.init({
     };
 
     There.data.background = new Background();
+    There.data.messageManager = new MessageManager();
   },
 
   onVariable: function(name, value) {
