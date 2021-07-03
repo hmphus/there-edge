@@ -1410,7 +1410,7 @@ body {
 }
 
 ::-webkit-scrollbar {
-  background-color:#e5f3f8;
+  background-color:#eee;
   width:14px;
   height:14px;
 }

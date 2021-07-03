@@ -88,7 +88,7 @@ class Background {
   }
 }
 
-class MessageManager {
+class Messages {
   constructor() {
     let self = this;
     self.queue = [];
@@ -96,6 +96,10 @@ class MessageManager {
     self.lastId = -1;
     self.timer = null;
     self.timestamp = null;
+    self.fastTimeout = 2000;
+    self.slowTimeout = 5000;
+    self.messageElement = $('.message');
+    self.messagesElement = $('.messages');
     There.data.listeners.push(self);
   }
 
@@ -121,23 +125,32 @@ class MessageManager {
     if (self.timestamp == null) {
       const message = self.queue.shift();
       if (message == undefined) {
-        $('.message').text('');
+        $(self.messageElement).text('');
         return;
       }
       self.lastId = message.id;
-      $('.message').text(message.text);
+      $(self.messageElement).text(message.text);
       self.updateHistory(`** ${message.text}`);
       self.timestamp = Date.now();
       self.timer = setTimeout(function() {
         self.timer = null;
         self.timestamp = null;
         self.displayMessage();
-      }, self.queue.length > 0 ? 2000 : 5000);
-    } else if (Date.now() - self.timestamp > 2000) {
+      }, self.queue.length > 0 ? self.fastTimeout : self.slowTimeout);
+    } else if (self.queue.length > 0) {
+      let elapsed = Date.now() - self.timestamp;
       clearTimeout(self.timer);
-      self.timer = null;
-      self.timestamp = null;
-      self.displayMessage();
+      if (elapsed < self.fastTimeout) {
+        self.timer = setTimeout(function() {
+          self.timer = null;
+          self.timestamp = null;
+          self.displayMessage();
+        }, self.fastTimeout - elapsed);
+      } else {
+        self.timer = null;
+        self.timestamp = null;
+        self.displayMessage();
+      }
     }
   }
 
@@ -147,17 +160,21 @@ class MessageManager {
     while (self.history.length > 25) {
       self.history.shift();
     }
-    let divMessage = $('.messages');
-    let scroll = ($(divMessage).height() - $(divMessage).prop('scrollHeight') + $(divMessage).prop('scrollTop'));
-    $(divMessage).empty();
+    let scroll = ($(self.messagesElement).height() - $(self.messagesElement).prop('scrollHeight') + $(self.messagesElement).prop('scrollTop'));
+    $(self.messagesElement).empty();
     for (let entry of self.history) {
-      $('<div/>').text(entry).appendTo($(divMessage));
+      $('<div/>').text(entry).appendTo($(self.messagesElement));
     }
     if (scroll >= 0) {
-      $(divMessage).animate({
-        scrollTop: $(divMessage).prop('scrollHeight'),
-      }, 400);
+      self.scrollHistory(400);
     }
+  }
+
+  scrollHistory(duration) {
+    let self = this;
+    $(self.messagesElement).animate({
+      scrollTop: $(self.messagesElement).prop('scrollHeight'),
+    }, duration ?? 0);
   }
 
   onData(name, data) {
@@ -171,6 +188,31 @@ class MessageManager {
         }
       }
     }
+  }
+}
+
+class Mood {
+  constructor() {
+    let self = this;
+    self.titles = ['Normal', 'Strong', 'Tentative'];
+    self.states = self.titles.map(e => e.toLowerCase());
+    self.element = $('.button[data-id="mood"]');
+    $(self.element).on('click', function() {
+      const oldValue = self.value;
+      const newValue = (oldValue + 1) % self.states.length;
+      self.value = newValue;
+      There.data.messages.addMessage(0, `Your mood has changed from ${self.titles[oldValue]} to ${self.titles[newValue]}.`);
+    });
+  }
+
+  get value() {
+    let self = this;
+    return self.states.indexOf($(self.element).attr('data-state'));
+  }
+
+  set value(value) {
+    let self = this;
+    $(self.element).attr('data-state', self.states[value]);
   }
 }
 
@@ -200,7 +242,9 @@ There.init({
     };
 
     There.data.background = new Background();
-    There.data.messageManager = new MessageManager();
+    There.data.messages = new Messages();
+    There.data.mood = new Mood();
+    There.data.game = new Game();
   },
 
   onVariable: function(name, value) {
@@ -220,6 +264,13 @@ There.init({
       }
     }
   },
+
+  sendEventMessageToClient: function(command, data) {
+    There.fsCommand('sendEvent', Object.assign({
+      command: command,
+      mood: There.data.mood.value,
+    }, data ?? {}));
+  },
 });
 
 $(document).ready(function() {
@@ -235,6 +286,9 @@ $(document).ready(function() {
     $(leftDiv).find('.panel').attr('data-selected', '0');
     $(leftDiv).find(`.tab[data-id="${id}"]`).attr('data-selected', '1');
     $(leftDiv).find(`.panel[data-id="${id}"]`).attr('data-selected', '1');
+    if (id == 'messages') {
+      There.data.messages.scrollHistory();
+    }
   });
 
   $('.button').on('mouseover', function() {
@@ -271,11 +325,5 @@ $(document).ready(function() {
 
   $('.right .button[data-id="alpha"').on('click', function() {
     $('.hud').attr('data-alpha', (Number($('.hud').attr('data-alpha') ?? 0) + 1) % 4);
-  });
-
-  $('.right .button[data-id="mood"').on('click', function() {
-    const states = ['normal', 'strong', 'tentative'];
-    let state = states[(states.indexOf($(this).attr('data-state')) + 1) % states.length];
-    $(this).attr('data-state', state);
   });
 });
