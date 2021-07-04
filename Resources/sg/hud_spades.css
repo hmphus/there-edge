@@ -46,13 +46,13 @@
   margin-right:5px;
 }
 
-.hud[data-gamestate="bid"] .left .panel[data-id="game"] .logo,
-.hud[data-gamestate="bid"] .left .panel[data-id="game"] .button[data-id="newgame"],
-.hud[data-gamestate="bid"] .left .panel[data-id="game"] .button[data-id="rules"] {
+.hud[data-gamestate="bid"][data-isactiveplayer="1"] .left .panel[data-id="game"] .logo,
+.hud[data-gamestate="bid"][data-isactiveplayer="1"] .left .panel[data-id="game"] .button[data-id="newgame"],
+.hud[data-gamestate="bid"][data-isactiveplayer="1"] .left .panel[data-id="game"] .button[data-id="rules"] {
   display:none;
 }
 
-.hud:not([data-gamestate="bid"]) .left .panel[data-id="game"] .bid {
+.hud:not([data-gamestate="bid"][data-isactiveplayer="1"]) .left .panel[data-id="game"] .bid {
   display:none;
 }
 
@@ -71,7 +71,95 @@
   display:inline-block;
 }
 
-.middle .message {
+.middle {
+  display:flex;
+  flex-direction:row;
+  height:100%;
+}
+
+.middle .table {
+  position:relative;
+  height:100%;
+}
+
+.middle .table::before {
+  position:absolute;
+  left:0px;
+  right:0px;
+  height:100%;
+  border-left:1px solid rgba(255, 255, 255, 0.25);
+  border-right:1px solid rgba(0, 0, 0, 0.5);
+  content:' ';
+  pointer-events:none;
+}
+
+.middle .table[data-player="1"] {
+  width:340px;
+}
+
+.middle .table:not([data-player="1"]) {
+  width:68px;
+  border-left:1px solid #000;
+}
+
+.middle .table[data-player="1"] .title {
+  position:absolute;
+  left:21px;
+  top:5px;
+  width:250px;
+  height:14px;
+  line-height:14px;
+  font-size:11px;
+  font-weight:bold;
+  color:#fff;
+  text-align:center;
+}
+
+
+.middle .table[data-player="1"] .message {
+  position:absolute;
+  left:21px;
+  top:64px;
+  width:250px;
+  height:14px;
+  line-height:14px;
+  font-size:11px;
+  font-weight:bold;
+  color:#fff;
+  text-align:center;
+  white-space:nowrap;
+  text-overflow:ellipsis;
+  overflow:hidden;
+}
+
+.middle .table .player {
+  position:absolute;
+  right:2px;
+  top:5px;
+  width:64px;
+  height:14px;
+  line-height:14px;
+  font-size:11px;
+  font-weight:bold;
+  color:#fff;
+  text-align:center;
+  white-space:nowrap;
+  text-overflow:ellipsis;
+  overflow:hidden;
+}
+
+.middle .table .stats {
+  position:absolute;
+  right:4px;
+  bottom:6px;
+  width:60px;
+  line-height:11px;
   font-size:11px;
   color:#fff;
+}
+
+.middle .table .stats div {
+  display:flex;
+  flex-direction:row;
+  justify-content:space-between;
 }

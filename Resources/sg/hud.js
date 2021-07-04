@@ -105,6 +105,13 @@ class Messages {
 
   addMessage(id, text) {
     let self = this;
+    text = text.trim();
+    if (text == '') {
+      return;
+    }
+    if (!text.endsWith('.') && !text.endsWith('!') && text.includes(' ')) {
+      text += '.';
+    }
     let index = self.queue.findIndex(e => e.id == id);
     if (index < 0) {
       if (id == 0 || id > self.lastId) {

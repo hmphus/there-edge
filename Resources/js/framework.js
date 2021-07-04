@@ -153,7 +153,7 @@ There.playSound = function(name) {
     'cards take trick': 12291,
     'cards your turn': 12292,
   };
-  const id = typeof(name) == 'string' ? names[name] : name;
+  const id = typeof(name) == 'string' ? names[name.replaceAll('_', ' ')] : name;
   if (id != undefined) {
     if (id == 4104 || id == 4105) {
       There.private.stopSoundId = id + 2;
