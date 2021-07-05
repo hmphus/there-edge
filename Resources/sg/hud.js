@@ -208,7 +208,7 @@ class Mood {
       const oldValue = self.value;
       const newValue = (oldValue + 1) % self.states.length;
       self.value = newValue;
-      There.data.messages.addMessage(0, `Your mood has changed from ${self.titles[oldValue]} to ${self.titles[newValue]}.`);
+      There.data.messages.addMessage(0, `Your mood has changed to ${self.titles[newValue]}.`);
     });
   }
 

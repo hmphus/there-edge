@@ -7,6 +7,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FlashProxy", "FlashProxy\Fl
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BrowserProxy", "BrowserProxy\BrowserProxy.vcxproj", "{DBD14B66-F34F-4401-966B-E0F1073168D5}"
 EndProject
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "Installer", "Installer\Installer.vdproj", "{4EA03C29-5CC6-46CC-B2CC-E956A716A745}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x86 = Debug|x86
@@ -26,6 +28,9 @@ Global
 		{DBD14B66-F34F-4401-966B-E0F1073168D5}.Develop|x86.Build.0 = Develop|Win32
 		{DBD14B66-F34F-4401-966B-E0F1073168D5}.Release|x86.ActiveCfg = Release|Win32
 		{DBD14B66-F34F-4401-966B-E0F1073168D5}.Release|x86.Build.0 = Release|Win32
+		{4EA03C29-5CC6-46CC-B2CC-E956A716A745}.Debug|x86.ActiveCfg = Release
+		{4EA03C29-5CC6-46CC-B2CC-E956A716A745}.Develop|x86.ActiveCfg = Release
+		{4EA03C29-5CC6-46CC-B2CC-E956A716A745}.Release|x86.ActiveCfg = Release
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
