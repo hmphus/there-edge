@@ -14,6 +14,9 @@ if __name__ == '__main__':
     parser.add_argument('--patch', action='store_true', help='patch the client')
     parser.add_argument('--register', action='store_true', help='register the libraries')
     args = parser.parse_args()
+    if not args.patch and not args.register:
+         parser.print_usage()
+         sys.exit(0)
     args.path = args.path.rstrip()
     if args.patch:
         uuid_pairs = [
