@@ -53,7 +53,7 @@ class Game {
         for (let player of self.players) {
           let tableDiv = $(`.middle .table[data-player="${player.id}"]`);
           $(tableDiv).find('.player').text(player.name);
-          $(tableDiv).find('.stats span[data-id="bid"]').text(player.bid == null ? '--' : player.bid);
+          $(tableDiv).find('.stats span[data-id="bid"]').text(player.bid == null ? '--' : (player.bid == 0 ? 'Nil' : player.bid));
           $(tableDiv).find('.stats span[data-id="tricks"]').text(player.tricks == null ? '--' : player.tricks);
         }
       }

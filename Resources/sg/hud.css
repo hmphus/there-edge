@@ -372,3 +372,131 @@ body {
 .right .button.small[data-id="alpha"] {
   background-position-x:-56px;
 }
+
+.deck {
+  font-size:0px;
+  direction:rtl;
+}
+
+.deck .card {
+  display:inline-block;
+  position:relative;
+  margin-left:-7px;
+  width:25px;
+  height:35px;
+  border:1px solid #000;
+  border-radius:4px;
+  background-color:#fff;
+}
+
+.deck[data-id="std"] .card:not([data-id]),
+.deck[data-id="std"] .card[data-id=""] {
+  background-image:url(deck_standard.png);
+  background-position:-315px -1px;
+}
+
+.deck[data-id="std"] .card[data-id="j1"] {
+  background-image:url(deck_standard.png);
+  background-position:-240px -1px;
+}
+
+.deck[data-id="std"] .card[data-id="j2"] {
+  background-image:url(deck_standard.png);
+  background-position:-265px -1px;
+}
+
+.deck[data-id="std"] .card[data-id]:not([data-id=""]):not([data-id="j1"]):not([data-id="j2"]) span {
+  display:inline-block;
+  position:absolute;
+  width:16px;
+  height:18px;
+  background-image:url(deck_standard.png);
+}
+
+.deck[data-id="std"] .card span:nth-of-type(1) {
+  left:5px;
+  top:1px;
+}
+
+.deck[data-id="std"] .card[data-id^="a"] span:nth-of-type(1) {
+  background-position-x:0px
+}
+
+.deck[data-id="std"] .card[data-id^="2"] span:nth-of-type(1) {
+  background-position-x:-16px
+}
+
+.deck[data-id="std"] .card[data-id^="3"] span:nth-of-type(1) {
+  background-position-x:-32px
+}
+
+.deck[data-id="std"] .card[data-id^="4"] span:nth-of-type(1) {
+  background-position-x:-48px
+}
+
+.deck[data-id="std"] .card[data-id^="5"] span:nth-of-type(1) {
+  background-position-x:-64px
+}
+
+.deck[data-id="std"] .card[data-id^="6"] span:nth-of-type(1) {
+  background-position-x:-80px
+}
+
+.deck[data-id="std"] .card[data-id^="7"] span:nth-of-type(1) {
+  background-position-x:-96px
+}
+
+.deck[data-id="std"] .card[data-id^="8"] span:nth-of-type(1) {
+  background-position-x:-112px
+}
+
+.deck[data-id="std"] .card[data-id^="9"] span:nth-of-type(1) {
+  background-position-x:-128px
+}
+
+.deck[data-id="std"] .card[data-id^="t"] span:nth-of-type(1) {
+  background-position-x:-144px
+}
+
+.deck[data-id="std"] .card[data-id^="j"] span:nth-of-type(1) {
+  background-position-x:-160px
+}
+
+.deck[data-id="std"] .card[data-id^="q"] span:nth-of-type(1) {
+  background-position-x:-176px
+}
+
+.deck[data-id="std"] .card[data-id^="k"] span:nth-of-type(1) {
+  background-position-x:-192px
+}
+
+.deck[data-id="std"] .card[data-id$="c"] span:nth-of-type(1),
+.deck[data-id="std"] .card[data-id$="s"] span:nth-of-type(1) {
+  background-position-y:0px;
+}
+
+.deck[data-id="std"] .card[data-id$="d"] span:nth-of-type(1),
+.deck[data-id="std"] .card[data-id$="h"] span:nth-of-type(1) {
+  background-position-y:-18px;
+}
+
+.deck[data-id="std"] .card span:nth-of-type(2) {
+  left:5px;
+  top:16px;
+}
+
+.deck[data-id="std"] .card[data-id$="c"] span:nth-of-type(2) {
+  background-position:-208px 0px;
+}
+
+.deck[data-id="std"] .card[data-id$="s"] span:nth-of-type(2) {
+  background-position:-224px 0px;
+}
+
+.deck[data-id="std"] .card[data-id$="d"] span:nth-of-type(2) {
+  background-position:-208px -18px;
+}
+
+.deck[data-id="std"] .card[data-id$="h"] span:nth-of-type(2) {
+  background-position:-224px -18px;
+}
