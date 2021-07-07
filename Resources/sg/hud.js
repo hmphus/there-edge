@@ -273,7 +273,7 @@ There.init({
   },
 
   sendEventMessageToClient: function(command, data) {
-    There.fsCommand('sendEvent', Object.assign({
+    There.fsCommand('sendEvent', Object.assign({}, {
       command: command,
       mood: There.data.mood.value,
     }, data ?? {}));

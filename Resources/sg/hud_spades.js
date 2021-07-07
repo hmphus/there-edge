@@ -1,8 +1,78 @@
+class CardSet {
+  constructor(id, name, settings) {
+    let self = this;
+    self.id = id;
+    self.name = name;
+    self.settings = Object.assign({}, {
+      selectable: false,
+    }, settings ?? {});
+    self.element = $(`.cardset[data-id="${self.id}"]`);
+    self.text = '';
+    self.cards = [];
+    self.suits = 'shcd';
+    self.ranks = 'akqjt98765432';
+    There.data.listeners.push(self);
+  }
+
+  onData(name, data) {
+    let self = this;
+    if (name == 'cardset') {
+      let cards = data.cardset.find(e => e.index == self.name)?.cards?.toLowerCase();
+      if (cards != undefined && self.text != cards) {
+        self.text = cards;
+        if (cards.startsWith('#')) {
+          self.cards = Array(Number(self.text.substr(1))).fill('??');
+        } else {
+          self.cards = self.text.match(/.{1,2}/g);
+          self.cards.sort(function(a, b) {
+            const suitA = a[1];
+            const suitB = b[1];
+            if (suitA != suitB) {
+              return self.suits.indexOf(suitA) - self.suits.indexOf(suitB);
+            }
+            const rankA = a[0];
+            const rankB = b[0];
+            return self.ranks.indexOf(rankA) - self.ranks.indexOf(rankB);
+          });
+        }
+        //<div class="cardset" data-id="hand1" data-deck="std" data-highlighted="1">
+        //<div class="card" data-id="3h" data-selected="1"><span></span><span></span></div>
+        $(self.element).empty();
+        for (let card of self.cards) {
+          let cardDiv = $('<div class="card"><span></span><span></span></div>');
+          $(cardDiv).attr('data-id', card);
+          $(self.element).prepend($(cardDiv));
+          if (self.settings.selectable) {
+            $(cardDiv).on('click', function() {
+              let selected = $(this).attr('data-selected');
+              $(self.element).find('.card').attr('data-selected', '0');
+              if (selected != 1) {
+                $(this).attr('data-selected', '1');
+              }
+            }).on('dblclick', function() {
+            });
+          }
+        }
+      }
+    }
+  }
+}
+
 class Game {
   constructor() {
     let self = this;
     self.previousGameStatesCount = 0;
     There.data.listeners.push(self);
+    There.data.cardsets = {
+      hand: null,
+      players: [
+        new CardSet('played1', 'played1'),
+        new CardSet('played2', 'played2'),
+        new CardSet('played3', 'played3'),
+        new CardSet('played4', 'played4'),
+      ],
+      lasttrick: new CardSet('lasttrick', 'lasttrick'),
+    };
   }
 
   onData(name, data) {
@@ -51,10 +121,25 @@ class Game {
         $('.button[data-id="play"]').attr('data-enabled', self.isActivePlayer && self.state == 'play' ? '1' : '0');
         $('.button[data-id="taketrick"]').attr('data-enabled', self.isActivePlayer && self.state == 'taketrick' ? '1' : '0');
         for (let player of self.players) {
-          let tableDiv = $(`.middle .table[data-player="${player.id}"]`);
-          $(tableDiv).find('.player').text(player.name);
-          $(tableDiv).find('.stats span[data-id="bid"]').text(player.bid == null ? '--' : (player.bid == 0 ? 'Nil' : player.bid));
-          $(tableDiv).find('.stats span[data-id="tricks"]').text(player.tricks == null ? '--' : player.tricks);
+          {
+            let playerDiv = $(`.left .panel[data-id="tricks"] .players .player[data-player="${player.id}"]`);
+            $(playerDiv).text(player.name);
+          }
+          {
+            let tableDiv = $(`.middle .table[data-player="${player.id}"]`);
+            $(tableDiv).find('.player').text(player.name);
+            $(tableDiv).find('.stats span[data-id="bid"]').text(player.bid == null ? '--' : (player.bid == 0 ? 'Nil' : player.bid));
+            $(tableDiv).find('.stats span[data-id="tricks"]').text(player.tricks == null ? '--' : player.tricks);
+          }
+        }
+        if (There.data.cardsets.hand == null) {
+          There.data.cardsets.hand = new CardSet('hand', `hand${self.players[self.thisPlayer].id}`, {
+            selectable: true,
+          });
+          let cardsetData = There.data.channels?.cardset?.data;
+          if (cardsetData != undefined) {
+            There.data.cardsets.hand.onData('cardset', cardsetData);
+          }
         }
       }
     }
