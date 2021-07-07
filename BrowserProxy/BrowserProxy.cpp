@@ -604,7 +604,7 @@ HRESULT STDMETHODCALLTYPE BrowserProxyModule::Invoke(HRESULT errorCode, ICoreWeb
     settings->put_AreDefaultScriptDialogsEnabled(true);
     settings->put_IsBuiltInErrorPageEnabled(true);
     settings->put_IsStatusBarEnabled(false);
-    settings->put_IsZoomControlEnabled(false);
+    settings->put_IsZoomControlEnabled(true);
     settings->put_AreHostObjectsAllowed(false);
     settings->put_IsScriptEnabled(true);
     settings->put_IsWebMessageEnabled(false);
