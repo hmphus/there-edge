@@ -1183,7 +1183,7 @@ void FlashProxyModule::GuessToolbarVisibility()
         }
     }
 
-    BroadcastMessage(WM_FLASHPROXY_SET_VISIBILITY, 0, (LPARAM)visibilityMask);
+    BroadcastMessage(WM_FLASHPROXY_SET_VISIBILITY, 0, (LPARAM)visibilityMask | (UINT32)Identity::MessageBar);
 }
 
 void FlashProxyModule::SetVisibility(UINT32 visibilityMask)
