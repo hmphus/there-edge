@@ -43,6 +43,11 @@ body {
   opacity:0.75;
 }
 
+.button[data-highlighted="1"]:not([data-enabled="0"]) {
+  background-color:#fa03;
+  background-blend-mode:multiply;
+}
+
 .button.small {
   display:inline-block;
   width:14px;
@@ -167,11 +172,6 @@ body {
   background-position-y:-156px;
   text-shadow:0px 0px 2px #0006;
   padding:2px 0px 0px 2px;
-}
-
-.button.large[data-highlighted="1"]:not([data-enabled="0"]) {
-  background-color:#fa03;
-  background-blend-mode:multiply;
 }
 
 .button.large[data-enabled="0"],
@@ -386,7 +386,7 @@ body {
 .cardset .card {
   display:inline-block;
   position:relative;
-  margin-left:-7px;
+  margin-left:-8px;
   top:0px;
   width:25px;
   height:35px;
