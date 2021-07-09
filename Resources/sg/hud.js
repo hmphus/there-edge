@@ -35,11 +35,7 @@ class Channel {
     if (xmlAnswer.getElementsByTagName('parsererror')[0] != undefined) {
       console.log(`${self.name} had an error during parsing: ${text}`);
     }
-    for (let listener of There.data.listeners) {
-      if (listener.onData != undefined) {
-        listener.onData(self.name, self.data);
-      }
-    }
+    self.notify();
   }
 
   parse(xml) {
@@ -63,6 +59,15 @@ class Channel {
       }
     }
     return data;
+  }
+
+  notify() {
+    let self = this;
+    for (let listener of There.data.listeners) {
+      if (listener.onData != undefined) {
+        listener.onData(self.name, self.data);
+      }
+    }
   }
 }
 
@@ -88,6 +93,32 @@ class Background {
   }
 }
 
+class EllipsisText {
+  constructor(selector) {
+    let self = this;
+    self.element = $(selector);
+    self.text = null;
+  }
+
+  get value() {
+    let self = this;
+    return self.text ?? '';
+  }
+
+  set value(text) {
+    let self = this;
+    if (self.text == text) {
+      return;
+    }
+    self.text = text;
+    $(self.element).text(text);
+    while(text.length > 0 && $(self.element).height() > $(self.element).parent().height()) {
+      text = text.substr(0, text.length - 1).trimEnd();
+      $(self.element).text(`${text}...`);
+    }
+  }
+}
+
 class Messages {
   constructor() {
     let self = this;
@@ -98,7 +129,7 @@ class Messages {
     self.timestamp = null;
     self.fastTimeout = 2000;
     self.slowTimeout = 5000;
-    self.messageElement = $('.message');
+    self.message = new EllipsisText('.message span');
     self.messagesElement = $('.messages');
     There.data.listeners.push(self);
   }
@@ -136,7 +167,7 @@ class Messages {
         return;
       }
       self.lastId = message.id;
-      $(self.messageElement).text(message.text);
+      self.message.value = message.text;
       self.updateHistory(`** ${message.text}`);
       self.timestamp = Date.now();
       self.timer = setTimeout(function() {

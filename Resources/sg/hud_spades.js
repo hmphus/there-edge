@@ -8,7 +8,8 @@ class CardSet {
       selectable: false,
     }, settings ?? {});
     self.element = $(`.cardset[data-id="${self.id}"]`);
-    self.text = '';
+    self.cardsText = null;
+    self.cardsUnsorted = [];
     self.cards = [];
     self.suits = 'shcd';
     self.ranks = 'akqjt98765432';
@@ -19,12 +20,14 @@ class CardSet {
     let self = this;
     if (name == 'cardset') {
       let cards = data.cardset.find(e => e.index == self.name)?.cards?.toLowerCase();
-      if (cards != undefined && self.text != cards) {
-        self.text = cards;
+      if (cards != undefined && self.cardsText != cards) {
+        self.cardsText = cards;
         if (cards.startsWith('#')) {
-          self.cards = Array(Number(self.text.substr(1))).fill('??');
+          self.cardsUnsorted = Array(Number(self.cardsText.substr(1))).fill('??');
+          self.cards = self.cardsUnsorted.concat();
         } else {
-          self.cards = self.text.match(/.{1,2}/g);
+          self.cardsUnsorted = self.cardsText.match(/.{1,2}/g) ?? [];
+          self.cards = self.cardsUnsorted.concat();
           if (self.settings.sorted) {
             self.cards.sort(function(a, b) {
               const suitA = a[1];
@@ -80,12 +83,63 @@ class CardSet {
     let self = this;
     return jQuery.map($(self.element).find('.card[data-selected="1"]'), e => $(e).attr('data-id'));
   }
+
+  set selected(id) {
+    let self = this;
+    if (!self.settings.selectable) {
+      return;
+    }
+    $(self.element).find('.card').attr('data-selected', '0');
+    $(self.element).find(`.card[data-id=${id}]`).attr('data-selected', '1');
+  }
+
+  detachCard(id) {
+    let self = this;
+    self.cardsText = null;
+    let cardDiv = $(self.element).find(`.card[data-id="${id}"]`).detach();
+    $(cardDiv).off('mouseover mousedown click dblclick');
+    $(cardDiv).attr('data-selected', '0');
+    return cardDiv;
+  }
+
+  attachCard(cardDiv) {
+    let self = this;
+    self.cardsText = null;
+    $(self.element).append(cardDiv);
+  }
+}
+
+class Score {
+  constructor(id) {
+    let self = this;
+    const selector = `.left .panel[data-id="score"] .section[data-team="${id}"]`;
+    self.element = $(selector);
+    self.playersText = new EllipsisText(`${selector} .players span`);
+    self.pointsDiv = $(selector).find('span[data-id="points"]');
+    self.bagsDiv = $(selector).find('span[data-id="bags"]');
+  }
+
+  set players(text) {
+    let self = this;
+    self.playersText.value = text;
+  }
+
+  set points(value) {
+    let self = this;
+    $(self.pointsDiv).text(value.toLocaleString());
+  }
+
+  set bags(value) {
+    let self = this;
+    $(self.bagsDiv).text(value.toLocaleString());
+  }
 }
 
 class Game {
   constructor() {
     let self = this;
-    self.previousGameStatesCount = 0;
+    self.playId = null;
+    self.playUiid = 1000;
     There.data.listeners.push(self);
     There.data.cardsets = {
       hand: null,
@@ -99,6 +153,10 @@ class Game {
         sorted: false,
       }),
     };
+    There.data.scores = [
+      new Score(1),
+      new Score(2),
+    ];
   }
 
   onData(name, data) {
@@ -124,25 +182,18 @@ class Game {
             players: [...Array(4).keys()].map(function(v) {
               return Number(e[`player${v + 1}`] ?? 0) - 1;
             }).filter(v => v >= 0).map(v => self.players[v]),
+            points: Number(e.score ?? 0),
+            bags: Number(e.bags ?? 0),
           };
           team.players.forEach(e => e.team = team);
           return team;
         });
-        self.playableCards = Number(gameData.playablecards ?? 1);
         self.activePlayer = Number(gameData.currentplayer) - 1;
-        let state = gameData.state.toLowerCase();
-        if (self.state != state) {
-          self.state = state;
-          self.resetIndicators();
-          if (self.state == 'endgame' && self.previousGameStatesCount > 0) {
-            There.playSound('cards game over');
-          }
-          self.previousGameStatesCount++;
-        }
+        self.setState(gameData.state.toLowerCase());
         self.isActivePlayer = (self.activePlayer == self.thisPlayer && self.thisPlayer >= 0);
         self.isDealer = (Number(gameData.dealer) - 1 == self.thisPlayer && self.thisPlayer >= 0);
         self.isHost = (Number(gameData.host) - 1 == self.thisPlayer && self.thisPlayer >= 0);
-        $('.hud').attr('data-gamestate', self.state).attr('data-isactiveplayer', self.isActivePlayer ? '1' : '0');
+        $('.hud').attr('data-isactiveplayer', self.isActivePlayer ? '1' : '0');
         $('.left .panel[data-id="game"] .button[data-id="newgame"]').attr('data-enabled', self.isHost ? '1' : '0');
         $('.left .panel[data-id="game"] .button[data-id="deal"]').attr('data-enabled', self.isActivePlayer && self.state == 'deal' ? '1' : '0');
         $('.left .panel[data-id="game"] .button[data-id="play"]').attr('data-enabled', self.isActivePlayer && self.state == 'play' ? '1' : '0');
@@ -159,6 +210,13 @@ class Game {
             $(tableDiv).find('.stats span[data-id="tricks"]').text(player.tricks == null ? '--' : player.tricks);
           }
         }
+        for (let team of self.teams) {
+          let isActiveTeam = team.id == self.players[self.thisPlayer].team?.id;
+          let score = There.data.scores[isActiveTeam ? 0 : 1];
+          score.players = team.players.map(e => e.name).filter(e => e != '').join(' & ');
+          score.points = team.points;
+          score.bags = team.bags;
+        }
         if (There.data.cardsets.hand == null) {
           There.data.cardsets.hand = new CardSet('hand', `hand${self.players[self.thisPlayer].id}`, {
             selectable: true,
@@ -171,6 +229,30 @@ class Game {
         self.showIndicators();
       }
     }
+    if (name == 'event') {
+      for (let event of data.event) {
+        const url = new URL(There.data.channels.event.data.event[0].query, 'http://host/');
+        if (url.pathname.toLowerCase() == '/uirej') {
+          if (url.searchParams.get('uiid') == self.playUiid && url.searchParams.get('avoid') == There.variables.there_pilotdoid) {
+            self.revertPlayCard();
+          }
+        }
+      }
+    }
+  }
+
+  setState(state) {
+    let self = this;
+    if (self.state == state) {
+      return;
+    }
+    if (state == 'endgame' && self.state == undefined) {
+      There.playSound('cards game over');
+    }
+    self.state = state;
+    $('.hud').attr('data-gamestate', self.state);
+    self.resetIndicators();
+    There.clearNamedTimer('card-play');
   }
 
   resetIndicators() {
@@ -183,7 +265,7 @@ class Game {
     let self = this;
     $('.left .panel[data-id="game"] .button').attr('data-highlighted', '0');
     $('.middle .table .turn').attr('data-visible', '0');
-    $('.cardset[data-id^="player"]').attr('data-highlighted', '0');
+    $('.cardset[data-id^="played"]').attr('data-highlighted', '0');
   }
 
   showIndicators() {
@@ -210,12 +292,16 @@ class Game {
         case 'deal': {
           if (isBlink) {
             $('.left .panel[data-id="game"] .button[data-id="deal"]').attr('data-highlighted', '1');
+          } else {
+            $(`.middle .table[data-player="${activePlayer.id}"] .turn`).attr('data-visible', '1');
           }
           break;
         }
         case 'bid': {
           if (isBlink) {
             $('.left .panel[data-id="game"] .button[data-id="bid"]').attr('data-highlighted', '1');
+          } else {
+            $(`.middle .table[data-player="${activePlayer.id}"] .turn`).attr('data-visible', '1');
           }
           break;
         }
@@ -229,9 +315,9 @@ class Game {
         }
         case 'taketrick': {
           if (isBlink) {
-            $('.left .panel[data-id="game"] .button[data-id="play"]').attr('data-highlighted', '1');
+            $('.left .panel[data-id="game"] .button[data-id="taketrick"]').attr('data-highlighted', '1');
           }
-          $(`.cardset[data-id="player${activePlayer.id}"]`).attr('data-highlighted', '1');
+          $(`.cardset[data-id="played${activePlayer.id}"]`).attr('data-highlighted', '1');
           break;
         }
       }
@@ -245,11 +331,36 @@ class Game {
     }
   }
 
-  playCard(card) {
+  playCard(id) {
     let self = this;
-    if (self.state != 'play') {
+    if (self.state != 'play' || !self.isActivePlayer) {
       return;
     }
+    self.setState('playsend');
+    self.playId = id;
+    let cardDiv = There.data.cardsets.hand.detachCard(self.playId);
+    There.data.cardsets.players[self.thisPlayer].attachCard(cardDiv);
+    self.playUiid++;
+    There.sendEventMessageToClient(3, {
+      cardset: `hand${self.players[self.thisPlayer].id}`,
+      cards: There.data.cardsets.hand.cardsUnsorted.indexOf(self.playId) + 1,
+      uiid: self.playUiid,
+    });
+    There.setNamedTimer('card-play', 5000, function() {
+      self.revertPlayCard();
+      There.data.messages.addMessage(0, `Please try playing the card again later.`);
+    });
+  }
+
+  revertPlayCard() {
+    let self = this;
+    if (self.playId == null) {
+      return;
+    }
+    There.data.channels.game.notify();
+    There.data.channels.cardset.notify();
+    There.data.cardsets.hand.selected = self.playId;
+    self.playId = null;
   }
 }
 

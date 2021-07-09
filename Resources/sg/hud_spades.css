@@ -57,6 +57,61 @@
   justify-content:space-around;
 }
 
+.left .panel[data-id="score"] .section {
+  position:absolute;
+  top:5px;
+  width:96px;
+  height:50px;
+  border:1px solid #000;
+  font-size:0px;
+}
+
+.left .panel[data-id="score"] .section[data-team="1"] {
+  left:5px;
+}
+
+.left .panel[data-id="score"] .section[data-team="2"] {
+  right:5px;
+  background-color:rgba(0, 0, 0, 0.15);
+}
+
+.left .panel[data-id="score"] .section .players {
+  position:absolute;
+  top:0px;
+  width:100%;
+  height:24px;
+  line-height:12px;
+  font-size:11px;
+  text-align:center;
+  color:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.left .panel[data-id="score"] .section .score {
+  position:absolute;
+  bottom:0px;
+  width:100%;
+  height:24px;
+  line-height:12px;
+  font-size:11px;
+  text-align:center;
+  color:#fff;
+  display:flex;
+  flex-direction:row;
+  justify-content:space-around;
+}
+
+.left .panel[data-id="score"] .section .score div {
+  display:inline-block;
+  width:50%;
+}
+
+.left .panel[data-id="score"] .section .score div span {
+  display:block;
+}
+
 .left .panel[data-id="tricks"] .players .player {
   display:inline-block;
   width:47px;
@@ -144,7 +199,7 @@
 
 .middle .table[data-player="1"] .title {
   position:absolute;
-  left:17px;
+  left:7px;
   top:5px;
   width:250px;
   height:14px;
@@ -157,7 +212,7 @@
 
 .middle .table[data-player="1"] .cardset[data-id^="hand"] {
   position:absolute;
-  left:22px;
+  left:7px;
   top:20px;
   width:260px;
   height:37px;
@@ -166,18 +221,17 @@
 
 .middle .table[data-player="1"] .message {
   position:absolute;
-  left:21px;
-  top:64px;
+  left:11px;
+  bottom:6px;
   width:250px;
-  height:14px;
-  line-height:14px;
+  height:27px;
+  line-height:12px;
   font-size:11px;
   font-weight:bold;
   color:#fff;
-  text-align:center;
-  white-space:nowrap;
-  text-overflow:ellipsis;
-  overflow:hidden;
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-evenly;
 }
 
 .middle .table:not([data-player="1"]) {
@@ -235,7 +289,7 @@
   right:4px;
   bottom:6px;
   width:60px;
-  line-height:11px;
+  line-height:12px;
   font-size:11px;
   color:#fff;
 }
