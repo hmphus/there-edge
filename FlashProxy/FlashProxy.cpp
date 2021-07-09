@@ -638,19 +638,19 @@ HRESULT STDMETHODCALLTYPE FlashProxyModule::put_WMode(BSTR pVal)
 
 HRESULT STDMETHODCALLTYPE FlashProxyModule::SetVariable(BSTR name, BSTR value)
 {
-    CComBSTR escName;
-    if (FAILED(Encode(name, escName)))
+    CComBSTR encName;
+    if (FAILED(Encode(name, encName)))
         return E_FAIL;
 
-    CComBSTR escValue;
-    if (FAILED(Encode(value, escValue)))
+    CComBSTR encValue;
+    if (FAILED(Encode(value, encValue)))
         return E_FAIL;
 
     CComBSTR uri;
     if (FAILED(uri.Append(L"setVariable?name=")) ||
-        FAILED(uri.Append(escName)) ||
+        FAILED(uri.Append(encName)) ||
         FAILED(uri.Append(L"&value=")) ||
-        FAILED(uri.Append(escValue)))
+        FAILED(uri.Append(encValue)))
         return E_FAIL;
 
     if (FAILED(m_variables.Add(uri)))
@@ -890,8 +890,8 @@ HRESULT FlashProxyModule::OnNavigationCompleted(ICoreWebView2 *sender, ICoreWebV
 
 HRESULT FlashProxyModule::Encode(const BSTR in, CComBSTR &out)
 {
-    WCHAR buffer[INTERNET_MAX_URL_LENGTH];
-    DWORD size = INTERNET_MAX_URL_LENGTH;
+    WCHAR buffer[10000];
+    DWORD size = _countof(buffer);
     if (SUCCEEDED(UrlEscape(in, buffer, &size, URL_ESCAPE_SEGMENT_ONLY | URL_ESCAPE_PERCENT)))
     {
         out = buffer;
