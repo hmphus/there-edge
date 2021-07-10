@@ -46,6 +46,19 @@ void Log(const WCHAR *format, ...)
 #endif
 }
 
+void ReportError(HWND wnd, const WCHAR *format, ...)
+{
+    va_list args;
+    va_start(args, format);
+
+    WCHAR buff[1000];
+    _vsnwprintf_s(buff, _countof(buff), format, args);
+
+    va_end(args);
+
+    MessageBox(wnd, buff, L"ThereEdge Error", MB_OK | MB_ICONERROR);
+}
+
 extern "C" BOOL WINAPI DllMain(HINSTANCE hInstance, DWORD dwReason, LPVOID lpReserved)
 {
     g_Instance = hInstance;
@@ -357,8 +370,60 @@ HRESULT STDMETHODCALLTYPE BrowserProxyModule::DoVerb(LONG iVerb, LPMSG lpmsg, IO
 
             SetRect(*lprcPosRect);
 
-            if (FAILED(CreateCoreWebView2Environment(this)))
+            HRESULT rc = CreateCoreWebView2Environment(this);
+            if (FAILED(rc))
+            {
+                switch (rc)
+                {
+                    case HRESULT_FROM_WIN32(ERROR_NOT_SUPPORTED):
+                    {
+                        ReportError(hwndParent, L"The Edge application path was used in the browser executable folder.");
+                        break;
+                    }
+                    case HRESULT_FROM_WIN32(ERROR_INVALID_STATE):
+                    {
+                        ReportError(hwndParent, L"The specified options do not match the options of the WebViews that are currently running in the shared browser process.");
+                        break;
+                    }
+                    case HRESULT_FROM_WIN32(ERROR_DISK_FULL):
+                    {
+                        ReportError(hwndParent, L"Too many previous WebView2 Runtime versions exist.");
+                        break;
+                    }
+                    case HRESULT_FROM_WIN32(ERROR_PRODUCT_UNINSTALLED):
+                    {
+                        ReportError(hwndParent, L"The Webview depends upon an installed WebView2 Runtime version and it is uninstalled.");
+                        break;
+                    }
+                    case HRESULT_FROM_WIN32(ERROR_FILE_NOT_FOUND):
+                    {
+                        ReportError(hwndParent, L"Could not find an Edge installation.");
+                        break;
+                    }
+                    case HRESULT_FROM_WIN32(ERROR_FILE_EXISTS):
+                    {
+                        ReportError(hwndParent, L"The user data folder cannot be created because a file with the same name already exists.");
+                        break;
+                    }
+                    case E_ACCESSDENIED:
+                    {
+                        ReportError(hwndParent, L"Unable to create the user data folder.");
+                        break;
+                    }
+                    case E_FAIL:
+                    {
+                        ReportError(hwndParent, L"The Edge runtime is unable to start.");
+                        break;
+                    }
+                    default:
+                    {
+                        ReportError(hwndParent, L"Unable to create a WebView2 environment: 0x%08lx", rc);
+                        break;
+                    }
+                }
+
                 return E_FAIL;
+            }
 
             return S_OK;
         }
