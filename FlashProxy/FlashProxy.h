@@ -81,7 +81,7 @@ protected:
     virtual HRESULT STDMETHODCALLTYPE UIDeactivate() override {return E_NOTIMPL;}
     virtual HRESULT STDMETHODCALLTYPE SetObjectRects(LPCRECT lprcPosRect, LPCRECT lprcClipRect) override;
     virtual HRESULT STDMETHODCALLTYPE ReactivateAndUndo() override {return E_NOTIMPL;}
-    virtual HRESULT STDMETHODCALLTYPE OnWindowMessage(UINT msg, WPARAM wParam, LPARAM lParam, LRESULT *plResult) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE OnWindowMessage(UINT msg, WPARAM wParam, LPARAM lParam, LRESULT *plResult) override;
     virtual HRESULT STDMETHODCALLTYPE GetDropTarget(IDropTarget **ppDropTarget) override {return E_NOTIMPL;}
     virtual HRESULT STDMETHODCALLTYPE Draw(DWORD dwDrawAspect, LONG lindex, void *pvAspect, DVTARGETDEVICE *ptd,
                                            HDC hdcTargetDev, HDC hdcDraw, LPCRECTL lprcBounds, LPCRECTL lprcWBounds,
@@ -236,6 +236,7 @@ protected:
     HWND                                     m_clientWnd;
     RECT                                     m_maskRects[10];
     LONG                                     m_maskRectCount;
+    WCHAR                                    m_encodeBuffer[10000];
     Identity                                 m_identity;
     CComBSTR                                 m_url;
     CComSafeArray<BSTR>                      m_variables;

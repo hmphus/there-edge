@@ -118,6 +118,7 @@ FlashProxyModule::FlashProxyModule():
     m_clientWnd(nullptr),
     m_maskRects(),
     m_maskRectCount(0),
+    m_encodeBuffer(),
     m_identity(Identity::Unknown),
     m_url(),
     m_variables(),
@@ -477,6 +478,11 @@ HRESULT STDMETHODCALLTYPE FlashProxyModule::SetObjectRects(LPCRECT lprcPosRect, 
     SetRect(*lprcClipRect);
 
     return S_OK;
+}
+
+HRESULT STDMETHODCALLTYPE FlashProxyModule::OnWindowMessage(UINT msg, WPARAM wParam, LPARAM lParam, LRESULT *plResult)
+{
+    return S_FALSE;
 }
 
 HRESULT STDMETHODCALLTYPE FlashProxyModule::Draw(DWORD dwDrawAspect, LONG lindex, void *pvAspect, DVTARGETDEVICE *ptd,
@@ -890,11 +896,10 @@ HRESULT FlashProxyModule::OnNavigationCompleted(ICoreWebView2 *sender, ICoreWebV
 
 HRESULT FlashProxyModule::Encode(const BSTR in, CComBSTR &out)
 {
-    WCHAR buffer[10000];
-    DWORD size = _countof(buffer);
-    if (SUCCEEDED(UrlEscape(in, buffer, &size, URL_ESCAPE_SEGMENT_ONLY | URL_ESCAPE_PERCENT)))
+    DWORD size = _countof(m_encodeBuffer);
+    if (SUCCEEDED(UrlEscape(in, m_encodeBuffer, &size, URL_ESCAPE_SEGMENT_ONLY | URL_ESCAPE_PERCENT)))
     {
-        out = buffer;
+        out = m_encodeBuffer;
         return S_OK;
     }
 
