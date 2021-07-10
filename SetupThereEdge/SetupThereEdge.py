@@ -13,6 +13,7 @@ from argparse import ArgumentParser
 if __name__ == '__main__':
     parser = ArgumentParser()
     parser.add_argument('--path', type=str, default='.', help='client path')
+    parser.add_argument('--pause', action='store_true', help='pause on error')
     parser.add_argument('--patch', action='store_true', help='patch the client')
     parser.add_argument('--register', action='store_true', help='register the libraries')
     parser.add_argument('--unregister', action='store_true', help='unregister the libraries')
@@ -80,6 +81,7 @@ if __name__ == '__main__':
             print('The shortcut was created successfully.')
     except RuntimeError as e:
         print(e)
-        time.sleep(5)
+        if args.pause:
+            input('Press Enter to continue.\n')
         sys.exit(1)
     sys.exit(0)

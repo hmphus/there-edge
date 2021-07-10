@@ -577,7 +577,7 @@
             "Object" = "8:_DCB8C5614D354C1382F77CC686409025"
             "FileType" = "3:2"
             "InstallAction" = "3:1"
-            "Arguments" = "8:--path \"[TARGETDIR] \" --patch --register --shortcut"
+            "Arguments" = "8:--path \"[TARGETDIR] \" --pause --patch --register --shortcut"
             "EntryPoint" = "8:"
             "Sequence" = "3:1"
             "Identifier" = "8:_138AEFC1_AFE0_4773_A9D3_70535243642C"
