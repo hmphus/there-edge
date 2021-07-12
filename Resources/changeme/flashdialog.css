@@ -1,6 +1,6 @@
 body {
   margin:0px;
-  font-family:sans-serif;
+  font-family:tahoma, sans-serif;
   font-size:16px;
   color:#000;
   user-select:none;
@@ -8,11 +8,373 @@ body {
   overflow:hidden;
 }
 
-ruffle-player {
-  width: 260px;
-  height: 192px;
+.dialog {
+  position:absolute;
+  left:0px;
+  top:0px;
+  width:253px;
+  height:189px;
+  background-color:rgba(200, 200, 200, 0.6);
+  border-radius:5px;
+  overflow:hidden;
 }
 
-ruffle-player:not([data-ready="1"]) {
+.dialog .titlebar {
+  position:absolute;
+  left:0px;
+  right:0px;
+  top:0px;
+  height:23px;
+  line-height:23px;
+  font-size:0px;
+  padding-left:5px;
+  border-top-left-radius:5px;
+  border-top-right-radius:5px;
+  border:1px solid #808080;
+  background-image:url(flashdialog.png);
+  background-color:orange;
+}
+
+.dialog .titlebar span {
+  font-size:11px;
   display:none;
+}
+
+.dialog[data-id="cameracontrolhelp"] .titlebar span[data-id="cameracontrolhelp"],
+.dialog[data-id="thankyou"] .titlebar span[data-id="thankyou"],
+.dialog[data-id="leavetreatments"] .titlebar span[data-id="leavetreatments"],
+.dialog[data-id="savelooksetchangeme"] .titlebar span[data-id="savelooksetchangeme"],
+.dialog[data-id="renamelooksetchangeme"] .titlebar span[data-id="renamelooksetchangeme"],
+.dialog[data-id="deletelooksetchangeme"] .titlebar span[data-id="deletelooksetchangeme"],
+.dialog[data-id="saveoutfitchangeme"] .titlebar span[data-id="saveoutfitchangeme"],
+.dialog[data-id="renameoutfitchangeme"] .titlebar span[data-id="renameoutfitchangeme"],
+.dialog[data-id="deleteoutfitchangeme"] .titlebar span[data-id="deleteoutfitchangeme"] {
+  display:inline-block;
+}
+
+
+.dialog .titlebar .buttons {
+  position:absolute;
+  top:4px;
+  right:5px;
+  display:inline-block;
+  font-size:0px;
+}
+
+.dialog .titlebar .buttons .button {
+  display:inline-block;
+  margin-left:1px;
+  width:14px;
+  height:13px;
+  border:1px solid #666;
+  border-radius:3px;
+  background-image:url(changeme.png);
+  background-position-x:-158px;
+  background-position-y:-948px;
+}
+
+.dialog .titlebar .buttons .button:hover {
+  background-position-x:-172px;
+}
+
+.dialog .titlebar .buttons .button:hover:active {
+  background-position-x:-186px;
+}
+
+.panel {
+  display:none;
+  position:absolute;
+  left:4px;
+  right:6px;
+  top:29px;
+  box-sizing:border-box;
+  border:1px solid #666;
+  background-color:#f2d4a3;
+  font-size:11px;
+  line-height:12px;
+}
+
+.modes {
+  display:none;
+  position:absolute;
+  left:4px;
+  right:6px;
+  top:37px;
+  box-sizing:border-box;
+}
+
+.modes .tabs {
+  position:absolute;
+  left:0px;
+  right:0px;
+  font-size:0px;
+}
+
+.modes .tabs .tab {
+  display:inline-block;
+  position:relative;
+  left:-1px;
+  height:15px;
+  padding:0px 11px;
+  border:1px solid #666;
+  border-bottom:none;
+  border-top-left-radius:4px;
+  border-top-right-radius:4px;
+  background-color:#abd2d9;
+  font-size:11px;
+  text-align:center;
+}
+
+.modes .tabs .tab:first-of-type {
+  left:0px;
+}
+
+.modes[data-mode="save"] .tabs .tab[data-id="save"],
+.modes[data-mode="saveas"] .tabs .tab[data-id="saveas"] {
+  background-color:#f2d4a3;
+  z-index:2;
+}
+
+.modes .panel {
+  left:0px;
+  right:0px;
+  top:15px;
+}
+
+.panel .checkbox {
+  position:absolute;
+  line-height:13px;
+}
+
+.panel .checkbox input[type="checkbox"] {
+  margin:0px 3px 0px 0px;
+  vertical-align:text-bottom;
+}
+
+.panel .textbox {
+  position:absolute;
+  left:11px;
+  right:11px;
+  height:27px;
+  border:1px solid #666;
+  border-radius:5px;
+  background-color:orange;
+}
+
+.panel .textbox input[type="text"] {
+  position:absolute;
+  left:3px;
+  top:4px;
+  width:calc(100% - 6px);
+  height:calc(100% - 8px);
+  box-sizing:border-box;
+  font-size:11px;
+  border:1px solid #666;
+  border-radius:0px;
+  outline:none;
+}
+
+.panel .textbox input[type="text"]::selection {
+  color:#fff;
+  background-color:#000;
+}
+
+.panel .textbox input[type="text"]::placeholder {
+  opacity:0.4;
+}
+
+.panel[data-id="cameracontrolhelp"] ul {
+  margin:4px 6px;
+  padding-inline-start:10px;
+  line-height:11px;
+}
+
+.panel[data-id="cameracontrolhelp"] ul li {
+  margin-bottom:8px;
+  list-style:none;
+}
+
+.panel[data-id="cameracontrolhelp"] ul li::before {
+  position:absolute;
+  left:6px;
+  line-height:10px;
+  content:'•';
+}
+
+.panel[data-id="cameracontrolhelp"] .checkbox {
+  left:7px;
+  bottom:-20px;
+}
+
+.panel[data-id="leavetreatments"] .checkbox {
+  left:7px;
+  bottom:9px;
+}
+
+.modes[data-id="savelooksetchangeme"] .panel[data-mode="saveas"] .textbox,
+.panel[data-id="saveoutfitchangeme"] .textbox {
+  bottom:10px;
+}
+
+.panel[data-id="renamelooksetchangeme"] .textbox,
+.panel[data-id="renameoutfitchangeme"] .textbox {
+  bottom:55px;
+}
+
+.dialog[data-id="cameracontrolhelp"] .panel[data-id="cameracontrolhelp"] {
+  display:block;
+  height:125px;
+}
+
+.dialog[data-id="thankyou"] .panel[data-id="thankyou"] {
+  display:block;
+  height:114px;
+  padding:8px 4px 0px 7px;
+}
+
+.dialog[data-id="leavetreatments"] .panel[data-id="leavetreatments"] {
+  display:block;
+  height:114px;
+  padding:8px 4px 0px 7px;
+}
+
+.dialog[data-id="savelooksetchangeme"] .modes[data-id="savelooksetchangeme"] {
+  display:block;
+}
+
+.dialog[data-id="savelooksetchangeme"] .modes[data-id="savelooksetchangeme"][data-mode="save"] .panel[data-mode="save"] {
+  display:block;
+  height:94px;
+  padding:17px 4px 0px 7px;
+}
+
+.dialog[data-id="savelooksetchangeme"] .modes[data-id="savelooksetchangeme"][data-mode="saveas"] .panel[data-mode="saveas"] {
+  display:block;
+  height:94px;
+  padding:17px 4px 0px 7px;
+}
+
+.dialog[data-id="renamelooksetchangeme"] .panel[data-id="renamelooksetchangeme"] {
+  display:block;
+  height:114px;
+  padding:8px 4px 0px 7px;
+}
+
+.dialog[data-id="deletelooksetchangeme"] .panel[data-id="deletelooksetchangeme"] {
+  display:block;
+  height:116px;
+  padding:8px 4px 0px 7px;
+}
+
+.dialog[data-id="saveoutfitchangeme"] .panel[data-id="saveoutfitchangeme"] {
+  display:block;
+  height:114px;
+  padding:8px 4px 0px 7px;
+}
+
+.dialog[data-id="renameoutfitchangeme"] .panel[data-id="renameoutfitchangeme"] {
+  display:block;
+  height:114px;
+  padding:8px 4px 0px 7px;
+}
+
+.dialog[data-id="deleteoutfitchangeme"] .panel[data-id="deleteoutfitchangeme"] {
+  display:block;
+  height:116px;
+  padding:8px 4px 0px 7px;
+}
+
+.footer {
+  position:absolute;
+  left:0px;
+  right:0px;
+  bottom:0px;
+  height:37px;
+  padding-right:2px;
+  font-size:0px;
+  display:flex;
+  justify-content:flex-end;
+  pointer-events:none;
+}
+
+.footer .button {
+  display:none;
+  margin-right:4px;
+  height:18px;
+  line-height:18px;
+  padding:1px;
+  border:1px solid #666;
+  border-radius:6px;
+  vertical-align:top;
+  background-image:url(flashdialog.png);
+  background-color:orange;
+  font-size:11px;
+  text-align:center;
+  pointer-events:all;
+}
+
+.footer .button:hover {
+  text-shadow:1px 1px 1px #0006;
+}
+
+.footer .button:hover:active {
+  text-shadow:0px 0px 2px #0006;
+  padding:2px 0px 0px 2px;
+}
+
+.footer .button[data-enabled="0"],
+.footer .button[data-enabled="0"]:hover,
+.footer .button[data-enabled="0"]:active {
+  pointer-events:none;
+  color:#7dbbca;
+  text-shadow:1px 1px 0px #fff;
+}
+
+.dialog[data-id="thankyou"] .footer .button[data-id="close"] {
+  display:inline-block;
+  width:44px;
+}
+
+.dialog[data-id="leavetreatments"] .footer .button[data-id="yes"],
+.dialog[data-id="leavetreatments"] .footer .button[data-id="no"] {
+  display:inline-block;
+  width:38px;
+}
+
+.dialog[data-id="savelooksetchangeme"] .footer .button[data-id="save"],
+.dialog[data-id="saveoutfitchangeme"] .footer .button[data-id="save"] {
+  display:inline-block;
+  width:41px;
+}
+
+.dialog[data-id="renamelooksetchangeme"] .footer .button[data-id="ok"],
+.dialog[data-id="deletelooksetchangeme"] .footer .button[data-id="ok"],
+.dialog[data-id="renameoutfitchangeme"] .footer .button[data-id="ok"],
+.dialog[data-id="deleteoutfitchangeme"] .footer .button[data-id="ok"] {
+  display:inline-block;
+  width:32px;
+}
+
+.dialog[data-id="savelooksetchangeme"] .footer .button[data-id="cancel"],
+.dialog[data-id="renamelooksetchangeme"] .footer .button[data-id="cancel"],
+.dialog[data-id="deletelooksetchangeme"] .footer .button[data-id="cancel"],
+.dialog[data-id="saveoutfitchangeme"] .footer .button[data-id="cancel"],
+.dialog[data-id="renameoutfitchangeme"] .footer .button[data-id="cancel"],
+.dialog[data-id="deleteoutfitchangeme"] .footer .button[data-id="cancel"] {
+  display:inline-block;
+  width:50px;
+}
+
+.footer .bar {
+  position:absolute;
+  left:0px;
+  right:0px;
+  bottom:0px;
+  height:7px;
+  font-size:0px;
+  border-bottom-left-radius:5px;
+  border-bottom-right-radius:5px;
+  border:1px solid #808080;
+  background-image:url(flashdialog.png);
+  background-color:orange;
 }

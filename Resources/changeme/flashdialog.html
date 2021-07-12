@@ -1,14 +1,98 @@
 <!DOCTYPE html>
 <html lang="en-US">
 <head>
-<title>Generic Dialog</title>
+<title>Change Me Dialog</title>
 <meta http-equiv="content-type" content="text/html; charset=utf-8">
 <link rel="stylesheet" type="text/css" href="flashdialog.css">
 <script src="../js/jquery-3.5.1.min.js"></script>
 <script src="../js/framework.js"></script>
-<script src="../js/ruffle.js"></script>
 <script src="flashdialog.js"></script>
 </head>
 <body>
+<div class="dialog" data-id="">
+<div class="titlebar">
+<span data-id="cameracontrolhelp">Welcome to the Spa</span>
+<span data-id="thankyou">Thank you for using the Spa</span>
+<span data-id="leavetreatments">Leave Treatments</span>
+<span data-id="savelooksetchangeme">Save Lookset</span>
+<span data-id="renamelooksetchangeme">Rename Lookset</span>
+<span data-id="deletelooksetchangeme">Delete Lookset</span>
+<span data-id="saveoutfitchangeme">Save Outfit</span>
+<span data-id="renameoutfitchangeme">Rename Outfit</span>
+<span data-id="deleteoutfitchangeme">Delete Outfit</span>
+<div class="buttons"><div class="button" data-id="close"></div></div>
+</div>
+<div class="panel" data-id="cameracontrolhelp">
+<ul>
+<li>To <b>Change</b> your look, click a ChangeMe icon. Move the sliders to adjust that body part.
+<li>To <b>See</b> a new view, press an arrow key.
+<li>To <b>Keep</b> your new avatar look, click "Save" in ChangeMe.
+<li>To <b>Leave</b> the Spa, click the floating blue circle icon.
+</ul>
+<div class="checkbox"><input type="checkbox">Don't show this message again.</div>
+</div>
+<div class="panel" data-id="thankyou">
+Your changes to the lookset "<span data-id="name"></span>" have been saved.
+</div>
+<div class="panel" data-id="leavetreatments">
+If you leave without clicking "Save" in ChangeMe,
+you will lose your new body settings.
+<br><br>
+Leave anyway?
+<div class="checkbox"><input type="checkbox">Don't show this message again.</div>
+</div>
+
+<div class="modes" data-id="savelooksetchangeme" data-mode="save">
+<div class="tabs">
+<div class="tab" data-id="save">Save</div>
+<div class="tab" data-id="saveas">Save As...</div>
+</div>
+<div class="panel" data-mode="save">
+Your current body and face lookset is called "<span data-id="name"></span>".
+Changes saved to this lookset are free.
+</div>
+<div class="panel" data-mode="saveas">
+Name and save a new lookset for <span data-id="price"></span>T?
+Please note that looksets are not refundable.
+<div class="textbox"><input type="text" spellcheck="false" placeholder="Name"></input></div>
+</div>
+</div>
+
+<div class="panel" data-id="renamelooksetchangeme">
+Enter a new name for this lookset.
+<div class="textbox"><input type="text" spellcheck="false" placeholder="Name"></input></div>
+</div>
+<div class="panel" data-id="deletelooksetchangeme">
+You will lose this lookset permanently if you delete it.
+<br><br>
+Delete the lookset "<span data-id="name"></span>"?
+</div>
+<div class="panel" data-id="saveoutfitchangeme">
+You can create an outfit from all of the items you are currently wearing.
+<br><br>
+Enter a name for this outfit.
+<div class="textbox"><input type="text" spellcheck="false" placeholder="Name"></input></div>
+</div>
+<div class="panel" data-id="renameoutfitchangeme">
+Enter a new name for this outfit.
+<div class="textbox"><input type="text" spellcheck="false" placeholder="Name"></input></div>
+</div>
+<div class="panel" data-id="deleteoutfitchangeme">
+You will lose this outfit if you delete it.
+<br><br>
+You will not lose the items in the outfit.
+<br><br>
+Delete the outfit "<span data-id="name"></span>"?
+</div>
+<div class="footer">
+<div class="button" data-id="close">Close</div>
+<div class="button" data-id="yes">Yes</div>
+<div class="button" data-id="no">No</div>
+<div class="button" data-id="save" data-enabled="1">Save</div>
+<div class="button" data-id="ok" data-enabled="1">OK</div>
+<div class="button" data-id="cancel">Cancel</div>
+<div class="bar"></div>
+</div>
+</div>
 </body>
 </html>
