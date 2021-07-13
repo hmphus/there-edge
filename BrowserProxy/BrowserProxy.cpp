@@ -753,6 +753,7 @@ HRESULT STDMETHODCALLTYPE BrowserProxyModule::Invoke(HRESULT errorCode, ICoreWeb
     ).Get(), &m_domContentLoadedToken);
 
     ProcessDeferral();
+    GetDefaultPage();
 
     if (FAILED(Navigate()))
         return E_FAIL;
@@ -1482,4 +1483,33 @@ HRESULT BrowserProxyModule::ProcessDeferral()
     m_newWindowArgs.Release();
 
     return S_OK;
+}
+
+HRESULT BrowserProxyModule::GetDefaultPage(WCHAR *path)
+{
+    if (m_url.Length() > 0)
+        return S_OK;
+
+    if (path == nullptr)
+    {
+        if (GetDefaultPage(L"Software\\There.com\\There\\Edge\\") == S_OK)
+            return S_OK;
+
+        if (GetDefaultPage(L"Software\\Microsoft\\Internet Explorer\\Main\\") == S_OK)
+            return S_OK;
+
+        return S_FALSE;
+    }
+
+    WCHAR url[INTERNET_MAX_URL_LENGTH];
+    DWORD length = _countof(url);
+    if (RegGetValue(HKEY_CURRENT_USER, path, L"Start Page", RRF_RT_REG_SZ, nullptr, &url, &length) == ERROR_SUCCESS)
+    {
+        if (length > 0 && wcscmp(url, L"about:blank") != 0)
+            m_url = url;
+
+        return S_OK;
+    }
+
+    return S_FALSE;
 }

@@ -179,6 +179,7 @@ protected:
     HRESULT ApplyScript(ICoreWebView2 *view, LONG id);
     HRESULT SetDeferral(ICoreWebView2NewWindowRequestedEventArgs *args);
     HRESULT ProcessDeferral();
+    HRESULT GetDefaultPage(WCHAR *path = nullptr);
 
 protected:
     ULONG                                              m_refCount;
