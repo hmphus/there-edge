@@ -4,6 +4,7 @@
 import os
 import sys
 import time
+from version import VERSION
 from uuid import UUID
 from win32com.shell import shell, shellcon
 from win32com.client import pythoncom as com
@@ -22,6 +23,7 @@ if __name__ == '__main__':
     if not args.patch and not args.register and not args.unregister and not args.shortcut:
          parser.print_usage()
          sys.exit(0)
+    print('ThereEdge %s' % VERSION)
     try:
         args.path = args.path.rstrip()
         if args.patch:
