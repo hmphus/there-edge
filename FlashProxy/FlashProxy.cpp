@@ -9,6 +9,7 @@
 #include "platform.h"
 #include "resource.h"
 #include "shlwapi.h"
+#include "shlobj.h"
 #include "wininet.h"
 #include "atlbase.h"
 #include "atlcom.h"
@@ -121,6 +122,7 @@ FlashProxyModule::FlashProxyModule():
     m_encodeBuffer(),
     m_identity(Identity::Unknown),
     m_url(),
+    m_userDataFolder(),
     m_variables(),
     m_flashEvents(),
     m_unknownContext(),
@@ -435,22 +437,42 @@ HRESULT STDMETHODCALLTYPE FlashProxyModule::DoVerb(LONG iVerb, LPMSG lpmsg, IOle
             RECT bounds;
             GetClientRect(m_clientWnd, &bounds);
 
-            WCHAR value[25];
-            _ltow_s(bounds.right - bounds.left, value, _countof(value), 10);
-            SetVariable(L"There_WindowWidth", value);
-            _ltow_s(bounds.bottom - bounds.top, value, _countof(value), 10);
-            SetVariable(L"There_WindowHeight", value);
+            {
+                WCHAR value[25];
+                _ltow_s(bounds.right - bounds.left, value, _countof(value), 10);
+                SetVariable(L"There_WindowWidth", value);
+                _ltow_s(bounds.bottom - bounds.top, value, _countof(value), 10);
+                SetVariable(L"There_WindowHeight", value);
+            }
 
-            m_proxyWnd = CreateWindowEx(WS_EX_TRANSPARENT, g_WindowClassName, L"",
-                                        WS_CHILD | WS_CLIPCHILDREN | WS_CLIPSIBLINGS,
-                                        m_pos.cx, m_pos.cy, m_size.cx, m_size.cy,
-                                        m_clientWnd, nullptr, GetModuleHandle(nullptr), nullptr);
-            if (m_proxyWnd == nullptr)
-                return E_FAIL;
+            {
+                m_proxyWnd = CreateWindowEx(WS_EX_TRANSPARENT, g_WindowClassName, L"",
+                                            WS_CHILD | WS_CLIPCHILDREN | WS_CLIPSIBLINGS,
+                                            m_pos.cx, m_pos.cy, m_size.cx, m_size.cy,
+                                            m_clientWnd, nullptr, GetModuleHandle(nullptr), nullptr);
+                if (m_proxyWnd == nullptr)
+                    return E_FAIL;
 
-            SetWindowLongPtr(m_proxyWnd, GWL_USERDATA, (LPARAM)this);
+                SetWindowLongPtr(m_proxyWnd, GWL_USERDATA, (LPARAM)this);
+            }
 
-            if (FAILED(CreateCoreWebView2Environment(this)))
+            {
+                WCHAR userDataFolder[MAX_PATH] = {0};
+                if (SUCCEEDED(SHGetFolderPath(nullptr, CSIDL_LOCAL_APPDATA, nullptr, SHGFP_TYPE_CURRENT, userDataFolder)) && userDataFolder[0] != 0)
+                {
+                    if (PathAppend(userDataFolder, L"There"))
+                    {
+                        CreateDirectory(userDataFolder, nullptr);
+                        if (PathAppend(userDataFolder, L"Edge"))
+                        {
+                            CreateDirectory(userDataFolder, nullptr);
+                            m_userDataFolder = userDataFolder;
+                        }
+                    }
+                }
+            }
+
+            if (FAILED(CreateCoreWebView2EnvironmentWithOptions(nullptr, m_userDataFolder, nullptr, this)))
                 return E_FAIL;
 
             return S_OK;

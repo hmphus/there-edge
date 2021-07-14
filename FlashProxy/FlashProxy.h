@@ -239,6 +239,7 @@ protected:
     WCHAR                                    m_encodeBuffer[10000];
     Identity                                 m_identity;
     CComBSTR                                 m_url;
+    CComBSTR                                 m_userDataFolder;
     CComSafeArray<BSTR>                      m_variables;
     CComPtr<IThereEdgeShockwaveFlashEvents>  m_flashEvents;
     CComPtr<IUnknown>                        m_unknownContext;

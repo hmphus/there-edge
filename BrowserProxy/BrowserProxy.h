@@ -186,6 +186,7 @@ protected:
     SIZE                                               m_size;
     HWND                                               m_wnd;
     CComBSTR                                           m_url;
+    CComBSTR                                           m_userDataFolder;
     CComPtr<IThereEdgeWebBrowserEvents2>               m_browserEvents;
     CComPtr<IUnknown>                                  m_unknownSite;
     CComPtr<IOleClientSite>                            m_clientSite;

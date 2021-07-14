@@ -9,6 +9,7 @@
 #include "platform.h"
 #include "resource.h"
 #include "shlwapi.h"
+#include "shlobj.h"
 #include "wininet.h"
 #include "atlbase.h"
 #include "atlcom.h"
@@ -122,6 +123,7 @@ BrowserProxyModule::BrowserProxyModule():
     m_size(),
     m_wnd(nullptr),
     m_url(),
+    m_userDataFolder(),
     m_browserEvents(),
     m_unknownSite(),
     m_clientSite(),
@@ -370,7 +372,23 @@ HRESULT STDMETHODCALLTYPE BrowserProxyModule::DoVerb(LONG iVerb, LPMSG lpmsg, IO
 
             SetRect(*lprcPosRect);
 
-            HRESULT rc = CreateCoreWebView2Environment(this);
+            {
+                WCHAR userDataFolder[MAX_PATH] = {0};
+                if (SUCCEEDED(SHGetFolderPath(nullptr, CSIDL_LOCAL_APPDATA, nullptr, SHGFP_TYPE_CURRENT, userDataFolder)) && userDataFolder[0] != 0)
+                {
+                    if (PathAppend(userDataFolder, L"There"))
+                    {
+                        CreateDirectory(userDataFolder, nullptr);
+                        if (PathAppend(userDataFolder, L"Edge"))
+                        {
+                            CreateDirectory(userDataFolder, nullptr);
+                            m_userDataFolder = userDataFolder;
+                        }
+                    }
+                }
+            }
+
+            HRESULT rc = CreateCoreWebView2EnvironmentWithOptions(nullptr, m_userDataFolder, nullptr, this);
             if (FAILED(rc))
             {
                 switch (rc)

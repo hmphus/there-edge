@@ -12,6 +12,7 @@ from argparse import ArgumentParser
 
 
 if __name__ == '__main__':
+    print('ThereEdge %s\n' % VERSION)
     parser = ArgumentParser()
     parser.add_argument('--path', type=str, default='.', help='client path')
     parser.add_argument('--pause', action='store_true', help='pause on error')
@@ -23,7 +24,6 @@ if __name__ == '__main__':
     if not args.patch and not args.register and not args.unregister and not args.shortcut:
          parser.print_usage()
          sys.exit(0)
-    print('ThereEdge %s' % VERSION)
     try:
         args.path = args.path.rstrip()
         if args.patch:
