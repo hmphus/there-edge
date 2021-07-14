@@ -55,8 +55,7 @@ body {
 .dialog[data-id="saveoutfitchangeme"] .titlebar span[data-id="saveoutfitchangeme"],
 .dialog[data-id="renameoutfitchangeme"] .titlebar span[data-id="renameoutfitchangeme"],
 .dialog[data-id="deleteoutfitchangeme"] .titlebar span[data-id="deleteoutfitchangeme"],
-.dialog[data-id="thankyou"][data-mode="save"] .titlebar span[data-id="thankyou"][data-mode="save"],
-.dialog[data-id="thankyou"][data-mode="saveas"] .titlebar span[data-id="thankyou"][data-mode="saveas"],
+.dialog[data-id="thankyou"] .titlebar span[data-id="thankyou"],
 .dialog[data-id="error"] .titlebar span[data-id="error"] {
   display:inline-block;
 }
@@ -390,6 +389,11 @@ body {
   display:inline-block;
   width:52px;
   background-position-x:-171px;
+}
+
+.dialog[data-busy="1"] .panel,
+.dialog[data-busy="1"] .footer .button {
+  pointer-events:none;
 }
 
 .footer .bar {

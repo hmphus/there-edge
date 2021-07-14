@@ -143,6 +143,8 @@ There.init({
               There.fsCommand('closeWindow', 'saveLooksetResult_0');
             });
             $('.footer .button[data-id="save"]').off('click').on('click', function() {
+              $('.dialog').attr('data-busy', '1');
+              $('.panel[data-id="thankyou"][data-mode="save"] span[data-id="looksetname"]').text(There.variables.looksettoupdate);
               There.fetch({
                 path: '/ChangeMe/ReconfigureOldLookset',
                 query: {
@@ -170,6 +172,8 @@ There.init({
               if (text == '') {
                 return;
               }
+              $('.dialog').attr('data-busy', '1');
+              $('.panel[data-id="thankyou"][data-mode="saveas"] span[data-id="looksetname"]').text(text);
               There.fetch({
                 path: '/ChangeMe/BuyConfigureNewLookset',
                 query: {
@@ -200,6 +204,7 @@ There.init({
           if (text == '') {
             return;
           }
+          $('.dialog').attr('data-busy', '1');
           There.fetch({
             path: '/ChangeMe/RenameLookset',
             query: {
@@ -225,6 +230,7 @@ There.init({
           There.fsCommand('closeWindow', '0');
         });
         $('.footer .button[data-id="ok"]').off('click').on('click', function() {
+          $('.dialog').attr('data-busy', '1');
           There.fetch({
             path: '/pobman/deletepob',
             query: {
@@ -251,6 +257,7 @@ There.init({
           if (text == '') {
             return;
           }
+          $('.dialog').attr('data-busy', '1');
           There.fetch({
             path: '/ChangeMe/BuyConfigureNewOutfit',
             query: {
@@ -278,6 +285,7 @@ There.init({
           if (text == '') {
             return;
           }
+          $('.dialog').attr('data-busy', '1');
           There.fetch({
             path: '/ChangeMe/RenameOutfit',
             query: {
@@ -303,6 +311,7 @@ There.init({
           There.fsCommand('closeWindow', '0');
         });
         $('.footer .button[data-id="ok"]').off('click').on('click', function() {
+          $('.dialog').attr('data-busy', '1');
           There.fetch({
             path: '/pobman/deletepob',
             query: {
@@ -342,13 +351,85 @@ There.init({
   },
 
   onChangeMeResultXml: function(xml) {
-    There.fsCommand('devtools');
-    console.log(xml);
+    $('.dialog').attr('data-busy', '0');
+    const xmlChangeMe = xml.getElementsByTagName('ChangeMe')[0];
+    const xmlErrorCode = xmlChangeMe.getElementsByTagName('ErrorCode')[0];
+    const errorCode = xmlErrorCode.childNodes[0].nodeValue;
+    const type = $('.dialog').attr('data-id');
+    switch (type) {
+      case 'savelooksetchangeme': {
+        const mode = $('.modes[data-id="savelooksetchangeme"]').attr('data-mode');
+        if (errorCode == 0) {
+          $('.dialog').attr('data-id', 'thankyou').attr('data-mode', mode);
+          There.updateButtonActions();
+        } else {
+          $('.dialog').attr('data-id', 'error');
+          $('.panel[data-id="error"] span[data-id="action"]').text('saving the lookset');
+          There.updateButtonActions();
+        }
+        break;
+      }
+      case 'renamelooksetchangeme': {
+        if (errorCode == 0) {
+          There.fsCommand('closeWindow', '1');
+        } else {
+          $('.dialog').attr('data-id', 'error');
+          $('.panel[data-id="error"] span[data-id="action"]').text('renaming the lookset');
+          There.updateButtonActions();
+        }
+        break;
+      }
+      case 'saveoutfitchangeme': {
+        if (errorCode == 0) {
+          There.fsCommand('closeWindow', '1');
+        } else {
+          $('.dialog').attr('data-id', 'error');
+          $('.panel[data-id="error"] span[data-id="action"]').text('saving the outfit');
+          There.updateButtonActions();
+        }
+        break;
+      }
+      case 'renameoutfitchangeme': {
+        if (errorCode == 0) {
+          There.fsCommand('closeWindow', '1');
+        } else {
+          $('.dialog').attr('data-id', 'error');
+          $('.panel[data-id="error"] span[data-id="action"]').text('renaming the outfit');
+          There.updateButtonActions();
+        }
+        break;
+      }
+    }
   },
 
   onPobManResultXml: function(xml) {
-    There.fsCommand('devtools');
-    console.log(xml);
+    $('.dialog').attr('data-busy', '0');
+    const xmlAnswer = xml.getElementsByTagName('Answer')[0];
+    const xmlSuccess = xmlAnswer.getElementsByTagName('Success')[0];
+    const success = xmlSuccess.childNodes[0].nodeValue;
+    const type = $('.dialog').attr('data-id');
+    switch (type) {
+      case 'deletelooksetchangeme': {
+        if (success == 1) {
+          There.fsCommand('closeWindow', '1');
+        } else {
+          $('.dialog').attr('data-id', 'error');
+          $('.panel[data-id="error"] span[data-id="action"]').text('deleting the lookset');
+          There.updateButtonActions();
+        }
+        break;
+      }
+      case 'deleteoutfitchangeme': {
+        if (success == 1) {
+          There.fsCommand('closeWindow', '1');
+        } else {
+          $('.dialog').attr('data-id', 'error');
+          $('.panel[data-id="error"] span[data-id="action"]').text('deleting the outfit');
+          There.updateButtonActions();
+        }
+        break;
+      }
+    }
   },
 });
 
@@ -390,5 +471,29 @@ $(document).ready(function() {
 
   $('.panel input[type="text"]').on('keydown keyup change input cut paste', function() {
     There.updateButtonState();
+  });
+
+  $('.modes[data-id="savelooksetchangeme"] .panel input[type="text"]').on('keypress', function(event) {
+    if(event.which == 13 && $(this).val() != '') {
+      $('.footer .button[data-id="save"]:not([data-enabled="0"])').trigger('click');
+    }
+  });
+
+  $('.panel[data-id="renamelooksetchangeme"] input[type="text"]').on('keypress', function(event) {
+    if(event.which == 13 && $(this).val() != '') {
+      $('.footer .button[data-id="ok"]:not([data-enabled="0"])').trigger('click');
+    }
+  });
+
+  $('.panel[data-id="saveoutfitchangeme"] input[type="text"]').on('keypress', function(event) {
+    if(event.which == 13 && $(this).val() != '') {
+      $('.footer .button[data-id="save"]:not([data-enabled="0"])').trigger('click');
+    }
+  });
+
+  $('.panel[data-id="renameoutfitchangeme"] input[type="text"]').on('keypress', function(event) {
+    if(event.which == 13 && $(this).val() != '') {
+      $('.footer .button[data-id="ok"]:not([data-enabled="0"])').trigger('click');
+    }
   });
 });
