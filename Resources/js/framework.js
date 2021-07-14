@@ -64,7 +64,7 @@ There.processVariable = function(name, value) {
 There.fsCommand = function(command, query) {
   let message = command;
   if (query != undefined) {
-    if (query.constructor.name != 'URLSearchParams') {
+    if (query.constructor.name != 'URLSearchParams' && query.constructor.name != 'String') {
       query = new URLSearchParams(query).toString();
     }
     message += '?' + query;
