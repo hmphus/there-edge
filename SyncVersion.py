@@ -41,6 +41,15 @@ def apply_version_rc(name, version):
                 ','.join(version.split('.') + ['0']),
             )
             lines[i] = line
+
+        match = re.match(r'^( +)VALUE "([A-Za-z]+)Version",', line)
+        if match is not None:
+            line = '%sVALUE "%sVersion", "%s.0"' % (
+                match.group(1),
+                match.group(2),
+                version,
+            )
+            lines[i] = line
     with open('%s/%s.rc' % (name, name), 'w', encoding='utf-16') as file:
         file.write('\n'.join(lines) + '\n')
 
