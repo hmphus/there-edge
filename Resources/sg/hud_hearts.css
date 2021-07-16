@@ -1,0 +1,224 @@
+.left .panel[data-id="game"] .logo {
+  position:absolute;
+  left:5px;
+  top:7px;
+  width:52px;
+  height:49px;
+  background-image:url(logo_hearts.png);
+}
+
+.left .panel[data-id="game"] .button[data-id="newgame"] {
+  position:absolute;
+  left:67px;
+  top:7px;
+}
+
+.left .panel[data-id="game"] .button[data-id="rules"] {
+  position:absolute;
+  left:67px;
+  top:34px;
+}
+
+.left .panel[data-id="game"] .button[data-id="deal"],
+.left .panel[data-id="game"] .button[data-id="pass"],
+.left .panel[data-id="game"] .button[data-id="play"],
+.left .panel[data-id="game"] .button[data-id="taketrick"] {
+  position:absolute;
+  left:135px;
+  top:7px;
+  display:none;
+}
+
+.left .panel[data-id="tricks"] .players {
+  position:absolute;
+  left:0px;
+  right:0px;
+  top:5px;
+  font-size:0px;
+  display:flex;
+  flex-direction:row;
+  justify-content:space-around;
+}
+
+.left .panel[data-id="tricks"] .players .player {
+  display:inline-block;
+  width:47px;
+  height:14px;
+  padding:0px 2px;
+  font-size:8px;
+  color:#fff;
+  text-align:center;
+  white-space:nowrap;
+  text-overflow:ellipsis;
+  overflow:hidden;
+  transform:scaleY(1.2)
+}
+
+.left .panel[data-id="tricks"] .cardset {
+  position:absolute;
+  left:0px;
+  top:17px;
+  width:100%;
+  font-size:0px;
+  display:flex;
+  flex-direction:row;
+  justify-content:space-around;
+}
+
+.left .panel[data-id="tricks"] .cardset .card {
+  margin:0px
+}
+
+.hud[data-gamestate="pregame"] .left .panel[data-id="game"] .button[data-id="deal"],
+.hud[data-gamestate="deal"] .left .panel[data-id="game"] .button[data-id="deal"] {
+  display:inline-block;
+}
+
+.hud[data-gamestate="pass"] .left .panel[data-id="game"] .button[data-id="pass"],
+.hud[data-gamestate="passsend"] .left .panel[data-id="game"] .button[data-id="pass"] {
+  display:inline-block;
+}
+
+.hud[data-gamestate="play"] .left .panel[data-id="game"] .button[data-id="play"],
+.hud[data-gamestate="playsend"] .left .panel[data-id="game"] .button[data-id="play"] {
+  display:inline-block;
+}
+
+.hud[data-gamestate="taketrick"] .left .panel[data-id="game"] .button[data-id="taketrick"],
+.hud[data-gamestate="endgame"] .left .panel[data-id="game"] .button[data-id="taketrick"] {
+  display:inline-block;
+}
+
+.middle {
+  display:flex;
+  flex-direction:row;
+  height:100%;
+}
+
+.middle .table {
+  position:relative;
+  height:100%;
+}
+
+.middle .table::before {
+  position:absolute;
+  left:0px;
+  right:0px;
+  height:100%;
+  border-left:1px solid rgba(255, 255, 255, 0.25);
+  border-right:1px solid rgba(0, 0, 0, 0.5);
+  content:' ';
+  pointer-events:none;
+}
+
+.middle .table[data-player="1"] {
+  width:340px;
+}
+
+.middle .table:not([data-player="1"]) {
+  width:68px;
+  border-left:1px solid #000;
+}
+
+.middle .table[data-player="1"] .title {
+  position:absolute;
+  left:7px;
+  top:5px;
+  width:250px;
+  height:14px;
+  line-height:14px;
+  font-size:11px;
+  font-weight:bold;
+  color:#fff;
+  text-align:center;
+}
+
+.middle .table[data-player="1"] .cardset[data-id^="hand"] {
+  position:absolute;
+  left:7px;
+  top:20px;
+  width:260px;
+  height:37px;
+  text-align:center;
+}
+
+.middle .table[data-player="1"] .message {
+  position:absolute;
+  left:11px;
+  bottom:6px;
+  width:250px;
+  height:27px;
+  line-height:12px;
+  font-size:11px;
+  font-weight:bold;
+  color:#fff;
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-evenly;
+}
+
+.middle .table:not([data-player="1"]) {
+  background-color:rgba(0, 0, 0, 0.15);
+}
+
+.middle .table .player {
+  position:absolute;
+  right:2px;
+  top:5px;
+  width:64px;
+  height:14px;
+  line-height:14px;
+  font-size:11px;
+  font-weight:bold;
+  color:#fff;
+  text-align:center;
+  white-space:nowrap;
+  text-overflow:ellipsis;
+  overflow:hidden;
+}
+
+.middle .table .turn {
+  position:absolute;
+  right:19px;
+  top:20px;
+  width:28px;
+  height:26px;
+  display:none;
+}
+
+.middle .table .turn[data-visible="1"] {
+  display:inline-block;
+  background-image:url(hud.png);
+  background-position:0px -272px;
+}
+
+.middle .table .cardset[data-id^="played"] {
+  position:absolute;
+  right:20px;
+  top:20px;
+  width:27px;
+  height:37px;
+  text-align:center;
+}
+
+.middle .table .cardset[data-id^="played"][data-highlighted="1"] {
+  margin:-2px -2px 0px 0px;
+  border:2px solid #fa0;
+  border-radius:6px;
+}
+
+.middle .table .stats {
+  position:absolute;
+  right:4px;
+  bottom:6px;
+  width:60px;
+  line-height:12px;
+  font-size:11px;
+  color:#fff;
+}
+
+.middle .table .stats div {
+  display:flex;
+  flex-direction:row;
+  justify-content:space-between;
+}

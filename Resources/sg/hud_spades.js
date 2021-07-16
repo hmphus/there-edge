@@ -4,6 +4,7 @@ class CardSet {
     self.id = id;
     self.name = name;
     self.settings = Object.assign({}, {
+      offset: 0,
       sorted: true,
       selectable: false,
     }, settings ?? {});
@@ -39,6 +40,8 @@ class CardSet {
               const rankB = b[0];
               return self.ranks.indexOf(rankA) - self.ranks.indexOf(rankB);
             });
+          } else if (self.settings.offset > 0) {
+            self.cards = self.cards.concat(self.cards.splice(0, self.settings.offset))
           }
         }
         $(self.element).empty();
@@ -143,15 +146,8 @@ class Game {
     There.data.listeners.push(self);
     There.data.cardsets = {
       hand: null,
-      players: [
-        new CardSet('played1', 'played1'),
-        new CardSet('played2', 'played2'),
-        new CardSet('played3', 'played3'),
-        new CardSet('played4', 'played4'),
-      ],
-      lasttrick: new CardSet('lasttrick', 'lasttrick', {
-        sorted: false,
-      }),
+      players: [],
+      lasttrick: null,
     };
     There.data.scores = [
       new Score(1),
@@ -168,7 +164,7 @@ class Game {
       if (playerData != undefined && teamData != undefined && gameData != undefined) {
         self.players = playerData.player.map(function(e, i) {
           return {
-            id: i + 1,
+            id: null,
             name: e.avname.trim(),
             bid: e.bid == '' ? null : Number(e.bid),
             tricks: e.tricks == '' ? null : Number(e.tricks),
@@ -176,6 +172,9 @@ class Game {
           };
         });
         self.thisPlayer = playerData.player.findIndex(e => e.avoid == There.variables.there_pilotdoid);
+        self.players.forEach(function(e, i) {
+          e.id = ((i + self.players.length - self.thisPlayer) % self.players.length) + 1;
+        });
         self.teams = teamData.team.map(function(e) {
           let team = {
             id: Number(e.index),
@@ -218,12 +217,18 @@ class Game {
           score.bags = team.bags;
         }
         if (There.data.cardsets.hand == null) {
-          There.data.cardsets.hand = new CardSet('hand', `hand${self.players[self.thisPlayer].id}`, {
+          There.data.cardsets.hand = new CardSet('hand', `hand${self.thisPlayer + 1}`, {
             selectable: true,
           });
-          let cardsetData = There.data.channels?.cardset?.data;
-          if (cardsetData != undefined) {
-            There.data.cardsets.hand.onData('cardset', cardsetData);
+          self.players.forEach(function(e, i) {
+            There.data.cardsets.players.push(new CardSet(`played${e.id}`, `played${i + 1}`));
+          });
+          self.lasttrick = new CardSet('lasttrick', 'lasttrick', {
+            offset: self.thisPlayer,
+            sorted: false,
+          });
+          if (There.data.channels?.cardset?.data != undefined) {
+            There.data.channels.cardset.notify();
           }
         }
         self.showIndicators();

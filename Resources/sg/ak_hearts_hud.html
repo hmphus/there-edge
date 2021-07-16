@@ -19,12 +19,67 @@
 <div class="tab" data-id="tricks">Last Trick</div>
 </div>
 <div class="panels">
-<div class="panel" data-id="game" data-selected="1"></div>
+<div class="panel" data-id="game" data-selected="1">
+<div class="logo"></div>
+<div class="button large" data-id="newgame">New Game</div>
+<div class="button large" data-id="rules">Rules</div>
+<div class="button large" data-id="deal">Deal</div>
+<div class="button large" data-id="pass">Pass Cards</div>
+<div class="button large" data-id="play">Play Card</div>
+<div class="button large" data-id="taketrick">Take Trick</div>
+</div>
 <div class="panel" data-id="messages"><div class="messages"></div></div>
-<div class="panel" data-id="tricks"></div>
+<div class="panel" data-id="tricks">
+<div class="players">
+<div class="player" data-player="1"></div>
+<div class="player" data-player="2"></div>
+<div class="player" data-player="3"></div>
+<div class="player" data-player="4"></div>
+</div>
+<div class="cardset" data-id="lasttrick" data-deck="std"></div>
+</div>
 </div>
 </div>
 <div class="middle">
+<div class="table" data-player="1">
+<div class="title">My Hand</div>
+<div class="cardset" data-id="hand" data-deck="std"></div>
+<div class="message"><span></span></div>
+<div class="player"></div>
+<div class="turn"></div>
+<div class="cardset" data-id="played1" data-deck="std"></div>
+<div class="stats">
+<div><span>Hand:</span><span data-id="hand">--</span></div>
+<div><span>Game:</span><span data-id="game">--</span></div>
+</div>
+</div>
+<div class="table" data-player="2">
+<div class="player"></div>
+<div class="turn"></div>
+<div class="cardset" data-id="played2" data-deck="std"></div>
+<div class="stats">
+<div><span>Hand:</span><span data-id="hand">--</span></div>
+<div><span>Game:</span><span data-id="game">--</span></div>
+</div>
+</div>
+<div class="table" data-player="3">
+<div class="player"></div>
+<div class="turn"></div>
+<div class="cardset" data-id="played3" data-deck="std"></div>
+<div class="stats">
+<div><span>Hand:</span><span data-id="hand">--</span></div>
+<div><span>Game:</span><span data-id="game">--</span></div>
+</div>
+</div>
+<div class="table" data-player="4">
+<div class="player"></div>
+<div class="turn"></div>
+<div class="cardset" data-id="played4" data-deck="std"></div>
+<div class="stats">
+<div><span>Hand:</span><span data-id="hand">--</span></div>
+<div><span>Game:</span><span data-id="game">--</span></div>
+</div>
+</div>
 </div>
 <div class="right">
 <div class="buttons">
