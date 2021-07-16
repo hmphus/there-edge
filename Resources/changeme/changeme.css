@@ -633,7 +633,7 @@ body {
   height:17px;
 }
 
-.changeme[data-area="outfits"] .sections .section[data-section="wardrobe"] .panel .items .item .icon:not([data-drawer]) {
+.changeme[data-area="outfits"] .sections .section[data-section="wardrobe"] .panel .items .item:not([data-drawer]) .icon {
   visibility:hidden;
 }
 
