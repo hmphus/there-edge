@@ -56,25 +56,33 @@ class CardSet {
               There.playSound('menu item activate');
             }).on('click', function() {
               There.clearNamedTimer('card-click');
-              if (There.data.game.state == 'playsend') {
-                return;
-              }
-              let selected = $(cardDiv).attr('data-selected');
-              if (selected != 1) {
-                $(self.element).find('.card').attr('data-selected', '0');
-                $(cardDiv).attr('data-selected', '1');
-              } else {
-                There.setNamedTimer('card-click', 100, function() {
+              if (There.data.game.state == 'pass') {
+                let selected = $(cardDiv).attr('data-selected');
+                if (selected != 1) {
+                  if ($(self.element).find('.card[data-selected="1"]').length < 3) {
+                    $(cardDiv).attr('data-selected', '1');
+                  }
+                } else {
                   $(cardDiv).attr('data-selected', '0');
-                });
+                }
+              }
+              if (There.data.game.state == 'play') {
+                let selected = $(cardDiv).attr('data-selected');
+                if (selected != 1) {
+                  $(self.element).find('.card').attr('data-selected', '0');
+                  $(cardDiv).attr('data-selected', '1');
+                } else {
+                  There.setNamedTimer('card-click', 100, function() {
+                    $(cardDiv).attr('data-selected', '0');
+                  });
+                }
               }
             }).on('dblclick', function() {
               There.clearNamedTimer('card-click');
-              if (There.data.game.state == 'playsend') {
-                return;
+              if (There.data.game.state == 'play') {
+                $(cardDiv).attr('data-selected', '1');
+                There.data.game.playCard($(cardDiv).attr('data-id'));
               }
-              $(cardDiv).attr('data-selected', '1');
-              There.data.game.playCard($(cardDiv).attr('data-id'));
             });
           }
         }
@@ -87,13 +95,18 @@ class CardSet {
     return jQuery.map($(self.element).find('.card[data-selected="1"]'), e => $(e).attr('data-id'));
   }
 
-  set selected(id) {
+  set selected(ids) {
     let self = this;
     if (!self.settings.selectable) {
       return;
     }
     $(self.element).find('.card').attr('data-selected', '0');
-    $(self.element).find(`.card[data-id=${id}]`).attr('data-selected', '1');
+    if (ids.constructor.name != 'Array') {
+      ids = [ids];
+    }
+    for (let id of ids) {
+      $(self.element).find(`.card[data-id=${id}]`).attr('data-selected', '1');
+    }
   }
 
   detachCard(id) {
@@ -115,8 +128,9 @@ class CardSet {
 class Game {
   constructor() {
     let self = this;
+    self.passIds = null;
     self.playId = null;
-    self.playUiid = 1000;
+    self.uiid = 1000;
     There.data.listeners.push(self);
     There.data.cardsets = {
       hand: null,
@@ -190,8 +204,13 @@ class Game {
       for (let event of data.event) {
         const url = new URL(There.data.channels.event.data.event[0].query, 'http://host/');
         if (url.pathname.toLowerCase() == '/uirej') {
-          if (url.searchParams.get('uiid') == self.playUiid && url.searchParams.get('avoid') == There.variables.there_pilotdoid) {
-            self.revertPlayCard();
+          if (url.searchParams.get('uiid') == self.uiid && url.searchParams.get('avoid') == There.variables.there_pilotdoid) {
+            if (self.state == 'passsend') {
+              self.revertPassCards();
+            }
+            if (self.state == 'playsend') {
+              self.revertPlayCard();
+            }
           }
         }
       }
@@ -209,6 +228,7 @@ class Game {
     self.state = state;
     $('.hud').attr('data-gamestate', self.state);
     self.resetIndicators();
+    There.clearNamedTimer('card-pass');
     There.clearNamedTimer('card-play');
   }
 
@@ -288,6 +308,39 @@ class Game {
     }
   }
 
+  passCards(ids) {
+    let self = this;
+    if (self.state != 'pass' || !self.isActivePlayer) {
+      return;
+    }
+    self.setState('passsend');
+    self.passIds = ids;
+    for (let id of ids) {
+      There.data.cardsets.hand.detachCard(id);
+    }
+    self.uiid++;
+    There.sendEventMessageToClient(6, {
+      cardset: `hand${self.players[self.thisPlayer].id}`,
+      cards: self.passIds.map(e => There.data.cardsets.hand.cardsUnsorted.indexOf(e) + 1).join(' '),
+      uiid: self.uiid,
+    });
+    There.setNamedTimer('card-pass', 5000, function() {
+      self.revertPassCards();
+      There.data.messages.addMessage(0, `Please try passing the cards again later.`);
+    });
+  }
+
+  revertPassCards() {
+    let self = this;
+    if (self.passIds == null) {
+      return;
+    }
+    There.data.channels.game.notify();
+    There.data.channels.cardset.notify();
+    There.data.cardsets.hand.selected = self.passIds;
+    self.passIds = null;
+  }
+
   playCard(id) {
     let self = this;
     if (self.state != 'play' || !self.isActivePlayer) {
@@ -297,11 +350,11 @@ class Game {
     self.playId = id;
     let cardDiv = There.data.cardsets.hand.detachCard(self.playId);
     There.data.cardsets.players[self.thisPlayer].attachCard(cardDiv);
-    self.playUiid++;
+    self.uiid++;
     There.sendEventMessageToClient(3, {
       cardset: `hand${self.players[self.thisPlayer].id}`,
       cards: There.data.cardsets.hand.cardsUnsorted.indexOf(self.playId) + 1,
-      uiid: self.playUiid,
+      uiid: self.uiid,
     });
     There.setNamedTimer('card-play', 5000, function() {
       self.revertPlayCard();
@@ -346,6 +399,22 @@ $(document).ready(function() {
     There.sendEventMessageToClient(2);
   });
 
+  $('.left .panel[data-id="game"] .button[data-id="pass"]').on('click', function() {
+    if ($(this).attr('data-enabled') == 0) {
+      return;
+    }
+    if (There.data.game.state != 'pass') {
+      There.data.messages.addMessage(0, `It isn't your turn to pass cards.`);
+      return;
+    }
+    let selectedCards = There.data.cardsets.hand?.selected ?? [];
+    if (selectedCards.length != 3) {
+      There.data.messages.addMessage(0, `Please select 3 cards to be passed.`);
+      return;
+    }
+    There.data.game.passCards(selectedCards);
+  });
+
   $('.left .panel[data-id="game"] .button[data-id="play"]').on('click', function() {
     if ($(this).attr('data-enabled') == 0) {
       return;
@@ -354,12 +423,12 @@ $(document).ready(function() {
       There.data.messages.addMessage(0, `It isn't your turn to play a card.`);
       return;
     }
-    let selectedCard = There.data.cardsets.hand?.selected ?? [];
-    if (selectedCard.length == 0) {
+    let selectedCards = There.data.cardsets.hand?.selected ?? [];
+    if (selectedCards.length != 1) {
       There.data.messages.addMessage(0, `Please select a card to be played.`);
       return;
     }
-    There.data.game.playCard(selectedCard[0]);
+    There.data.game.playCard(selectedCards[0]);
   });
 
   $('.left .panel[data-id="game"] .button[data-id="taketrick"]').on('click', function() {

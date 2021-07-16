@@ -56,25 +56,23 @@ class CardSet {
               There.playSound('menu item activate');
             }).on('click', function() {
               There.clearNamedTimer('card-click');
-              if (There.data.game.state == 'playsend') {
-                return;
-              }
-              let selected = $(cardDiv).attr('data-selected');
-              if (selected != 1) {
-                $(self.element).find('.card').attr('data-selected', '0');
-                $(cardDiv).attr('data-selected', '1');
-              } else {
-                There.setNamedTimer('card-click', 100, function() {
-                  $(cardDiv).attr('data-selected', '0');
-                });
+              if (There.data.game.state == 'play') {
+                let selected = $(cardDiv).attr('data-selected');
+                if (selected != 1) {
+                  $(self.element).find('.card').attr('data-selected', '0');
+                  $(cardDiv).attr('data-selected', '1');
+                } else {
+                  There.setNamedTimer('card-click', 100, function() {
+                    $(cardDiv).attr('data-selected', '0');
+                  });
+                }
               }
             }).on('dblclick', function() {
               There.clearNamedTimer('card-click');
-              if (There.data.game.state == 'playsend') {
-                return;
+              if (There.data.game.state == 'play') {
+                $(cardDiv).attr('data-selected', '1');
+                There.data.game.playCard($(cardDiv).attr('data-id'));
               }
-              $(cardDiv).attr('data-selected', '1');
-              There.data.game.playCard($(cardDiv).attr('data-id'));
             });
           }
         }
@@ -142,7 +140,7 @@ class Game {
   constructor() {
     let self = this;
     self.playId = null;
-    self.playUiid = 1000;
+    self.uiid = 1000;
     There.data.listeners.push(self);
     There.data.cardsets = {
       hand: null,
@@ -238,8 +236,10 @@ class Game {
       for (let event of data.event) {
         const url = new URL(There.data.channels.event.data.event[0].query, 'http://host/');
         if (url.pathname.toLowerCase() == '/uirej') {
-          if (url.searchParams.get('uiid') == self.playUiid && url.searchParams.get('avoid') == There.variables.there_pilotdoid) {
-            self.revertPlayCard();
+          if (url.searchParams.get('uiid') == self.uiid && url.searchParams.get('avoid') == There.variables.there_pilotdoid) {
+            if (self.state == 'playsend') {
+              self.revertPlayCard();
+            }
           }
         }
       }
@@ -345,11 +345,11 @@ class Game {
     self.playId = id;
     let cardDiv = There.data.cardsets.hand.detachCard(self.playId);
     There.data.cardsets.players[self.thisPlayer].attachCard(cardDiv);
-    self.playUiid++;
+    self.uiid++;
     There.sendEventMessageToClient(3, {
       cardset: `hand${self.players[self.thisPlayer].id}`,
       cards: There.data.cardsets.hand.cardsUnsorted.indexOf(self.playId) + 1,
-      uiid: self.playUiid,
+      uiid: self.uiid,
     });
     There.setNamedTimer('card-play', 5000, function() {
       self.revertPlayCard();
@@ -402,12 +402,12 @@ $(document).ready(function() {
       There.data.messages.addMessage(0, `It isn't your turn to play a card.`);
       return;
     }
-    let selectedCard = There.data.cardsets.hand?.selected ?? [];
-    if (selectedCard.length == 0) {
+    let selectedCards = There.data.cardsets.hand?.selected ?? [];
+    if (selectedCards.length != 1) {
       There.data.messages.addMessage(0, `Please select a card to be played.`);
       return;
     }
-    There.data.game.playCard(selectedCard[0]);
+    There.data.game.playCard(selectedCards[0]);
   });
 
   $('.left .panel[data-id="game"] .button[data-id="taketrick"]').on('click', function() {
