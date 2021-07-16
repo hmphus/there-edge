@@ -755,11 +755,6 @@ There.init({
           enabled = false;
         }
       }
-      if (enabled && area == 'looksets') {
-        if (menu.key == 'give' || menu.key == 'delete') {
-          enabled = false;
-        }
-      }
       let divMenuItem = $('<div class="item"></div>');
       let divSound = $('<div class="sound"></div>');
       $(divMenuItem).attr('data-index', index);
