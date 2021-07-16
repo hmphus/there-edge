@@ -78,7 +78,8 @@ if __name__ == '__main__':
             shortcut = com.CoCreateInstance(shell.CLSID_ShellLink, None, com.CLSCTX_INPROC_SERVER, shell.IID_IShellLink)
             file = shortcut.QueryInterface(com.IID_IPersistFile)
             file.Load(os.path.join(args.path, 'Sign on to There.lnk'))
-            shortcut.SetPath(os.path.join(shortcut.GetWorkingDirectory(), 'ThereEdge.exe'))
+            shortcut.SetWorkingDirectory(os.path.abspath(args.path))
+            shortcut.SetPath(os.path.join(os.path.abspath(args.path), 'ThereEdge.exe'))
             file.Save(os.path.join(shell.SHGetFolderPath(0, shellcon.CSIDL_PROGRAMS, 0, 0), 'There', 'There (Edge).lnk'), 0)
             print('The shortcut was created successfully.')
     except RuntimeError as e:
