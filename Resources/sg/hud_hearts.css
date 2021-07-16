@@ -177,6 +177,10 @@
   overflow:hidden;
 }
 
+.middle .table .player[data-leader="1"] {
+  font-style:italic;
+}
+
 .middle .table .turn {
   position:absolute;
   right:19px;

@@ -19,6 +19,6 @@ Install [Visual Studio 2019](https://visualstudio.microsoft.com/vs/) with the fo
 
 ### Status
 
-This project is currently in the [initial development](https://github.com/hmphus/there-edge/projects/1) phase.
+This project is currently in the [development](https://github.com/hmphus/there-edge/projects/1) phase.
 
-![Screenshot](https://media.fotki.com/2v2abYSngx3JhYT.png)
+![Screenshot](https://media.fotki.com/2v2aKZw88x3JhYT.png)

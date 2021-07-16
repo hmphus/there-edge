@@ -146,14 +146,16 @@ class Game {
       let playerData = There.data.channels?.player?.data;
       let gameData = There.data.channels?.game?.data;
       if (playerData != undefined && gameData != undefined) {
+        const leader = Number(gameData.leader) - 1;
         self.players = playerData.player.map(function(e, i) {
           return {
             id: null,
             name: e.avname.trim(),
             tricks: e.tricks == '' ? null : Number(e.tricks),
-            hand: e.points == '' ? null : Number(e.roundpoints),
-            game: e.points == '' ? null : Number(e.gamepoints),
-            inGame: e.points == '' ? null : Number(e.ingame),
+            hand: e.roundpoints == '' ? null : Number(e.roundpoints),
+            game: e.gamepoints == '' ? null : Number(e.gamepoints),
+            inGame: e.ingame == 1,
+            isLeader: leader == i,
           };
         });
         self.thisPlayer = playerData.player.findIndex(e => e.avoid == There.variables.there_pilotdoid);
@@ -177,7 +179,7 @@ class Game {
           }
           {
             let tableDiv = $(`.middle .table[data-player="${player.id}"]`);
-            $(tableDiv).find('.player').text(player.name);
+            $(tableDiv).find('.player').text(player.name).attr('data-leader', player.isLeader && player.inGame ? '1' : '0');
             $(tableDiv).find('.stats span[data-id="hand"]').text(player.hand == null ? '--' : player.hand);
             $(tableDiv).find('.stats span[data-id="game"]').text(player.game == null ? '--' : player.game);
           }
