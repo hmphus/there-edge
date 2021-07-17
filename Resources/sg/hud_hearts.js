@@ -20,6 +20,7 @@ class CardSet {
   onData(name, data) {
     let self = this;
     if (name == 'cardset') {
+      let cardsNew = [];
       let cards = data.cardset.find(e => e.index == self.name)?.cards?.toLowerCase();
       if (cards != undefined && self.cardsText != cards) {
         self.cardsText = cards;
@@ -27,6 +28,7 @@ class CardSet {
           self.cardsUnsorted = Array(Number(self.cardsText.substr(1))).fill('??');
           self.cards = self.cardsUnsorted.concat();
         } else {
+          const cardsPrev = self.cards.concat();
           self.cardsUnsorted = self.cardsText.match(/.{1,2}/g) ?? [];
           self.cards = self.cardsUnsorted.concat();
           if (self.settings.sorted) {
@@ -43,11 +45,24 @@ class CardSet {
           } else if (self.settings.offset > 0) {
             self.cards = self.cards.concat(self.cards.splice(0, self.settings.offset))
           }
+          if (self.id == 'hand' && There.data.game.state.startsWith('pass') && cardsPrev.length > 0) {
+            for (let card of self.cards) {
+              if (cardsPrev.indexOf(card) < 0 && cardsNew.indexOf(card) < 0) {
+                cardsNew.push(card);
+              }
+            }
+            if (cardsNew.length > 0) {
+              There.data.messages.addMessage(0, `You have received ${cardsNew.length} new ${cardsNew.length == 1 ? 'card' : 'cards'}.`);
+            }
+          }
         }
         $(self.element).empty();
         for (let card of self.cards) {
           let cardDiv = $('<div class="card"><span></span><span></span></div>');
           $(cardDiv).attr('data-id', card);
+          if (self.id == 'hand' && cardsNew.indexOf(card) >= 0) {
+            $(cardDiv).attr('data-new', '1');
+          }
           $(self.element).prepend($(cardDiv));
           if (self.settings.selectable) {
             $(cardDiv).on('mouseover', function() {
@@ -69,7 +84,7 @@ class CardSet {
               if (There.data.game.state == 'play') {
                 let selected = $(cardDiv).attr('data-selected');
                 if (selected != 1) {
-                  $(self.element).find('.card').attr('data-selected', '0');
+                  $(self.element).find('.card').attr('data-new', '0').attr('data-selected', '0');
                   $(cardDiv).attr('data-selected', '1');
                 } else {
                   There.setNamedTimer('card-click', 100, function() {
@@ -80,6 +95,7 @@ class CardSet {
             }).on('dblclick', function() {
               There.clearNamedTimer('card-click');
               if (There.data.game.state == 'play') {
+                $(self.element).find('.card').attr('data-new', '0');
                 $(cardDiv).attr('data-selected', '1');
                 There.data.game.playCard($(cardDiv).attr('data-id'));
               }
@@ -137,7 +153,6 @@ class Game {
       players: [],
       lasttrick: null,
     };
-    //There.fsCommand('devtools');
   }
 
   onData(name, data) {
@@ -170,6 +185,7 @@ class Game {
         $('.hud').attr('data-isactiveplayer', self.isActivePlayer ? '1' : '0');
         $('.left .panel[data-id="game"] .button[data-id="newgame"]').attr('data-enabled', self.isHost ? '1' : '0');
         $('.left .panel[data-id="game"] .button[data-id="deal"]').attr('data-enabled', self.isActivePlayer && self.state == 'deal' ? '1' : '0');
+        $('.left .panel[data-id="game"] .button[data-id="pass"]').attr('data-enabled', self.isActivePlayer && self.state == 'pass' ? '1' : '0');
         $('.left .panel[data-id="game"] .button[data-id="play"]').attr('data-enabled', self.isActivePlayer && self.state == 'play' ? '1' : '0');
         $('.left .panel[data-id="game"] .button[data-id="taketrick"]').attr('data-enabled', self.isActivePlayer && self.state == 'taketrick' ? '1' : '0');
         for (let player of self.players) {

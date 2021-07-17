@@ -401,6 +401,10 @@ body {
   margin-left:0px;
 }
 
+.cardset .card[data-new="1"] {
+  background-color:#cbffcb;
+}
+
 .cardset .card[data-selected="1"] {
   top:-5px;
   background-color:#fa0;
