@@ -71,6 +71,9 @@ class CardSet {
               There.playSound('menu item activate');
             }).on('click', function() {
               There.clearNamedTimer('card-click');
+              if (There.data.game.state.endsWith('send')) {
+                return;
+              }
               if (There.data.game.state == 'pass') {
                 let selected = $(cardDiv).attr('data-selected');
                 if (selected != 1) {
@@ -80,8 +83,7 @@ class CardSet {
                 } else {
                   $(cardDiv).attr('data-selected', '0');
                 }
-              }
-              if (There.data.game.state == 'play') {
+              } else {
                 let selected = $(cardDiv).attr('data-selected');
                 if (selected != 1) {
                   $(self.element).find('.card').attr('data-new', '0').attr('data-selected', '0');

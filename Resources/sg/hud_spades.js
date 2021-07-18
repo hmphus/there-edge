@@ -56,16 +56,17 @@ class CardSet {
               There.playSound('menu item activate');
             }).on('click', function() {
               There.clearNamedTimer('card-click');
-              if (There.data.game.state == 'play') {
-                let selected = $(cardDiv).attr('data-selected');
-                if (selected != 1) {
-                  $(self.element).find('.card').attr('data-selected', '0');
-                  $(cardDiv).attr('data-selected', '1');
-                } else {
-                  There.setNamedTimer('card-click', 100, function() {
-                    $(cardDiv).attr('data-selected', '0');
-                  });
-                }
+              if (There.data.game.state.endsWith('send')) {
+                return;
+              }
+              let selected = $(cardDiv).attr('data-selected');
+              if (selected != 1) {
+                $(self.element).find('.card').attr('data-selected', '0');
+                $(cardDiv).attr('data-selected', '1');
+              } else {
+                There.setNamedTimer('card-click', 100, function() {
+                  $(cardDiv).attr('data-selected', '0');
+                });
               }
             }).on('dblclick', function() {
               There.clearNamedTimer('card-click');
