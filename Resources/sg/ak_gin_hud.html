@@ -18,11 +18,45 @@
 <div class="tab" data-id="messages">Messages</div>
 </div>
 <div class="panels">
-<div class="panel" data-id="game" data-selected="1"></div>
+<div class="panel" data-id="game" data-selected="1">
+<div class="logo"></div>
+<div class="button large" data-id="newgame">New Game</div>
+<div class="button large" data-id="rules">Rules</div>
+<div class="button large" data-id="deal">Deal</div>
+<div class="button large" data-id="draw">Draw Card</div>
+<div class="button large" data-id="discard">Discard</div>
+<div class="button large" data-id="knock">Knock</div>
+</div>
 <div class="panel" data-id="messages"><div class="messages"></div></div>
 </div>
 </div>
 <div class="middle">
+<div class="table" data-player="1">
+<div class="deck">
+<div class="title">Deck</div>
+</div>
+<div class="title">My Hand</div>
+<div class="cardset" data-id="hand" data-deck="std"></div>
+<div class="message"><span></span></div>
+<div class="melds">
+<div class="player"></div>
+<div class="turn"></div>
+<div class="cardset" data-id="played1" data-deck="std"></div>
+<div class="stats">
+<div><span>Game:</span><span data-id="game">--</span></div>
+</div>
+</div>
+</div>
+<div class="table" data-player="2">
+<div class="melds">
+<div class="player"></div>
+<div class="turn"></div>
+<div class="cardset" data-id="played2" data-deck="std"></div>
+<div class="stats">
+<div><span>Game:</span><span data-id="game">--</span></div>
+</div>
+</div>
+</div>
 </div>
 <div class="right">
 <div class="buttons">

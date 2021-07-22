@@ -1,0 +1,239 @@
+.left .panel[data-id="game"] .logo {
+  position:absolute;
+  left:3px;
+  top:12px;
+  width:58px;
+  height:32px;
+  background-image:url(logo_gin.png);
+}
+
+.left .panel[data-id="game"] .button[data-id="newgame"] {
+  position:absolute;
+  left:67px;
+  top:7px;
+}
+
+.left .panel[data-id="game"] .button[data-id="rules"] {
+  position:absolute;
+  left:67px;
+  top:34px;
+}
+
+.left .panel[data-id="game"] .button[data-id="deal"],
+.left .panel[data-id="game"] .button[data-id="draw"],
+.left .panel[data-id="game"] .button[data-id="discard"] {
+  position:absolute;
+  left:135px;
+  top:7px;
+  display:none;
+}
+
+.left .panel[data-id="game"] .button[data-id="knock"] {
+  position:absolute;
+  left:135px;
+  top:34px;
+  display:none;
+}
+
+.hud[data-gamestate="pregame"] .left .panel[data-id="game"] .button[data-id="deal"],
+.hud[data-gamestate="deal"] .left .panel[data-id="game"] .button[data-id="deal"] {
+  display:inline-block;
+}
+
+.hud[data-gamestate="draw"] .left .panel[data-id="game"] .button[data-id="draw"],
+.hud[data-gamestate="drawsend"] .left .panel[data-id="game"] .button[data-id="draw"] {
+  display:inline-block;
+}
+
+.hud[data-gamestate="discard"] .left .panel[data-id="game"] .button[data-id="discard"],
+.hud[data-gamestate="discard"] .left .panel[data-id="game"] .button[data-id="knock"],
+.hud[data-gamestate="discardsend"] .left .panel[data-id="game"] .button[data-id="discard"],
+.hud[data-gamestate="discardsend"] .left .panel[data-id="game"] .button[data-id="knock"] {
+  display:inline-block;
+}
+
+.middle {
+  width:547px;
+  height:100%;
+}
+
+.middle .table {
+  position:absolute;
+  top:0px;
+  left:0px;
+  width:100%;
+  height:100%;
+}
+
+.middle .table::before {
+  position:absolute;
+  left:0px;
+  right:0px;
+  height:100%;
+  border-left:1px solid rgba(255, 255, 255, 0.25);
+  border-right:1px solid rgba(0, 0, 0, 0.5);
+  content:' ';
+  pointer-events:none;
+}
+
+.middle .table[data-player="1"] .title {
+  position:absolute;
+  left:7px;
+  top:5px;
+  width:250px;
+  height:14px;
+  line-height:14px;
+  font-size:11px;
+  font-weight:bold;
+  color:#fff;
+  text-align:center;
+}
+
+.middle .table[data-player="1"] .cardset[data-id^="hand"] {
+  position:absolute;
+  left:7px;
+  top:20px;
+  width:260px;
+  height:37px;
+  text-align:center;
+}
+
+.middle .table[data-player="1"] .message {
+  position:absolute;
+  left:11px;
+  bottom:6px;
+  width:250px;
+  height:27px;
+  line-height:12px;
+  font-size:11px;
+  font-weight:bold;
+  color:#fff;
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-evenly;
+}
+
+.middle .table[data-player="2"] {
+  pointer-events:none;
+}
+
+.middle .table[data-player="2"]::before {
+  display:none;
+}
+
+.middle .table .melds {
+  position:absolute;
+  right:0px;
+  width:223px;
+  height:44px;
+  pointer-events:all;
+}
+
+.middle .table[data-player="1"] .melds {
+  top:0px;
+}
+
+.middle .table[data-player="2"] .melds {
+  bottom:0px;
+  border-left:1px solid #000;
+  border-top:1px solid #000;
+  background-color:rgba(0, 0, 0, 0.15);
+}
+
+.middle .table[data-player="2"] .melds::before {
+  position:absolute;
+  left:0px;
+  right:1px;
+  height:100%;
+  border-left:1px solid rgba(255, 255, 255, 0.25);
+  border-top:1px solid rgba(255, 255, 255, 0.25);
+  content:' ';
+  pointer-events:none;
+}
+
+.middle .table .melds .player {
+  position:absolute;
+  left:10px;
+  top:5px;
+  width:64px;
+  height:14px;
+  line-height:14px;
+  font-size:11px;
+  font-weight:bold;
+  color:#fff;
+  text-align:center;
+  white-space:nowrap;
+  text-overflow:ellipsis;
+  overflow:hidden;
+}
+
+.middle .table .deck {
+  position:absolute;
+  left:0px;
+  top:0px;
+  width:88px;
+  height:62px;
+  border-right:1px solid rgba(255, 255, 255, 0.25);
+}
+
+.middle .table .deck::before {
+  position:absolute;
+  left:0px;
+  right:0px;
+  height:100%;
+  border-right:1px solid rgba(0, 0, 0, 0.5);
+  content:' ';
+  pointer-events:none;
+}
+
+.middle .table .deck .title {
+  left:5px;
+  right:5px;
+  width:auto;
+}
+
+.middle .table .turn {
+  position:absolute;
+  right:19px;
+  top:20px;
+  width:28px;
+  height:26px;
+  display:none;
+}
+
+.middle .table .turn[data-visible="1"] {
+  display:inline-block;
+  background-image:url(hud.png);
+  background-position:0px -272px;
+}
+
+.middle .table .cardset[data-id^="played"] {
+  position:absolute;
+  right:20px;
+  top:20px;
+  width:27px;
+  height:37px;
+  text-align:center;
+}
+
+.middle .table .cardset[data-id^="played"][data-highlighted="1"] {
+  margin:-2px -2px 0px 0px;
+  border:2px solid #fa0;
+  border-radius:6px;
+}
+
+.middle .table .stats {
+  position:absolute;
+  right:4px;
+  top:5px;
+  width:60px;
+  line-height:14px;
+  font-size:11px;
+  color:#fff;
+}
+
+.middle .table .stats div {
+  display:flex;
+  flex-direction:row;
+  justify-content:space-between;
+}
