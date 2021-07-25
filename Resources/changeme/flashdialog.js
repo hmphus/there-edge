@@ -34,6 +34,7 @@ There.init({
       $('.dialog').attr('data-id', value.toLowerCase());
       There.updateButtonState();
       There.updateButtonActions();
+      There.fsCommand('getKeyboardFocus');
     }
 
     if (name == 'looksettoupdate') {
