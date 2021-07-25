@@ -153,7 +153,6 @@ class Game {
     There.data.cardsets = {
       hand: null,
       players: [],
-      lasttrick: null,
     };
     There.fsCommand('devtools');
   }
@@ -164,16 +163,12 @@ class Game {
       let playerData = There.data.channels?.player?.data;
       let gameData = There.data.channels?.game?.data;
       if (playerData != undefined && gameData != undefined) {
-        const leader = Number(gameData.leader) - 1;
         self.players = playerData.player.map(function(e, i) {
           return {
             id: null,
             name: e.avname.trim(),
-            //tricks: e.tricks == '' ? null : Number(e.tricks),
-            //hand: e.roundpoints == '' ? null : Number(e.roundpoints),
-            //game: e.gamepoints == '' ? null : Number(e.gamepoints),
-            //inGame: e.ingame == 1,
-            //isLeader: leader == i,
+            hand: e.roundpoints == '' ? null : Number(e.roundpoints),
+            game: e.gamepoints == '' ? null : Number(e.gamepoints),
           };
         });
         self.thisPlayer = playerData.player.findIndex(e => e.avoid == There.variables.there_pilotdoid);
@@ -191,19 +186,12 @@ class Game {
         $('.left .panel[data-id="game"] .button[data-id="pass"]').attr('data-enabled', self.isActivePlayer && self.state == 'pass' ? '1' : '0');
         $('.left .panel[data-id="game"] .button[data-id="play"]').attr('data-enabled', self.isActivePlayer && self.state == 'play' ? '1' : '0');
         $('.left .panel[data-id="game"] .button[data-id="taketrick"]').attr('data-enabled', self.isActivePlayer && self.state == 'taketrick' ? '1' : '0');
-        /*
         for (let player of self.players) {
-          {
-            let playerDiv = $(`.left .panel[data-id="tricks"] .players .player[data-player="${player.id}"]`);
-            $(playerDiv).text(player.name);
-          }
-          {
-            let tableDiv = $(`.middle .table[data-player="${player.id}"]`);
-            $(tableDiv).find('.player').text(player.name).attr('data-leader', player.isLeader && player.inGame ? '1' : '0');
-            $(tableDiv).find('.stats span[data-id="hand"]').text(player.hand == null ? '--' : player.hand);
-            $(tableDiv).find('.stats span[data-id="game"]').text(player.game == null ? '--' : player.game);
-          }
+          let tableDiv = $(`.middle .table[data-player="${player.id}"]`);
+          $(tableDiv).find('.player').text(player.name);
+          $(tableDiv).find('.stats span[data-id="game"]').text(player.game == null ? '--' : player.game);
         }
+        /*
         if (There.data.cardsets.hand == null) {
           There.data.cardsets.hand = new CardSet('hand', `hand${self.thisPlayer + 1}`, {
             selectable: true,

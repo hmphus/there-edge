@@ -102,7 +102,7 @@
   position:absolute;
   left:11px;
   bottom:6px;
-  width:250px;
+  width:300px;
   height:27px;
   line-height:12px;
   font-size:11px;
@@ -172,7 +172,7 @@
   left:0px;
   top:0px;
   width:88px;
-  height:62px;
+  height:63px;
   border-right:1px solid rgba(255, 255, 255, 0.25);
 }
 
@@ -194,17 +194,17 @@
 
 .middle .table .turn {
   position:absolute;
-  right:19px;
+  left:9px;
   top:20px;
-  width:28px;
-  height:26px;
+  width:22px;
+  height:20px;
   display:none;
 }
 
 .middle .table .turn[data-visible="1"] {
   display:inline-block;
   background-image:url(hud.png);
-  background-position:0px -272px;
+  background-position:-29px -278px;
 }
 
 .middle .table .cardset[data-id^="played"] {
@@ -224,9 +224,9 @@
 
 .middle .table .stats {
   position:absolute;
-  right:4px;
+  right:10px;
   top:5px;
-  width:60px;
+  width:50px;
   line-height:14px;
   font-size:11px;
   color:#fff;
