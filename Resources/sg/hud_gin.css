@@ -21,7 +21,8 @@
 
 .left .panel[data-id="game"] .button[data-id="deal"],
 .left .panel[data-id="game"] .button[data-id="draw"],
-.left .panel[data-id="game"] .button[data-id="discard"] {
+.left .panel[data-id="game"] .button[data-id="discard"],
+.left .panel[data-id="game"] .button[data-id="show"] {
   position:absolute;
   left:135px;
   top:7px;
@@ -52,6 +53,11 @@
   display:inline-block;
 }
 
+.hud[data-gamestate="knock"] .left .panel[data-id="game"] .button[data-id="show"],
+.hud[data-gamestate="knock"] .left .panel[data-id="game"] .button[data-id="showsend"] {
+  display:inline-block;
+}
+
 .middle {
   width:547px;
   height:100%;
@@ -79,7 +85,7 @@
 .middle .table[data-player="1"] .title {
   position:absolute;
   left:7px;
-  top:5px;
+  top:1px;
   width:250px;
   height:14px;
   line-height:14px;
@@ -91,9 +97,9 @@
 
 .middle .table[data-player="1"] .cardset[data-id^="hand"] {
   position:absolute;
-  left:7px;
+  left:90px;
   top:20px;
-  width:260px;
+  width:232px;
   height:37px;
   text-align:center;
 }
@@ -207,16 +213,18 @@
   background-position:-29px -278px;
 }
 
-.middle .table .cardset[data-id^="played"] {
+.middle .table .cardset[data-id^="meld"] {
   position:absolute;
-  right:20px;
-  top:20px;
-  width:27px;
+  left:37px;
+  top:16px;
+  width:255px;
   height:37px;
   text-align:center;
+  transform-origin:top left;
+  transform:scale(0.7);
 }
 
-.middle .table .cardset[data-id^="played"][data-highlighted="1"] {
+.middle .table .cardset[data-id^="meld"][data-highlighted="1"] {
   margin:-2px -2px 0px 0px;
   border:2px solid #fa0;
   border-radius:6px;
@@ -225,7 +233,7 @@
 .middle .table .stats {
   position:absolute;
   right:10px;
-  top:5px;
+  top:1px;
   width:50px;
   line-height:14px;
   font-size:11px;

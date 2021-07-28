@@ -152,7 +152,7 @@ class Game {
     There.data.listeners.push(self);
     There.data.cardsets = {
       hand: null,
-      players: [],
+      melds: [],
     };
     There.fsCommand('devtools');
   }
@@ -191,24 +191,20 @@ class Game {
           $(tableDiv).find('.player').text(player.name);
           $(tableDiv).find('.stats span[data-id="game"]').text(player.game == null ? '--' : player.game);
         }
-        /*
         if (There.data.cardsets.hand == null) {
           There.data.cardsets.hand = new CardSet('hand', `hand${self.thisPlayer + 1}`, {
             selectable: true,
           });
           self.players.forEach(function(e, i) {
-            There.data.cardsets.players.push(new CardSet(`played${e.id}`, `played${i + 1}`));
-          });
-          self.lasttrick = new CardSet('lasttrick', 'lasttrick', {
-            offset: self.thisPlayer,
-            sorted: false,
+            There.data.cardsets.melds.push(new CardSet(`meld${e.id}`, `melda${i + 1}`, {
+              selectable: true,
+            }));
           });
           if (There.data.channels?.cardset?.data != undefined) {
             There.data.channels.cardset.notify();
           }
         }
         self.showIndicators();
-        */
       }
     }
     if (name == 'event') {
