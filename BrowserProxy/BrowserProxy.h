@@ -169,6 +169,7 @@ protected:
     HRESULT OnWebMessageReceived(ICoreWebView2 *sender, ICoreWebView2WebMessageReceivedEventArgs *args);
     HRESULT OnWindowCloseRequested(ICoreWebView2 *sender);
     HRESULT OnDOMContentLoaded(ICoreWebView2 *sender, ICoreWebView2DOMContentLoadedEventArgs *args);
+    HRESULT OnDownloadStarting(ICoreWebView2 *sender, ICoreWebView2DownloadStartingEventArgs *args);
     HRESULT Navigate();
     HRESULT InvokeBrowserEvent(DISPID id, DISPPARAMS &args, VARIANT *result = nullptr);
     HRESULT SetSize(const SIZE &size);
@@ -192,7 +193,7 @@ protected:
     CComPtr<IOleClientSite>                            m_clientSite;
     CComPtr<ICoreWebView2Environment>                  m_environment;
     CComPtr<ICoreWebView2Controller2>                  m_controller;
-    CComPtr<ICoreWebView2_2>                           m_view;
+    CComPtr<ICoreWebView2_4>                           m_view;
     CComPtr<ICoreWebView2Deferral>                     m_newWindowDeferral;
     CComPtr<ICoreWebView2NewWindowRequestedEventArgs>  m_newWindowArgs;
     CComPtr<VoiceTrainerProxy>                         m_voiceTrainerProxy;
@@ -206,6 +207,7 @@ protected:
     EventRegistrationToken                             m_webMessageReceivedToken;
     EventRegistrationToken                             m_windowCloseRequestedToken;
     EventRegistrationToken                             m_domContentLoadedToken;
+    EventRegistrationToken                             m_downloadStartingToken;
     BOOL                                               m_ready;
     BOOL                                               m_visible;
 };

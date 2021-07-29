@@ -142,6 +142,7 @@ BrowserProxyModule::BrowserProxyModule():
     m_webMessageReceivedToken(),
     m_windowCloseRequestedToken(),
     m_domContentLoadedToken(),
+    m_downloadStartingToken(),
     m_ready(false),
     m_visible(true)
 {
@@ -161,6 +162,7 @@ BrowserProxyModule::~BrowserProxyModule()
         m_view->remove_WebMessageReceived(m_webMessageReceivedToken);
         m_view->remove_WindowCloseRequested(m_windowCloseRequestedToken);
         m_view->remove_DOMContentLoaded(m_domContentLoadedToken);
+        m_view->remove_DownloadStarting(m_downloadStartingToken);
     }
 
     if (m_controller != nullptr)
@@ -770,6 +772,13 @@ HRESULT STDMETHODCALLTYPE BrowserProxyModule::Invoke(HRESULT errorCode, ICoreWeb
         }
     ).Get(), &m_domContentLoadedToken);
 
+    m_view->add_DownloadStarting(Callback<ICoreWebView2DownloadStartingEventHandler>(
+        [this](ICoreWebView2 *sender, ICoreWebView2DownloadStartingEventArgs *args) -> HRESULT
+        {
+            return OnDownloadStarting(sender, args);
+        }
+    ).Get(), &m_downloadStartingToken);
+
     GetDefaultPage();
     ProcessDeferral();
 
@@ -1188,6 +1197,65 @@ HRESULT BrowserProxyModule::OnDOMContentLoaded(ICoreWebView2 *sender, ICoreWebVi
     {
         if (wcscmp(host, L"webapps.prod.there.com") == 0)
             ApplyScript(sender, IDR_COUPLING);
+    }
+
+    return S_OK;
+}
+
+HRESULT BrowserProxyModule::OnDownloadStarting(ICoreWebView2 *sender, ICoreWebView2DownloadStartingEventArgs *args)
+{
+    if (sender == nullptr || args == nullptr)
+        return E_INVALIDARG;
+
+    CComBSTR burl;
+    {
+        CComPtr<ICoreWebView2DownloadOperation> operation;
+        if (FAILED(args->get_DownloadOperation(&operation)) || operation == nullptr)
+            return E_FAIL;
+
+        WCHAR *url = nullptr;
+        if (FAILED(operation->get_Uri(&url)) || url == nullptr)
+            return E_FAIL;
+
+        burl = url;
+        CoTaskMemFree(url);
+    }
+
+    CComVariant vurl = burl;
+    CComVariant vflags = (LONG)0;
+    CComVariant vframe = L"";
+    CComVariant vpost = L"";
+    CComVariant vheaders = L"";
+    VARIANT_BOOL vcancel = VARIANT_FALSE;
+
+    VARIANTARG vargs[7];
+    vargs[0].vt = VT_BOOL | VT_BYREF;
+    vargs[0].pboolVal = &vcancel;
+    vargs[1].vt = VT_VARIANT | VT_BYREF;
+    vargs[1].pvarVal = &vheaders;
+    vargs[2].vt = VT_VARIANT | VT_BYREF;
+    vargs[2].pvarVal = &vpost;
+    vargs[3].vt = VT_VARIANT | VT_BYREF;
+    vargs[3].pvarVal = &vframe;
+    vargs[4].vt = VT_VARIANT | VT_BYREF;
+    vargs[4].pvarVal = &vflags;
+    vargs[5].vt = VT_VARIANT | VT_BYREF;
+    vargs[5].pvarVal = &vurl;
+    vargs[6].vt = VT_DISPATCH;
+    vargs[6].pdispVal = static_cast<IDispatch*>(this);
+
+    DISPPARAMS params;
+    params.rgvarg = vargs;
+    params.cArgs = _countof(vargs);
+    params.cNamedArgs = 0;
+
+    if (FAILED(InvokeBrowserEvent(DISPID_BEFORENAVIGATE2, params)))
+        return E_FAIL;
+
+    if (vcancel != VARIANT_FALSE)
+    {
+        args->put_Cancel(true);
+        return S_OK;
     }
 
     return S_OK;
