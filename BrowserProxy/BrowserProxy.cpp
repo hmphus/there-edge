@@ -770,8 +770,8 @@ HRESULT STDMETHODCALLTYPE BrowserProxyModule::Invoke(HRESULT errorCode, ICoreWeb
         }
     ).Get(), &m_domContentLoadedToken);
 
-    ProcessDeferral();
     GetDefaultPage();
+    ProcessDeferral();
 
     if (FAILED(Navigate()))
         return E_FAIL;
@@ -1505,7 +1505,7 @@ HRESULT BrowserProxyModule::ProcessDeferral()
 
 HRESULT BrowserProxyModule::GetDefaultPage(WCHAR *path)
 {
-    if (m_url.Length() > 0)
+    if (m_url.Length() > 0 || m_newWindowDeferral != nullptr)
         return S_OK;
 
     if (path == nullptr)
