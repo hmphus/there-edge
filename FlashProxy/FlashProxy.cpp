@@ -1233,7 +1233,7 @@ void FlashProxyModule::SetVisibility(UINT32 visibilityMask)
 
     ShowWindow(m_proxyWnd, visible ? SW_SHOWNA : SW_HIDE);
 
-    if (m_controller != NULL)
+    if (m_controller != nullptr)
         m_controller->put_IsVisible(visible);
 
     return;

@@ -1351,7 +1351,7 @@ HRESULT BrowserProxyModule::SetVisibility(BOOL visible)
 
     m_visible = visible;
 
-    if (m_controller != NULL)
+    if (m_controller != nullptr)
         m_controller->put_IsVisible(visible);
 
     return S_OK;
