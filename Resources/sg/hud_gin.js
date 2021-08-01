@@ -104,6 +104,12 @@ class CardSet {
             });
           }
         }
+        if (self.id == 'hand') {
+          $('.middle .table[data-player="1"] .title .count[data-id="hand"]').text(self.cards.length > 0 ?`(${self.cards.length})` : '');
+        }
+        if (self.id == 'deck') {
+          $('.middle .table[data-player="1"] .title .count[data-id="deck"]').text(self.cards.length > 0 ?`(${self.cards.length})` : '');
+        }
       }
     }
   }
@@ -152,8 +158,11 @@ class Game {
     There.data.listeners.push(self);
     There.data.cardsets = {
       hand: null,
+      deck: null,
+      spot: null,
       melds: [],
     };
+    //There.fsCommand('devtools');
   }
 
   onData(name, data) {
@@ -192,6 +201,12 @@ class Game {
         }
         if (There.data.cardsets.hand == null) {
           There.data.cardsets.hand = new CardSet('hand', `hand${self.thisPlayer + 1}`, {
+            selectable: true,
+          });
+          There.data.cardsets.hand = new CardSet('deck', `deck`, {
+            selectable: true,
+          });
+          There.data.cardsets.hand = new CardSet('spot', `spot`, {
             selectable: true,
           });
           self.players.forEach(function(e, i) {

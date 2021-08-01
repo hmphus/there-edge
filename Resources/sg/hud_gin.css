@@ -95,6 +95,10 @@
   text-align:center;
 }
 
+.middle .table[data-player="1"] .title .count {
+  font-weight:normal;
+}
+
 .middle .table[data-player="1"] .cardset[data-id^="hand"] {
   position:absolute;
   left:90px;
@@ -196,6 +200,47 @@
   left:5px;
   right:5px;
   width:auto;
+}
+
+.middle .table .deck .cardset[data-id="deck"] {
+  position:absolute;
+  left:12px;
+  top:20px;
+  width:27px;
+  height:37px;
+  text-align:center;
+}
+
+.middle .table .deck .cardset[data-id="deck"] .card {
+  position:absolute;
+  left:0px;
+  margin:0px;
+}
+
+.middle .table .deck .cardset[data-id="deck"] .card:last-of-type span:nth-of-type(3) {
+  display:inline;
+}
+
+.middle .table .deck .cardset[data-id="spot"] {
+  position:absolute;
+  left:49px;
+  top:20px;
+  width:27px;
+  height:37px;
+  text-align:center;
+}
+
+.middle .table .deck .cardset[data-id="deck"]::before,
+.middle .table .deck .cardset[data-id="spot"]::before {
+  position:absolute;
+  left:0px;
+  right:0px;
+  top:0px;
+  bottom:0px;
+  border:2px solid rgba(255, 255, 255, 0.2);
+  border-radius:4px;
+  content:' ';
+  pointer-events:none;
 }
 
 .middle .table .turn {
