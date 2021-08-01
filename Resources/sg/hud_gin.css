@@ -290,3 +290,7 @@
   flex-direction:row;
   justify-content:space-between;
 }
+
+.button.mood {
+  display:none;
+}

@@ -163,7 +163,7 @@ class Messages {
     if (self.timestamp == null) {
       const message = self.queue.shift();
       if (message == undefined) {
-        $(self.messageElement).text('');
+        self.message.value = '';
         return;
       }
       self.lastId = message.id;
