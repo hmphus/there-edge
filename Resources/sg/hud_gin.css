@@ -243,6 +243,19 @@
   pointer-events:none;
 }
 
+.middle .table .deck .cardset[data-id="spot"][data-stack="1"]::before {
+  border:1px solid #000;
+  border-radius:4px;
+  background-color:#fff;
+}
+
+.middle .table .deck .cardset[data-id="spot"][data-stack="2"]::before {
+  border:1px solid #000;
+  border-radius:4px;
+  background-image:url(deck_standard.png);
+  background-position:-315px -1px;
+}
+
 .middle .table .turn {
   position:absolute;
   left:9px;
