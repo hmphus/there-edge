@@ -54,7 +54,7 @@
 }
 
 .hud[data-gamestate="knock"] .left .panel[data-id="game"] .button[data-id="show"],
-.hud[data-gamestate="knock"] .left .panel[data-id="game"] .button[data-id="showsend"] {
+.hud[data-gamestate="knocksend"] .left .panel[data-id="game"] .button[data-id="show"] {
   display:inline-block;
 }
 
@@ -93,6 +93,7 @@
   font-weight:bold;
   color:#fff;
   text-align:center;
+  pointer-events:none;
 }
 
 .middle .table[data-player="1"] .title .count {
@@ -112,7 +113,7 @@
   position:absolute;
   left:11px;
   bottom:6px;
-  width:300px;
+  width:255px;
   height:27px;
   line-height:12px;
   font-size:11px;
@@ -164,7 +165,7 @@
 .middle .table .melds .player {
   position:absolute;
   left:10px;
-  top:5px;
+  top:1px;
   width:64px;
   height:14px;
   line-height:14px;
@@ -271,21 +272,35 @@
   background-position:-29px -278px;
 }
 
-.middle .table .cardset[data-id^="meld"] {
+.middle .table .cardsets[data-id^="meld"] {
   position:absolute;
   left:37px;
   top:16px;
   width:255px;
   height:37px;
-  text-align:center;
+  font-size:0px;
+  display:flex;
+  flex-direction:row;
+  justify-content:flex-start;
   transform-origin:top left;
   transform:scale(0.7);
 }
 
-.middle .table .cardset[data-id^="meld"][data-highlighted="1"] {
-  margin:-2px -2px 0px 0px;
-  border:2px solid #fa0;
-  border-radius:6px;
+.middle .table .cardset[data-id^="meld"] {
+  position:relative;
+  height:37px;
+}
+
+.middle .table .cardset[data-id^="meld"] .card[data-selected="1"] {
+  top:0px;
+}
+
+.middle .table .cardset[data-id^="meld"] .card:first-of-type {
+  margin-right:6px;
+}
+
+.middle .table .cardset[data-id^="meldd"] .card {
+  background-color:#ffb2b2;
 }
 
 .middle .table .stats {
@@ -302,6 +317,58 @@
   display:flex;
   flex-direction:row;
   justify-content:space-between;
+}
+
+.middle .button[data-id="sort234"] {
+  position:absolute;
+  left:244px;
+  top:1px;
+  width:35px;
+  border-top-right-radius:0px;
+  border-bottom-right-radius:0px;
+  display:none;
+}
+
+.middle .button[data-id="sort222"] {
+  position:absolute;
+  left:282px;
+  top:1px;
+  width:35px;
+  border-top-left-radius:0px;
+  border-bottom-left-radius:0px;
+  background-position-x:-34px;
+  display:none;
+}
+
+.middle .button[data-id="group"] {
+  position:absolute;
+  left:269px;
+  bottom:2px;
+  display:none;
+}
+
+.hud[data-gamestate="prompt"] .middle .button[data-id="sort234"],
+.hud[data-gamestate="prompt"] .middle .button[data-id="sort222"],
+.hud[data-gamestate="prompt"] .middle .button[data-id="group"],
+.hud[data-gamestate="draw"] .middle .button[data-id="sort234"],
+.hud[data-gamestate="draw"] .middle .button[data-id="sort222"],
+.hud[data-gamestate="draw"] .middle .button[data-id="group"],
+.hud[data-gamestate="drawsend"] .middle .button[data-id="sort234"],
+.hud[data-gamestate="drawsend"] .middle .button[data-id="sort222"],
+.hud[data-gamestate="drawsend"] .middle .button[data-id="group"],
+.hud[data-gamestate="discard"] .middle .button[data-id="sort234"],
+.hud[data-gamestate="discard"] .middle .button[data-id="sort222"],
+.hud[data-gamestate="discard"] .middle .button[data-id="group"],
+.hud[data-gamestate="discardsend"] .middle .button[data-id="sort234"],
+.hud[data-gamestate="discardsend"] .middle .button[data-id="sort222"],
+.hud[data-gamestate="discardsend"] .middle .button[data-id="group"],
+.hud[data-gamestate="knock"] .middle .button[data-id="sort234"],
+.hud[data-gamestate="knock"] .middle .button[data-id="sort222"],
+.hud[data-gamestate="knock"] .middle .button[data-id="group"],
+.hud[data-gamestate="knocksend"] .middle .button[data-id="sort234"],
+.hud[data-gamestate="knocksend"] .middle .button[data-id="sort222"],
+.hud[data-gamestate="knocksend"] .middle .button[data-id="group"] {
+  display:inline-block;
 }
 
 .button.mood {

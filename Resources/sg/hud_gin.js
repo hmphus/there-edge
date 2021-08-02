@@ -8,6 +8,7 @@ class CardSet {
       sorted: true,
       selectable: false,
       multiple: false,
+      grouped: false,
     }, settings ?? {});
     self.element = $(`.cardset[data-id="${self.id}"]`);
     self.cardsText = null;
@@ -46,7 +47,7 @@ class CardSet {
           } else if (self.settings.offset > 0) {
             self.cards = self.cards.concat(self.cards.splice(0, self.settings.offset))
           }
-          if (self.id == 'hand' && cardsPrev.length > 0) {
+          if (self.id == 'hand' && cardsPrev.length > 0 && There.data.game.splitId == null) {
             for (let card of self.cards) {
               if (cardsPrev.indexOf(card) < 0 && cardsNew.indexOf(card) < 0) {
                 cardsNew.push(card);
@@ -75,15 +76,21 @@ class CardSet {
               if (There.data.game.state.endsWith('send')) {
                 return;
               }
-              for (let cardsetId in There.data.cardsets) {
-                if (cardsetId != self.id) {
-                  let cardset = There.data.cardsets[cardsetId]?.element;
-                  if (cardset != null) {
-                    $(cardset).find('.card').attr('data-selected', '0');
-                  }
+              for (let cardset of Object.values(There.data.cardsets).flat()) {
+                if (cardset.id != self.id) {
+                  $(cardset.element).find('.card').attr('data-selected', '0');
                 }
+                $('.middle .button[data-id="group"]').attr('data-action', 'group').text('Group');
               }
-              if (self.settings.multiple) {
+              if (self.settings.grouped) {
+                let selected = $(cardDiv).attr('data-selected');
+                if (selected != 1) {
+                  $(self.element).find('.card').attr('data-selected', '1');
+                  $('.middle .button[data-id="group"]').attr('data-action', 'split').text('Split');
+                } else {
+                  $(self.element).find('.card').attr('data-selected', '0');
+                }
+              } else if (self.settings.multiple) {
                 let selected = $(cardDiv).attr('data-selected');
                 if (selected != 1) {
                   $(cardDiv).attr('data-selected', '1');
@@ -168,6 +175,8 @@ class Game {
     let self = this;
     self.drawId = null;
     self.discardId = null;
+    self.groupIds = null;
+    self.splitId = null;
     self.uiid = 1000;
     There.data.listeners.push(self);
     There.data.cardsets = {
@@ -210,6 +219,7 @@ class Game {
         $('.left .panel[data-id="game"] .button[data-id="discard"]').attr('data-enabled', self.isActivePlayer && self.state == 'discard' ? '1' : '0');
         $('.left .panel[data-id="game"] .button[data-id="knock"]').attr('data-enabled', self.isActivePlayer && self.state == 'discard' ? '1' : '0');
         $('.left .panel[data-id="game"] .button[data-id="show"]').attr('data-enabled', self.isActivePlayer && self.state == 'knock' ? '1' : '0');
+        $('.middle .button[data-id="group"]').attr('data-enabled', self.isActivePlayer ? '1' : '0');
         for (let player of self.players) {
           let tableDiv = $(`.middle .table[data-player="${player.id}"]`);
           $(tableDiv).find('.player').text(player.name);
@@ -232,10 +242,13 @@ class Game {
             sorted: false,
           });
           self.players.forEach(function(e, i) {
-            There.data.cardsets.melds.push(new CardSet(`meld${e.id}`, `melda${i + 1}`, {
-              selectable: true,
-              sorted: false,
-            }));
+            for (let letter of 'abcd') {
+              There.data.cardsets.melds.push(new CardSet(`meld${letter}${e.id}`, `meld${letter}${i + 1}`, {
+                selectable: true,
+                sorted: false,
+                grouped: true,
+              }));
+            }
           });
           if (There.data.channels?.cardset?.data != undefined) {
             There.data.channels.cardset.notify();
@@ -254,6 +267,12 @@ class Game {
             }
             if (self.state == 'discardsend') {
               self.revertDiscardCard();
+            }
+            if (self.groupIds != null) {
+              self.revertGroupCards();
+            }
+            if (self.splitId != null) {
+              self.revertSplitCards();
             }
           }
         }
@@ -274,6 +293,8 @@ class Game {
     self.resetIndicators();
     There.clearNamedTimer('card-draw');
     There.clearNamedTimer('card-discard');
+    There.clearNamedTimer('card-group');
+    There.clearNamedTimer('card-split');
   }
 
   resetIndicators() {
@@ -413,6 +434,57 @@ class Game {
     There.data.channels.game.notify();
     self.discardId = null;
   }
+
+  groupCards(ids) {
+    let self = this;
+    if (self.groupIds != null || !self.isActivePlayer) {
+      return;
+    }
+    self.groupIds = ids;
+    self.uiid++;
+    There.sendEventMessageToClient(3, {
+      action: 'meld',
+      cardset: `hand${self.players[self.thisPlayer].id}`,
+      cards: self.groupIds.map(e => There.data.cardsets.hand.cardsUnsorted.indexOf(e) + 1).join(' '),
+      uiid: self.uiid,
+    });
+    There.setNamedTimer('card-group', 5000, function() {
+      self.revertGroupCards();
+    });
+  }
+
+  revertGroupCards() {
+    let self = this;
+    if (self.groupIds == null) {
+      return;
+    }
+    self.groupIds = null;
+  }
+
+  splitCards(meldId) {
+    let self = this;
+    if (self.splitId != null || !self.isActivePlayer) {
+      return;
+    }
+    self.splitId = meldId;
+    self.uiid++;
+    There.sendEventMessageToClient(8, {
+      action: 'unmeld',
+      meldid: self.splitId.substr(0, self.splitId.length - 1),
+      uiid: self.uiid,
+    });
+    There.setNamedTimer('card-split', 5000, function() {
+      self.revertSplitCards();
+    });
+  }
+
+  revertSplitCards() {
+    let self = this;
+    if (self.splitId == null) {
+      return;
+    }
+    self.splitId = null;
+  }
 }
 
 $(document).ready(function() {
@@ -488,5 +560,25 @@ $(document).ready(function() {
       return;
     }
     There.data.game.discardCard(selectedCards[0], 'knock');
+  });
+
+  $('.middle .button[data-id="group"]').on('click', function() {
+    if ($(this).attr('data-enabled') == 0) {
+      return;
+    }
+    if ($(this).attr('data-action') == 'group') {
+      let selectedCards = There.data.cardsets.hand?.selected ?? [];
+      if (selectedCards.length < 3) {
+        There.data.messages.addMessage(0, `Please select at least 3 cards to group.`);
+        return;
+      }
+      There.data.game.groupCards(selectedCards);
+    } else {
+      let selectedMelds = There.data.cardsets.melds.filter(e => e.selected.length > 0);
+      if (selectedMelds.length < 1) {
+        return;
+      }
+      There.data.game.splitCards(selectedMelds[0].name);
+    }
   });
 });

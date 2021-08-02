@@ -381,6 +381,7 @@ body {
 .cardset {
   font-size:0px;
   direction:rtl;
+  white-space:nowrap;
 }
 
 .cardset .card {
