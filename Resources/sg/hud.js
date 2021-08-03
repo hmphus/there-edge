@@ -136,7 +136,7 @@ class Messages {
 
   addMessage(id, text) {
     let self = this;
-    text = text.trim();
+    text = decodeURIComponent(text).trim();
     if (text == '') {
       return;
     }

@@ -108,6 +108,18 @@ class CardSet {
                   });
                 }
               }
+            }).on('dblclick', function() {
+              There.clearNamedTimer('card-click');
+              if (There.data.game.state == 'draw') {
+                if (self.id == 'deck') {
+                  $(cardDiv).attr('data-selected', '1');
+                  There.data.game.drawCard('stock');
+                }
+                if (self.id == 'spot') {
+                  $(cardDiv).attr('data-selected', '1');
+                  There.data.game.drawCard('discard');
+                }
+              }
             });
           }
         }
@@ -175,6 +187,7 @@ class Game {
     let self = this;
     self.drawId = null;
     self.discardId = null;
+    self.showIds = null;
     self.groupIds = null;
     self.splitId = null;
     self.uiid = 1000;
@@ -262,11 +275,14 @@ class Game {
         const url = new URL(There.data.channels.event.data.event[0].query, 'http://host/');
         if (url.pathname.toLowerCase() == '/uirej') {
           if (url.searchParams.get('uiid') == self.uiid && url.searchParams.get('avoid') == There.variables.there_pilotdoid) {
-            if (self.state == 'drawsend') {
+            if (self.drawId != null) {
               self.revertDrawCard();
             }
-            if (self.state == 'discardsend') {
+            if (self.discardId != null) {
               self.revertDiscardCard();
+            }
+            if (self.showIds != null) {
+              self.revertShowCards();
             }
             if (self.groupIds != null) {
               self.revertGroupCards();
@@ -293,6 +309,7 @@ class Game {
     self.resetIndicators();
     There.clearNamedTimer('card-draw');
     There.clearNamedTimer('card-discard');
+    There.clearNamedTimer('card-show');
     There.clearNamedTimer('card-group');
     There.clearNamedTimer('card-split');
   }
@@ -435,6 +452,31 @@ class Game {
     self.discardId = null;
   }
 
+  showCards() {
+    let self = this;
+    if (self.state != 'knock' || !self.isActivePlayer) {
+      return;
+    }
+    self.setState('knocksend');
+    self.discardIds = ['melds'];
+    self.uiid++;
+    There.sendEventMessageToClient(9, {
+      uiid: self.uiid,
+    });
+    There.setNamedTimer('card-show', 5000, function() {
+      self.revertShowCards();
+    });
+  }
+
+  revertShowCards() {
+    let self = this;
+    if (self.showIds == null) {
+      return;
+    }
+    There.data.channels.game.notify();
+    self.showIds = null;
+  }
+
   groupCards(ids) {
     let self = this;
     if (self.groupIds != null || !self.isActivePlayer) {
@@ -560,6 +602,16 @@ $(document).ready(function() {
       return;
     }
     There.data.game.discardCard(selectedCards[0], 'knock');
+  });
+
+  $('.left .panel[data-id="game"] .button[data-id="show"]').on('click', function() {
+    if ($(this).attr('data-enabled') == 0) {
+      return;
+    }
+    if (There.data.game.state != 'knock') {
+      return;
+    }
+    There.data.game.showCards();
   });
 
   $('.middle .button[data-id="group"]').on('click', function() {
