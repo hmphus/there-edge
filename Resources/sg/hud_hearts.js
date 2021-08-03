@@ -43,7 +43,7 @@ class CardSet {
               return self.ranks.indexOf(rankA) - self.ranks.indexOf(rankB);
             });
           } else if (self.settings.offset > 0) {
-            self.cards = self.cards.concat(self.cards.splice(0, self.settings.offset))
+            self.cards = self.cards.concat(self.cards.splice(0, self.settings.offset));
           }
           if (self.id == 'hand' && There.data.game.state.startsWith('pass') && cardsPrev.length > 0) {
             for (let card of self.cards) {
@@ -78,7 +78,7 @@ class CardSet {
                 let selected = $(cardDiv).attr('data-selected');
                 if (selected != 1) {
                   if ($(self.element).find('.card[data-selected="1"]').length < 3) {
-                    $(cardDiv).attr('data-selected', '1');
+                    $(cardDiv).attr('data-new', '0').attr('data-selected', '1');
                   }
                 } else {
                   $(cardDiv).attr('data-selected', '0');

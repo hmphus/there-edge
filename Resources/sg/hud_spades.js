@@ -41,7 +41,7 @@ class CardSet {
               return self.ranks.indexOf(rankA) - self.ranks.indexOf(rankB);
             });
           } else if (self.settings.offset > 0) {
-            self.cards = self.cards.concat(self.cards.splice(0, self.settings.offset))
+            self.cards = self.cards.concat(self.cards.splice(0, self.settings.offset));
           }
         }
         $(self.element).empty();

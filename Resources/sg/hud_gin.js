@@ -4,7 +4,6 @@ class CardSet {
     self.id = id;
     self.name = name;
     self.settings = Object.assign({}, {
-      offset: 0,
       sorted: true,
       selectable: false,
       multiple: false,
@@ -14,8 +13,9 @@ class CardSet {
     self.cardsText = null;
     self.cardsUnsorted = [];
     self.cards = [];
+    self.order = 'suit';
     self.suits = 'shcd';
-    self.ranks = 'akqjt98765432';
+    self.ranks = 'a23456789tjqk';
     There.data.listeners.push(self);
   }
 
@@ -34,18 +34,37 @@ class CardSet {
           self.cardsUnsorted = self.cardsText.match(/.{1,2}/g) ?? [];
           self.cards = self.cardsUnsorted.concat();
           if (self.settings.sorted) {
-            self.cards.sort(function(a, b) {
-              const suitA = a[1];
-              const suitB = b[1];
-              if (suitA != suitB) {
-                return self.suits.indexOf(suitA) - self.suits.indexOf(suitB);
+            switch (self.order) {
+              case 'suit': {
+                self.cards.sort(function(a, b) {
+                  const suitA = a[1];
+                  const suitB = b[1];
+                  if (suitA != suitB) {
+                    return self.suits.indexOf(suitA) - self.suits.indexOf(suitB);
+                  }
+                  const rankA = a[0];
+                  const rankB = b[0];
+                  return self.ranks.indexOf(rankA) - self.ranks.indexOf(rankB);
+                });
+                break;
               }
-              const rankA = a[0];
-              const rankB = b[0];
-              return self.ranks.indexOf(rankA) - self.ranks.indexOf(rankB);
-            });
-          } else if (self.settings.offset > 0) {
-            self.cards = self.cards.concat(self.cards.splice(0, self.settings.offset))
+              case 'rank': {
+                self.cards.sort(function(a, b) {
+                  const rankA = a[0];
+                  const rankB = b[0];
+                  if (rankA != rankB) {
+                    return self.ranks.indexOf(rankA) - self.ranks.indexOf(rankB);
+                  }
+                  const suitA = a[1];
+                  const suitB = b[1];
+                  return self.suits.indexOf(suitA) - self.suits.indexOf(suitB);
+                });
+                break;
+              }
+              case 'user': {
+                break;
+              }
+            }
           }
           if (self.id == 'hand' && cardsPrev.length > 0 && There.data.game.splitId == null) {
             for (let card of self.cards) {
@@ -85,7 +104,7 @@ class CardSet {
               if (self.settings.grouped) {
                 let selected = $(cardDiv).attr('data-selected');
                 if (selected != 1) {
-                  $(self.element).find('.card').attr('data-selected', '1');
+                  $(self.element).find('.card').attr('data-new', '0').attr('data-selected', '1');
                   $('.middle .button[data-id="group"]').attr('data-action', 'split').text('Split');
                 } else {
                   $(self.element).find('.card').attr('data-selected', '0');
@@ -93,7 +112,7 @@ class CardSet {
               } else if (self.settings.multiple) {
                 let selected = $(cardDiv).attr('data-selected');
                 if (selected != 1) {
-                  $(cardDiv).attr('data-selected', '1');
+                  $(cardDiv).attr('data-selected', '1').attr('data-new', '0');
                 } else {
                   $(cardDiv).attr('data-selected', '0');
                 }
@@ -143,6 +162,7 @@ class CardSet {
           }
           $('.middle .table[data-player="1"] .cardset[data-id="spot"]').attr('data-stack',  stack);
         }
+        There.data.game.clearRevertTimers();
       }
     }
   }
@@ -163,6 +183,17 @@ class CardSet {
     }
     for (let id of ids) {
       $(self.element).find(`.card[data-id=${id}]`).attr('data-selected', '1');
+    }
+  }
+
+  sort(order) {
+    let self = this;
+    if (self.order != order) {
+      self.order = order;
+      self.cardsText = null;
+      if (There.data.channels?.cardset?.data != undefined) {
+        There.data.channels.cardset.notify(this);
+      }
     }
   }
 
@@ -258,7 +289,7 @@ class Game {
             for (let letter of 'abcd') {
               There.data.cardsets.melds.push(new CardSet(`meld${letter}${e.id}`, `meld${letter}${i + 1}`, {
                 selectable: true,
-                sorted: false,
+                sorted: true,
                 grouped: true,
               }));
             }
@@ -307,11 +338,7 @@ class Game {
     self.state = state;
     $('.hud').attr('data-gamestate', self.state);
     self.resetIndicators();
-    There.clearNamedTimer('card-draw');
-    There.clearNamedTimer('card-discard');
-    There.clearNamedTimer('card-show');
-    There.clearNamedTimer('card-group');
-    There.clearNamedTimer('card-split');
+    self.clearRevertTimers();
   }
 
   resetIndicators() {
@@ -395,6 +422,20 @@ class Game {
         self.showIndicators();
       });
     }
+  }
+
+  clearRevertTimers() {
+    let self = this;
+    There.clearNamedTimer('card-draw');
+    There.clearNamedTimer('card-discard');
+    There.clearNamedTimer('card-show');
+    There.clearNamedTimer('card-group');
+    There.clearNamedTimer('card-split');
+    self.drawId = null;
+    self.discardId = null;
+    self.showIds = null;
+    self.groupIds = null;
+    self.splitId = null;
   }
 
   drawCard(deckId) {
@@ -612,6 +653,24 @@ $(document).ready(function() {
       return;
     }
     There.data.game.showCards();
+  });
+
+  $('.middle .button[data-id="sort234"]').on('click', function() {
+    if ($(this).attr('data-enabled') == 0) {
+      return;
+    }
+    if (There.data.cardsets.hand != undefined) {
+      There.data.cardsets.hand.sort('suit');
+    }
+  });
+
+  $('.middle .button[data-id="sort222"]').on('click', function() {
+    if ($(this).attr('data-enabled') == 0) {
+      return;
+    }
+    if (There.data.cardsets.hand != undefined) {
+      There.data.cardsets.hand.sort('rank');
+    }
   });
 
   $('.middle .button[data-id="group"]').on('click', function() {

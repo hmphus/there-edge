@@ -61,9 +61,15 @@ class Channel {
     return data;
   }
 
-  notify() {
+  notify(listener) {
     let self = this;
-    for (let listener of There.data.listeners) {
+    if (listener == undefined) {
+      for (let listener of There.data.listeners) {
+        if (listener.onData != undefined) {
+          listener.onData(self.name, self.data);
+        }
+      }
+    } else {
       if (listener.onData != undefined) {
         listener.onData(self.name, self.data);
       }
