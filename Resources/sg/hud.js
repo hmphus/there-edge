@@ -172,7 +172,9 @@ class Messages {
         self.message.value = '';
         return;
       }
-      self.lastId = message.id;
+      if (message.id > 0) {
+        self.lastId = message.id;
+      }
       self.message.value = message.text;
       self.updateHistory(`** ${message.text}`);
       self.timestamp = Date.now();
