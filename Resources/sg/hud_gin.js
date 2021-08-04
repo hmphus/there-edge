@@ -61,6 +61,9 @@ class CardSet {
         self.dragDivs[0] = null;
         self.dragDivs[1] = null;
         self.cardsText = cards;
+        if (self.cards.length == 0 && self.order == 'user') {
+          self.order = 'suit';
+        }
         if (cards.startsWith('#')) {
           self.cardsUnsorted = Array(Number(self.cardsText.substr(1))).fill('??');
           self.cards = self.cardsUnsorted.concat();
@@ -97,6 +100,11 @@ class CardSet {
                 break;
               }
               case 'user': {
+                self.cards.sort(function(a, b) {
+                  let indexA = cardsPrev.indexOf(a);
+                  let indexB = cardsPrev.indexOf(b);
+                  return indexA - indexB;
+                });
                 break;
               }
             }
@@ -280,6 +288,11 @@ class CardSet {
     $(self.dragDivs[0]).attr('data-hidden', '0');
     $(self.dragDivs[1]).remove();
     self.dragDivs[1] = null;
+    const cards = jQuery.map($(self.element).find('.card'), e => $(e).attr('data-id')).reverse();
+    if (self.cards.toString() != cards.toString()) {
+      self.cards = cards;
+      self.order = 'user';
+    }
   }
 
   detachCard(id) {
@@ -315,7 +328,6 @@ class Game {
       history: null,
       melds: [],
     };
-    //There.fsCommand('devtools');
   }
 
   onData(name, data) {
