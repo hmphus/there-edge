@@ -103,10 +103,21 @@
 .middle .table[data-player="1"] .cardset[data-id^="hand"] {
   position:absolute;
   left:90px;
-  top:20px;
+  top:25px;
   width:232px;
   height:37px;
   text-align:center;
+}
+
+.middle .table[data-player="1"] .cardset[data-id^="hand"] .card[data-hidden="1"] {
+  visibility:hidden;
+}
+
+.middle .table[data-player="1"] .cardset[data-id^="hand"] .card[data-dragging="1"] {
+  position:absolute;
+  margin-left:0px;
+  opacity:0.9;
+  z-index:1;
 }
 
 .middle .table[data-player="1"] .message {
@@ -206,7 +217,7 @@
 .middle .table .deck .cardset[data-id="deck"] {
   position:absolute;
   left:12px;
-  top:20px;
+  top:25px;
   width:27px;
   height:37px;
   text-align:center;
@@ -225,7 +236,7 @@
 .middle .table .deck .cardset[data-id="spot"] {
   position:absolute;
   left:49px;
-  top:20px;
+  top:25px;
   width:27px;
   height:37px;
   text-align:center;

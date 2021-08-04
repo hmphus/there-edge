@@ -6,6 +6,7 @@ class CardSet {
     self.settings = Object.assign({}, {
       sorted: true,
       selectable: false,
+      draggable: false,
       multiple: false,
       grouped: false,
     }, settings ?? {});
@@ -16,6 +17,37 @@ class CardSet {
     self.order = 'suit';
     self.suits = 'shcd';
     self.ranks = 'a23456789tjqk';
+    self.dragDivs = [null, null];
+    if (self.settings.draggable) {
+      $(document).on('mousemove', function(event) {
+        if (self.dragDivs[0] != null) {
+          if (self.dragDivs[1] == null) {
+            if (Math.abs(self.dragX - event.pageX + self.dragOffsetX) < 10) {
+              return;
+            }
+            There.clearNamedTimer('card-click');
+            self.beginDrag();
+          }
+          let x = Math.min(Math.max(self.dragMinX, event.pageX - self.dragOffsetX), self.dragMaxX);
+          $(self.dragDivs[1]).css({
+            left: x,
+          });
+          let index1 = self.dragCount + 1 - Math.floor(Math.min(x - self.dragMinX - self.dragMarginX, self.dragMaxX) / (self.dragMaxX - self.dragMinX) * self.dragCount);
+          let index2 = $(self.dragDivs[0]).parent().find('.card').index($(self.dragDivs[0]));
+          if (index1 != index2) {
+            $(self.dragDivs[0]).parent().find('.card').not($(self.dragDivs[0])).eq(index1 - 1).after($(self.dragDivs[0]).detach());
+          }
+        }
+      }).on('mouseup', function() {
+        There.clearNamedTimer('card-click');
+        if (self.dragDivs[0] != null) {
+          if (self.dragDivs[1] != null) {
+            self.endDrag();
+          }
+          self.dragDivs[0] = null;
+        }
+      });
+    }
     There.data.listeners.push(self);
   }
 
@@ -25,6 +57,9 @@ class CardSet {
       let cardsNew = [];
       let cards = data.cardset.find(e => e.index == self.name)?.cards?.toLowerCase();
       if (cards != undefined && self.cardsText != cards) {
+        There.clearNamedTimer('card-click');
+        self.dragDivs[0] = null;
+        self.dragDivs[1] = null;
         self.cardsText = cards;
         if (cards.startsWith('#')) {
           self.cardsUnsorted = Array(Number(self.cardsText.substr(1))).fill('??');
@@ -87,11 +122,34 @@ class CardSet {
           $(self.element).prepend($(cardDiv));
           if (self.settings.selectable) {
             $(cardDiv).on('mouseover', function() {
+              if (self.dragDivs[1] != null) {
+                return;
+              }
               There.playSound('enabled menu item rollover');
             }).on('mousedown', function(event) {
+              if (self.dragDivs[1] != null) {
+                return;
+              }
               There.playSound('menu item activate');
+              if (self.settings.draggable && event.which == 1) {
+                self.dragDivs[0] = cardDiv;
+                There.setNamedTimer('card-click', 500, function() {
+                  self.beginDrag();
+                });
+                self.dragX = $(self.dragDivs[0]).position().left + parseInt($(self.dragDivs[0]).css('margin-left'));
+                self.dragOffsetX = event.pageX - self.dragX;
+                let minDiv = $(self.dragDivs[0]).parent().find('.card').last();
+                let maxDiv = $(self.dragDivs[0]).parent().find('.card').first();
+                self.dragMinX = $(minDiv).position().left + parseInt($(minDiv).css('margin-left'));
+                self.dragMaxX = $(maxDiv).position().left + parseInt($(maxDiv).css('margin-left'));
+                self.dragMarginX = parseInt($(maxDiv).css('margin-left'));
+                self.dragCount = $(self.dragDivs[0]).parent().find('.card').length - 1;
+              }
             }).on('click', function() {
               There.clearNamedTimer('card-click');
+              if (self.dragDivs[1] != null) {
+                return;
+              }
               if (There.data.game.state.endsWith('send')) {
                 return;
               }
@@ -129,6 +187,9 @@ class CardSet {
               }
             }).on('dblclick', function() {
               There.clearNamedTimer('card-click');
+              if (self.dragDivs[1] != null) {
+                return;
+              }
               if (There.data.game.state == 'draw') {
                 if (self.id == 'deck') {
                   $(cardDiv).attr('data-selected', '1');
@@ -195,6 +256,30 @@ class CardSet {
         There.data.channels.cardset.notify(this);
       }
     }
+  }
+
+  beginDrag() {
+    let self = this;
+    if (self.dragDivs[0] == null || self.dragDivs[1] != null) {
+      return;
+    }
+    self.dragDivs[1] = $(self.dragDivs[0]).clone();
+    $(self.dragDivs[0]).attr('data-hidden', '1');
+    $(self.dragDivs[1]).attr('data-dragging', '1');
+    $(self.dragDivs[1]).css({
+      left: self.dragX,
+    });
+    $(self.dragDivs[0]).parent().prepend($(self.dragDivs[1]));
+  }
+
+  endDrag() {
+    let self = this;
+    if (self.dragDivs[0] == null || self.dragDivs[1] == null) {
+      return;
+    }
+    $(self.dragDivs[0]).attr('data-hidden', '0');
+    $(self.dragDivs[1]).remove();
+    self.dragDivs[1] = null;
   }
 
   detachCard(id) {
@@ -272,6 +357,7 @@ class Game {
         if (There.data.cardsets.hand == null) {
           There.data.cardsets.hand = new CardSet('hand', `hand${self.thisPlayer + 1}`, {
             selectable: true,
+            draggable: true,
             multiple: true,
           });
           There.data.cardsets.deck = new CardSet('deck', `deck`, {
