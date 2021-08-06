@@ -1,0 +1,330 @@
+.left .panel[data-id="game"] .logo {
+  position:absolute;
+  left:4px;
+  top:4px;
+  width:59px;
+  height:56px;
+  background-image:url(logo_motumotu.png);
+}
+
+.left .panel[data-id="game"] .button[data-id="newgame"] {
+  position:absolute;
+  left:67px;
+  top:7px;
+}
+
+.left .panel[data-id="game"] .button[data-id="rules"] {
+  position:absolute;
+  left:67px;
+  top:34px;
+}
+
+.left .panel[data-id="game"] .button[data-id="deal"],
+.left .panel[data-id="game"] .button[data-id="discard"],
+.left .panel[data-id="game"] .button[data-id="draw2"] {
+  position:absolute;
+  left:135px;
+  top:7px;
+  display:none;
+}
+
+.left .panel[data-id="game"] .button[data-id="draw1"] {
+  position:absolute;
+  left:135px;
+  top:34px;
+  display:none;
+}
+
+.hud[data-gamestate="pregame"] .left .panel[data-id="game"] .button[data-id="deal"],
+.hud[data-gamestate="deal"] .left .panel[data-id="game"] .button[data-id="deal"] {
+  display:inline-block;
+}
+
+.hud[data-gamestate="discard"] .left .panel[data-id="game"] .button[data-id="discard"],
+.hud[data-gamestate="discard"] .left .panel[data-id="game"] .button[data-id="draw1"],
+.hud[data-gamestate="discardsend"] .left .panel[data-id="game"] .button[data-id="discard"],
+.hud[data-gamestate="discardsend"] .left .panel[data-id="game"] .button[data-id="draw1"] {
+  display:inline-block;
+}
+
+.hud[data-gamestate="draw"] .left .panel[data-id="game"] .button[data-id="draw2"],
+.hud[data-gamestate="drawsend"] .left .panel[data-id="game"] .button[data-id="draw2"] {
+  display:inline-block;
+}
+
+.middle {
+  width:547px;
+  height:100%;
+}
+
+.middle .table {
+  position:absolute;
+  top:0px;
+  left:0px;
+  width:398px;
+  height:100%;
+  border-right: 1px solid #000;
+}
+
+.middle .table::before {
+  position:absolute;
+  left:0px;
+  right:0px;
+  height:100%;
+  border-left:1px solid rgba(255, 255, 255, 0.25);
+  border-right:1px solid rgba(0, 0, 0, 0.5);
+  content:' ';
+  pointer-events:none;
+}
+
+.middle .table[data-player="1"] .title {
+  position:absolute;
+  left:72px;
+  top:5px;
+  height:14px;
+  line-height:14px;
+  font-size:11px;
+  font-weight:bold;
+  color:#fff;
+  pointer-events:none;
+}
+
+.middle .table[data-player="1"] .title .count {
+  font-weight:normal;
+}
+
+.middle .table[data-player="1"] .cardset[data-id^="hand"] {
+  position:absolute;
+  left:65px;
+  top:25px;
+  width:320px;
+  height:37px;
+  text-align:center;
+}
+
+.middle .table[data-player="1"] .message {
+  position:absolute;
+  left:11px;
+  bottom:6px;
+  width:315px;
+  height:27px;
+  line-height:12px;
+  font-size:11px;
+  font-weight:bold;
+  color:#fff;
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-evenly;
+}
+
+.middle .table .deck {
+  position:absolute;
+  left:0px;
+  top:0px;
+  width:52px;
+  height:63px;
+  border-right:1px solid rgba(255, 255, 255, 0.25);
+}
+
+.middle .table .deck::before {
+  position:absolute;
+  left:0px;
+  right:0px;
+  height:100%;
+  border-right:1px solid rgba(0, 0, 0, 0.5);
+  content:' ';
+  pointer-events:none;
+}
+
+.middle .table .deck .title {
+  left:5px;
+  right:5px;
+  text-align:center;
+}
+
+.middle .table .deck .cardset[data-id="spot"] {
+  position:absolute;
+  left:13px;
+  top:25px;
+  width:27px;
+  height:37px;
+  text-align:center;
+}
+
+.middle .table .deck .cardset[data-id="spot"] .card {
+  position:absolute;
+  left:0px;
+  margin:0px;
+}
+
+.middle .table .deck .cardset[data-id="spot"]::before {
+  position:absolute;
+  left:0px;
+  right:0px;
+  top:0px;
+  bottom:0px;
+  border:2px solid rgba(255, 255, 255, 0.2);
+  border-radius:4px;
+  content:' ';
+  pointer-events:none;
+}
+
+.middle .button[data-id="one"] {
+  position:absolute;
+  right:9px;
+  bottom:2px;
+}
+
+.button.mood {
+  display:none;
+}
+
+.cardset[data-deck="motu"] .card {
+  background-color:#fff;
+  border-color:#fff;
+  overflow:hidden;
+  margin-left:1px;
+}
+
+.cardset[data-deck="motu"] .card:not([data-id="??"]) span:nth-of-type(1) {
+  display:inline-block;
+  position:absolute;
+  left:2.5px;
+  top:3.5px;
+  width:20px;
+  height:28px;
+  background-image:url(deck_motumotu.png);
+  background-position-y:0px;
+}
+
+.cardset[data-deck="motu"] .card[data-id^="0"] span:nth-of-type(1) {
+  background-position-x:0px;
+}
+
+.cardset[data-deck="motu"] .card[data-id^="1"] span:nth-of-type(1) {
+  background-position-x:-20px;
+}
+
+.cardset[data-deck="motu"] .card[data-id^="2"] span:nth-of-type(1) {
+  background-position-x:-40px;
+}
+
+.cardset[data-deck="motu"] .card[data-id^="3"] span:nth-of-type(1) {
+  background-position-x:-60px;
+}
+
+.cardset[data-deck="motu"] .card[data-id^="4"] span:nth-of-type(1) {
+  background-position-x:-80px;
+}
+
+.cardset[data-deck="motu"] .card[data-id^="5"] span:nth-of-type(1) {
+  background-position-x:-100px;
+}
+
+.cardset[data-deck="motu"] .card[data-id^="6"] span:nth-of-type(1) {
+  background-position-x:-120px;
+}
+
+.cardset[data-deck="motu"] .card[data-id^="7"] span:nth-of-type(1) {
+  background-position-x:-140px;
+}
+
+.cardset[data-deck="motu"] .card[data-id^="8"] span:nth-of-type(1) {
+  background-position-x:-160px;
+}
+
+.cardset[data-deck="motu"] .card[data-id^="9"] span:nth-of-type(1) {
+  background-position-x:-180px;
+}
+
+.cardset[data-deck="motu"] .card[data-id^="r"] span:nth-of-type(1) {
+  background-position-x:-200px;
+}
+
+.cardset[data-deck="motu"] .card[data-id^="s"] span:nth-of-type(1) {
+  background-position-x:-220px;
+}
+
+.cardset[data-deck="motu"] .card[data-id^="w"] span:nth-of-type(1) {
+  left:1.5px;
+  width:22px;
+  background-position-x:-240px;
+}
+
+.cardset[data-deck="motu"] .card[data-id^="d"] span:nth-of-type(1) {
+  left:0.5px;
+  top:6.5px;
+  width:24px;
+  height:22px;
+  background-position-x:-280px;
+}
+
+.cardset[data-deck="motu"] .card[data-id^="z"] span:nth-of-type(1) {
+  left:0.5px;
+  top:6.5px;
+  width:24px;
+  height:22px;
+  background-position-x:-304px;
+}
+
+.cardset[data-deck="motu"] .card[data-id^="z"]:not([data-id$="e"]) span:nth-of-type(1) {
+  left:3.5px;
+  top:2.5px;
+  width:18px;
+  height:16px;
+  background-position-x:-328px;
+}
+
+.cardset[data-deck="motu"] .card[data-id^="z"]:not([data-id$="e"]) span:nth-of-type(2) {
+  display:inline-block;
+  position:absolute;
+  left:-1px;
+  bottom:1.5px;
+  width:27px;
+  height:18px;
+  background-image:url(deck_motumotu.png);
+  background-position:-346px 0px;
+}
+
+.cardset[data-deck="motu"] .card[data-id$="a"] {
+  background-color:#606;
+}
+
+.cardset[data-deck="motu"] .card[data-id$="b"] {
+  background-color:#5bb700;
+}
+
+.cardset[data-deck="motu"] .card[data-id$="c"] {
+  background-color:#005ebb;
+}
+
+.cardset[data-deck="motu"] .card[data-id$="d"] {
+  background-color:#f29200;
+}
+
+.cardset[data-deck="motu"] .card[data-id$="e"] {
+  background-image:linear-gradient(90deg, #606 0px, #606 12px, #fff 12px, #fff 13px, #005ebb 13px, #005ebb 25px);
+}
+
+.cardset[data-deck="motu"] .card[data-id$="e"]::before {
+  position:absolute;
+  left:0px;
+  right:0px;
+  top:17px;
+  bottom:0px;
+  border-top:1px solid #fff;
+  background-image:linear-gradient(90deg, #5bb700 0px, #5bb700 12px, #fff 12px, #fff 13px, #f29200 13px, #f29200 25px);
+  pointer-events:none;
+  content:' ';
+}
+
+.cardset[data-deck="motu"] .card[data-new="1"]::after {
+  position:absolute;
+  left:0px;
+  right:0px;
+  top:0px;
+  bottom:0px;
+  background-color:rgba(255, 255, 255, 0.5);
+  pointer-events:none;
+  content:' ';
+}

@@ -84,15 +84,13 @@
 
 .middle .table[data-player="1"] .title {
   position:absolute;
-  left:7px;
+  left:108px;
   top:1px;
-  width:250px;
   height:14px;
   line-height:14px;
   font-size:11px;
   font-weight:bold;
   color:#fff;
-  text-align:center;
   pointer-events:none;
 }
 
@@ -211,7 +209,7 @@
 .middle .table .deck .title {
   left:5px;
   right:5px;
-  width:auto;
+  text-align:center;
 }
 
 .middle .table .deck .cardset[data-id="deck"] {

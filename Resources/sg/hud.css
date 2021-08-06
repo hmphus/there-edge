@@ -440,55 +440,55 @@ body {
 }
 
 .cardset[data-deck="std"] .card[data-id^="a"] span:nth-of-type(1) {
-  background-position-x:0px
+  background-position-x:0px;
 }
 
 .cardset[data-deck="std"] .card[data-id^="2"] span:nth-of-type(1) {
-  background-position-x:-16px
+  background-position-x:-16px;
 }
 
 .cardset[data-deck="std"] .card[data-id^="3"] span:nth-of-type(1) {
-  background-position-x:-32px
+  background-position-x:-32px;
 }
 
 .cardset[data-deck="std"] .card[data-id^="4"] span:nth-of-type(1) {
-  background-position-x:-48px
+  background-position-x:-48px;
 }
 
 .cardset[data-deck="std"] .card[data-id^="5"] span:nth-of-type(1) {
-  background-position-x:-64px
+  background-position-x:-64px;
 }
 
 .cardset[data-deck="std"] .card[data-id^="6"] span:nth-of-type(1) {
-  background-position-x:-80px
+  background-position-x:-80px;
 }
 
 .cardset[data-deck="std"] .card[data-id^="7"] span:nth-of-type(1) {
-  background-position-x:-96px
+  background-position-x:-96px;
 }
 
 .cardset[data-deck="std"] .card[data-id^="8"] span:nth-of-type(1) {
-  background-position-x:-112px
+  background-position-x:-112px;
 }
 
 .cardset[data-deck="std"] .card[data-id^="9"] span:nth-of-type(1) {
-  background-position-x:-128px
+  background-position-x:-128px;
 }
 
 .cardset[data-deck="std"] .card[data-id^="t"] span:nth-of-type(1) {
-  background-position-x:-144px
+  background-position-x:-144px;
 }
 
 .cardset[data-deck="std"] .card[data-id^="j"] span:nth-of-type(1) {
-  background-position-x:-160px
+  background-position-x:-160px;
 }
 
 .cardset[data-deck="std"] .card[data-id^="q"] span:nth-of-type(1) {
-  background-position-x:-176px
+  background-position-x:-176px;
 }
 
 .cardset[data-deck="std"] .card[data-id^="k"] span:nth-of-type(1) {
-  background-position-x:-192px
+  background-position-x:-192px;
 }
 
 .cardset[data-deck="std"] .card[data-id$="c"] span:nth-of-type(1),
