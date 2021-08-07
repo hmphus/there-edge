@@ -96,7 +96,7 @@
 .middle .table[data-player="1"] .cardset[data-id^="hand"] {
   position:absolute;
   left:65px;
-  top:25px;
+  top:20px;
   width:320px;
   height:37px;
   text-align:center;
@@ -145,7 +145,7 @@
 .middle .table .deck .cardset[data-id="spot"] {
   position:absolute;
   left:13px;
-  top:25px;
+  top:20px;
   width:27px;
   height:37px;
   text-align:center;

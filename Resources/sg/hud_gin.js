@@ -456,7 +456,7 @@ class Game {
     let self = this;
     let duration = 0;
     let isBlink = false;
-    if (self.isActivePlayer && self.state != 'playsend') {
+    if (self.isActivePlayer && !self.state.endsWith('send')) {
       if (self.blinkCount % 2 == 0) {
         duration = 2000;
         isBlink = false;

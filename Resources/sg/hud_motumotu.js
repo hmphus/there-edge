@@ -20,6 +20,7 @@ class CardSet {
   onData(name, data) {
     let self = this;
     if (name == 'cardset') {
+      let cardsNew = [];
       let cards = data.cardset.find(e => e.index == self.name)?.cards?.toLowerCase();
       if (cards != undefined && self.id == 'spot' && cards.length == 2) {
         cards = cards[0] + There.data.game.leadSuit;
@@ -30,6 +31,7 @@ class CardSet {
           self.cardsUnsorted = Array(Number(self.cardsText.substr(1))).fill('??');
           self.cards = self.cardsUnsorted.concat();
         } else {
+          const cardsPrev = self.cards.concat();
           self.cardsUnsorted = self.cardsText.match(/.{1,2}/g) ?? [];
           self.cards = self.cardsUnsorted.concat();
           if (self.settings.sorted) {
@@ -46,11 +48,24 @@ class CardSet {
           } else if (self.settings.offset > 0) {
             self.cards = self.cards.concat(self.cards.splice(0, self.settings.offset));
           }
+          if (self.id == 'hand' && cardsPrev.length > 0) {
+            for (let card of self.cards) {
+              if (cardsPrev.indexOf(card) < 0 && cardsNew.indexOf(card) < 0) {
+                cardsNew.push(card);
+              }
+            }
+            if (cardsNew.length > 0) {
+              There.data.messages.addMessage(0, `You have received ${cardsNew.length} new ${cardsNew.length == 1 ? 'card' : 'cards'}.`);
+            }
+          }
         }
         $(self.element).empty();
         for (let card of self.cards) {
           let cardDiv = $('<div class="card"><span></span><span></span></div>');
           $(cardDiv).attr('data-id', card);
+          if (self.id == 'hand' && cardsNew.indexOf(card) >= 0) {
+            $(cardDiv).attr('data-new', '1');
+          }
           $(self.element).prepend($(cardDiv));
           if (self.settings.selectable) {
             $(cardDiv).on('mouseover', function() {
@@ -64,7 +79,7 @@ class CardSet {
               }
               let selected = $(cardDiv).attr('data-selected');
               if (selected != 1) {
-                $(self.element).find('.card').attr('data-selected', '0');
+                $(self.element).find('.card').attr('data-new', '0').attr('data-selected', '0');
                 $(cardDiv).attr('data-selected', '1');
               } else {
                 There.setNamedTimer('card-click', 100, function() {
@@ -73,9 +88,9 @@ class CardSet {
               }
             }).on('dblclick', function() {
               There.clearNamedTimer('card-click');
-              if (There.data.game.state == 'play') {
-                $(cardDiv).attr('data-selected', '1');
-                //There.data.game.playCard($(cardDiv).attr('data-id'));
+              if (There.data.game.state == 'discard') {
+                $(cardDiv).attr('data-new', '0').attr('data-selected', '1');
+                There.data.game.discardCard($(cardDiv).attr('data-id'));
               }
             });
           }
@@ -83,7 +98,7 @@ class CardSet {
         if (self.id == 'hand') {
           $('.middle .table[data-player="1"] .title .count[data-id="hand"]').text(self.cards.length > 0 ?`(${self.cards.length})` : '');
         }
-        //There.data.game.clearRevertTimers();
+        There.data.game.clearRevertTimers();
       }
     }
   }
@@ -132,7 +147,9 @@ class CardSet {
 class Game {
   constructor() {
     let self = this;
-    self.playId = null;
+    self.discardId = null;
+    self.drawId = null;
+    self.drawIds = null;
     self.uiid = 1000;
     There.data.listeners.push(self);
     There.data.cardsets = {
@@ -225,9 +242,15 @@ class Game {
         const url = new URL(There.data.channels.event.data.event[0].query, 'http://host/');
         if (url.pathname.toLowerCase() == '/uirej') {
           if (url.searchParams.get('uiid') == self.uiid && url.searchParams.get('avoid') == There.variables.there_pilotdoid) {
-            /*if (self.state == 'playsend') {
-              self.revertPlayCard();
-            }*/
+            if (self.discardId != null) {
+              self.revertDiscardCard();
+            }
+            if (self.drawId != null) {
+              self.revertDiscardCard();
+            }
+            if (self.drawIds != null) {
+              self.revertDiscardCards();
+            }
           }
         }
       }
@@ -245,7 +268,7 @@ class Game {
     self.state = state;
     $('.hud').attr('data-gamestate', self.state);
     self.resetIndicators();
-    There.clearNamedTimer('card-play');
+    self.clearRevertTimers();
   }
 
   resetIndicators() {
@@ -265,7 +288,7 @@ class Game {
     let self = this;
     let duration = 0;
     let isBlink = false;
-    if (self.isActivePlayer && self.state != 'playsend') {
+    if (self.isActivePlayer && !self.state.endsWith('send')) {
       if (self.blinkCount % 2 == 0) {
         duration = 2000;
         isBlink = false;
@@ -317,6 +340,102 @@ class Game {
       });
     }
   }
+
+  clearRevertTimers() {
+    let self = this;
+    There.clearNamedTimer('card-discard');
+    There.clearNamedTimer('card-draw');
+    self.discardId = null;
+    self.drawId = null;
+    self.drawIds = null;
+  }
+
+  discardCard(id) {
+    let self = this;
+    if (self.state != 'discard' || !self.isActivePlayer) {
+      return;
+    }
+    self.setState('discardsend');
+    self.discardId = id;
+    self.uiid++;
+    There.sendEventMessageToClient(3, {
+      action: 'discard',
+      cardset: `hand${self.players[self.thisPlayer].id}`,
+      cards: There.data.cardsets.hand.cardsUnsorted.indexOf(self.discardId) + 1,
+      uiid: self.uiid,
+    });
+    There.setNamedTimer('card-discard', 5000, function() {
+      self.revertDiscardCard();
+    });
+  }
+
+  revertDiscardCard() {
+    let self = this;
+    if (self.discardId == null) {
+      return;
+    }
+    There.data.channels.game.notify();
+    self.discardId = null;
+  }
+
+  drawCard() {
+    let self = this;
+    if (self.state != 'discard' || !self.isActivePlayer) {
+      return;
+    }
+    self.setState('discardsend');
+    self.drawId = 1;
+    self.uiid++;
+    There.sendEventMessageToClient(7, {
+      uiid: self.uiid,
+    });
+    There.setNamedTimer('card-draw', 5000, function() {
+      self.revertDrawCard();
+    });
+  }
+
+  revertDrawCard() {
+    let self = this;
+    if (self.drawId == null) {
+      return;
+    }
+    There.data.channels.game.notify();
+    self.drawId = null;
+  }
+
+  drawCards() {
+    let self = this;
+    if (self.state != 'draw' || !self.isActivePlayer) {
+      return;
+    }
+    self.setState('drawsend');
+    self.drawIds = [1];
+    self.uiid++;
+    There.sendEventMessageToClient(7, {
+      uiid: self.uiid,
+    });
+    There.setNamedTimer('card-draw', 5000, function() {
+      self.revertDrawCards();
+    });
+  }
+
+  revertDrawCards() {
+    let self = this;
+    if (self.drawIds == null) {
+      return;
+    }
+    There.data.channels.game.notify();
+    self.drawIds = null;
+  }
+
+  callOne() {
+    let self = this;
+    self.uiid++;
+    There.sendEventMessageToClient(9, {
+      action: 105,
+      uiid: self.uiid,
+    });
+  }
 }
 
 $(document).ready(function() {
@@ -342,5 +461,47 @@ $(document).ready(function() {
       return;
     }
     There.sendEventMessageToClient(2);
+  });
+
+  $('.left .panel[data-id="game"] .button[data-id="discard"]').on('click', function() {
+    if ($(this).attr('data-enabled') == 0) {
+      return;
+    }
+    if (There.data.game.state != 'discard') {
+      return;
+    }
+    let selectedCards = There.data.cardsets.hand?.selected ?? [];
+    if (selectedCards.length != 1) {
+      There.data.messages.addMessage(0, `Please select a card to discard.`);
+      return;
+    }
+    There.data.game.discardCard(selectedCards[0]);
+  });
+
+  $('.left .panel[data-id="game"] .button[data-id="draw1"]').on('click', function() {
+    if ($(this).attr('data-enabled') == 0) {
+      return;
+    }
+    if (There.data.game.state != 'discard') {
+      return;
+    }
+    There.data.game.drawCard();
+  });
+
+  $('.left .panel[data-id="game"] .button[data-id="draw2"]').on('click', function() {
+    if ($(this).attr('data-enabled') == 0) {
+      return;
+    }
+    if (There.data.game.state != 'draw') {
+      return;
+    }
+    There.data.game.drawCards();
+  });
+
+  $('.middle .button[data-id="one"]').on('click', function() {
+    if ($(this).attr('data-enabled') == 0) {
+      return;
+    }
+    There.data.game.callOne();
   });
 });
