@@ -394,6 +394,7 @@ body {
   border:1px solid #000;
   border-radius:4px;
   background-color:#fff;
+  box-shadow:2px 0px 2px rgba(0, 0, 0, 0.2);
   transition-property:top;
   transition-duration:100ms;
 }

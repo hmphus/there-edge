@@ -146,6 +146,10 @@ class Messages {
     if (text == '') {
       return;
     }
+    if (text.startsWith('!')) {
+      There.playSound(text.substr(1));
+      return;
+    }
     if (!text.endsWith('.') && !text.endsWith('!') && text.includes(' ')) {
       text += '.';
     }

@@ -449,7 +449,6 @@ class Game {
     let self = this;
     $('.left .panel[data-id="game"] .button').attr('data-highlighted', '0');
     $('.middle .table .turn').attr('data-visible', '0');
-    $('.cardset[data-id^="played"]').attr('data-highlighted', '0');
   }
 
   showIndicators() {

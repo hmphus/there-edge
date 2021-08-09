@@ -240,6 +240,11 @@
   text-align:center;
 }
 
+.middle .table .deck .cardset[data-id="deck"] .card:not(:last-of-type),
+.middle .table .deck .cardset[data-id="spot"] .card:not(:last-of-type) {
+  box-shadow:none;
+}
+
 .middle .table .deck .cardset[data-id="deck"]::before,
 .middle .table .deck .cardset[data-id="spot"]::before {
   position:absolute;

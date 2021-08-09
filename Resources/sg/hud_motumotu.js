@@ -97,6 +97,16 @@ class CardSet {
         }
         if (self.id == 'hand') {
           $('.middle .table[data-player="1"] .title .count[data-id="hand"]').text(self.cards.length > 0 ?`(${self.cards.length})` : '');
+          const width1 = $(self.element).innerWidth();
+          const width2 = $(self.element).find('.card').outerWidth();
+          let overlap = 1;
+          if (self.cards.length > 2) {
+            const excess = ((width2 + overlap) * (self.cards.length - 1) + width2) - width1;
+            if (excess > 0) {
+              overlap = -Math.min(width2 - 10, excess / (self.cards.length - 1) - overlap);
+            }
+          }
+          $(self.element).find('.card').css('--overlap', `${overlap}px`);
         }
         There.data.game.clearRevertTimers();
       }
@@ -150,6 +160,7 @@ class Game {
     self.discardId = null;
     self.drawId = null;
     self.drawIds = null;
+    self.pickId = null;
     self.uiid = 1000;
     There.data.listeners.push(self);
     There.data.cardsets = {
@@ -199,11 +210,11 @@ class Game {
           }
         }
         $('.hud').attr('data-isactiveplayer', self.isActivePlayer ? '1' : '0');
-        $('.left .panel[data-id="game"] .button[data-id="newgame"]').attr('data-enabled', self.isHost ? '1' : '0');
-        $('.left .panel[data-id="game"] .button[data-id="deal"]').attr('data-enabled', self.isActivePlayer && self.state == 'deal' ? '1' : '0');
-        $('.left .panel[data-id="game"] .button[data-id="discard"]').attr('data-enabled', self.isActivePlayer && self.state == 'discard' ? '1' : '0');
-        $('.left .panel[data-id="game"] .button[data-id="draw1"]').attr('data-enabled', self.isActivePlayer && self.state == 'discard' ? '1' : '0');
-        $('.left .panel[data-id="game"] .button[data-id="draw2"]').attr('data-enabled', self.isActivePlayer && self.state == 'draw' ? '1' : '0');
+        $('.left .panel[data-id="game"] .layer[data-id="game"] .button[data-id="newgame"]').attr('data-enabled', self.isHost ? '1' : '0');
+        $('.left .panel[data-id="game"] .layer[data-id="game"] .button[data-id="deal"]').attr('data-enabled', self.isActivePlayer && self.state == 'deal' ? '1' : '0');
+        $('.left .panel[data-id="game"] .layer[data-id="game"] .button[data-id="discard"]').attr('data-enabled', self.isActivePlayer && self.state == 'discard' ? '1' : '0');
+        $('.left .panel[data-id="game"] .layer[data-id="game"] .button[data-id="draw1"]').attr('data-enabled', self.isActivePlayer && self.state == 'discard' ? '1' : '0');
+        $('.left .panel[data-id="game"] .layer[data-id="game"] .button[data-id="draw2"]').attr('data-enabled', self.isActivePlayer && self.state == 'draw' ? '1' : '0');
         /*
         for (let player of self.players) {
           {
@@ -251,6 +262,9 @@ class Game {
             if (self.drawIds != null) {
               self.revertDiscardCards();
             }
+            if (self.pickId != null) {
+              self.revertPickSuit();
+            }
           }
         }
       }
@@ -279,9 +293,9 @@ class Game {
 
   clearIndicators() {
     let self = this;
-    $('.left .panel[data-id="game"] .button').attr('data-highlighted', '0');
+    $('.left .panel[data-id="game"] .layer[data-id="game"] .button').attr('data-highlighted', '0');
+    $('.left .panel[data-id="game"] .layer[data-id="prompt"] .cardset').attr('data-highlighted', '0');
     $('.middle .table .turn').attr('data-visible', '0');
-    $('.cardset[data-id^="played"]').attr('data-highlighted', '0');
   }
 
   showIndicators() {
@@ -307,7 +321,7 @@ class Game {
       switch (self.state) {
         case 'deal': {
           if (isBlink) {
-            $('.left .panel[data-id="game"] .button[data-id="deal"]').attr('data-highlighted', '1');
+            $('.left .panel[data-id="game"] .layer[data-id="game"] .button[data-id="deal"]').attr('data-highlighted', '1');
           } else {
             //$(`.middle .table[data-player="${activePlayer.id}"] .turn`).attr('data-visible', '1');
           }
@@ -315,8 +329,8 @@ class Game {
         }
         case 'discard': {
           if (isBlink) {
-            $('.left .panel[data-id="game"] .button[data-id="discard"]').attr('data-highlighted', '1');
-            $('.left .panel[data-id="game"] .button[data-id="draw1"]').attr('data-highlighted', '1');
+            $('.left .panel[data-id="game"] .layer[data-id="game"] .button[data-id="discard"]').attr('data-highlighted', '1');
+            $('.left .panel[data-id="game"] .layer[data-id="game"] .button[data-id="draw1"]').attr('data-highlighted', '1');
           } else {
             //$(`.middle .table[data-player="${activePlayer.id}"] .turn`).attr('data-visible', '1');
           }
@@ -324,7 +338,15 @@ class Game {
         }
         case 'draw': {
           if (isBlink) {
-            $('.left .panel[data-id="game"] .button[data-id="draw2"]').attr('data-highlighted', '1');
+            $('.left .panel[data-id="game"] .layer[data-id="game"] .button[data-id="draw2"]').attr('data-highlighted', '1');
+          } else {
+            //$(`.middle .table[data-player="${activePlayer.id}"] .turn`).attr('data-visible', '1');
+          }
+          break;
+        }
+        case 'prompt': {
+          if (isBlink) {
+            $('.left .panel[data-id="game"] .layer[data-id="prompt"] .cardset').attr('data-highlighted', '1');
           } else {
             //$(`.middle .table[data-player="${activePlayer.id}"] .turn`).attr('data-visible', '1');
           }
@@ -345,9 +367,11 @@ class Game {
     let self = this;
     There.clearNamedTimer('card-discard');
     There.clearNamedTimer('card-draw');
+    There.clearNamedTimer('card-pick');
     self.discardId = null;
     self.drawId = null;
     self.drawIds = null;
+    self.pickId = null;
   }
 
   discardCard(id) {
@@ -428,6 +452,32 @@ class Game {
     self.drawIds = null;
   }
 
+  pickSuit(id) {
+    let self = this;
+    if (self.state != 'prompt' || !self.isActivePlayer) {
+      return;
+    }
+    self.setState('promptsend');
+    self.pickId = id;
+    self.uiid++;
+    There.sendEventMessageToClient(9, {
+      action: id,
+      uiid: self.uiid,
+    });
+    There.setNamedTimer('card-pick', 5000, function() {
+      self.revertPickSuit();
+    });
+  }
+
+  revertPickSuit() {
+    let self = this;
+    if (self.pickId == null) {
+      return;
+    }
+    There.data.channels.game.notify();
+    self.pickId = null;
+  }
+
   callOne() {
     let self = this;
     self.uiid++;
@@ -439,14 +489,14 @@ class Game {
 }
 
 $(document).ready(function() {
-  $('.left .panel[data-id="game"] .button[data-id="newgame"]').on('click', function() {
+  $('.left .panel[data-id="game"] .layer[data-id="game"] .button[data-id="newgame"]').on('click', function() {
     if ($(this).attr('data-enabled') == 0) {
       return;
     }
     There.sendEventMessageToClient(1);
   });
 
-  $('.left .panel[data-id="game"] .button[data-id="rules"]').on('click', function() {
+  $('.left .panel[data-id="game"] .layer[data-id="game"] .button[data-id="rules"]').on('click', function() {
     const rulesPath = There.data.channels?.hudconfig?.data?.rulesurl;
     if (rulesPath != undefined) {
       There.guiCommand({
@@ -456,14 +506,14 @@ $(document).ready(function() {
     }
   });
 
-  $('.left .panel[data-id="game"] .button[data-id="deal"]').on('click', function() {
+  $('.left .panel[data-id="game"] .layer[data-id="game"] .button[data-id="deal"]').on('click', function() {
     if ($(this).attr('data-enabled') == 0) {
       return;
     }
     There.sendEventMessageToClient(2);
   });
 
-  $('.left .panel[data-id="game"] .button[data-id="discard"]').on('click', function() {
+  $('.left .panel[data-id="game"] .layer[data-id="game"] .button[data-id="discard"]').on('click', function() {
     if ($(this).attr('data-enabled') == 0) {
       return;
     }
@@ -478,7 +528,7 @@ $(document).ready(function() {
     There.data.game.discardCard(selectedCards[0]);
   });
 
-  $('.left .panel[data-id="game"] .button[data-id="draw1"]').on('click', function() {
+  $('.left .panel[data-id="game"] .layer[data-id="game"] .button[data-id="draw1"]').on('click', function() {
     if ($(this).attr('data-enabled') == 0) {
       return;
     }
@@ -488,7 +538,7 @@ $(document).ready(function() {
     There.data.game.drawCard();
   });
 
-  $('.left .panel[data-id="game"] .button[data-id="draw2"]').on('click', function() {
+  $('.left .panel[data-id="game"] .layer[data-id="game"] .button[data-id="draw2"]').on('click', function() {
     if ($(this).attr('data-enabled') == 0) {
       return;
     }
@@ -496,6 +546,29 @@ $(document).ready(function() {
       return;
     }
     There.data.game.drawCards();
+  });
+
+  $('.left .panel[data-id="game"] .layer[data-id="prompt"] .card').on('mouseover', function() {
+    There.playSound('enabled menu item rollover');
+  }).on('mousedown', function(event) {
+    There.playSound('menu item activate');
+  }).on('click', function() {
+    if (There.data.game.state != 'prompt') {
+      return;
+    }
+    There.data.game.pickSuit($(this).attr('data-action'));
+  });
+
+  $('.left .panel[data-id="game"] .layer[data-id="pass"] .button[data-id="discard"]').on('click', function() {
+    if (There.data.game.state != 'pass') {
+      return;
+    }
+  });
+
+  $('.left .panel[data-id="game"] .layer[data-id="pass"] .button[data-id="pass"]').on('click', function() {
+    if (There.data.game.state != 'pass') {
+      return;
+    }
   });
 
   $('.middle .button[data-id="one"]').on('click', function() {

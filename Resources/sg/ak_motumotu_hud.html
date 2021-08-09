@@ -19,6 +19,7 @@
 </div>
 <div class="panels">
 <div class="panel" data-id="game" data-selected="1">
+<div class="layer" data-id="game">
 <div class="logo"></div>
 <div class="button large" data-id="newgame">New Game</div>
 <div class="button large" data-id="rules">Rules</div>
@@ -26,6 +27,26 @@
 <div class="button large" data-id="discard">Discard</div>
 <div class="button large" data-id="draw1">Draw</div>
 <div class="button large" data-id="draw2">Draw Cards</div>
+</div>
+
+<div class="layer" data-id="prompt">
+<div class="prompt">Please choose the wild color.</div>
+<div class="cardset" data-id="color" data-deck="motu">
+<div class="card" data-id="_a" data-action="100"></div>
+<div class="card" data-id="_b" data-action="101"></div>
+<div class="card" data-id="_c" data-action="102"></div>
+<div class="card" data-id="_d" data-action="103"></div>
+</div>
+</div>
+
+<div class="layer" data-id="pass">
+<div class="prompt">Discard this card or pass?</div>
+<div class="buttons">
+<div class="button medium" data-id="discard">Discard</div>
+<div class="button medium" data-id="pass">Pass</div>
+</div>
+</div>
+
 </div>
 <div class="panel" data-id="messages"><div class="messages"></div></div>
 </div>
