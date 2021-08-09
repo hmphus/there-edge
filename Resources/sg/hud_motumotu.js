@@ -58,6 +58,9 @@ class CardSet {
               There.data.messages.addMessage(0, `You have received ${cardsNew.length} new ${cardsNew.length == 1 ? 'card' : 'cards'}.`);
             }
           }
+          if (self.id == 'hand' && cardsNew.length == 0 && There.data.game.state == 'pass' && self.cardsUnsorted.length > 0) {
+            cardsNew.push(self.cardsUnsorted[self.cardsUnsorted.length - 1]);
+          }
         }
         $(self.element).empty();
         for (let card of self.cards) {
@@ -75,6 +78,9 @@ class CardSet {
             }).on('click', function() {
               There.clearNamedTimer('card-click');
               if (There.data.game.state.endsWith('send')) {
+                return;
+              }
+              if (There.data.game.state.startsWith('pass') && There.data.game.isActivePlayer) {
                 return;
               }
               let selected = $(cardDiv).attr('data-selected');
@@ -160,7 +166,7 @@ class Game {
     self.discardId = null;
     self.drawId = null;
     self.drawIds = null;
-    self.pickId = null;
+    self.answerId = null;
     self.uiid = 1000;
     There.data.listeners.push(self);
     There.data.cardsets = {
@@ -262,8 +268,8 @@ class Game {
             if (self.drawIds != null) {
               self.revertDiscardCards();
             }
-            if (self.pickId != null) {
-              self.revertPickSuit();
+            if (self.answerId != null) {
+              self.revertAnswerPrompt();
             }
           }
         }
@@ -295,6 +301,7 @@ class Game {
     let self = this;
     $('.left .panel[data-id="game"] .layer[data-id="game"] .button').attr('data-highlighted', '0');
     $('.left .panel[data-id="game"] .layer[data-id="prompt"] .cardset').attr('data-highlighted', '0');
+    $('.left .panel[data-id="game"] .layer[data-id="pass"] .button').attr('data-highlighted', '0');
     $('.middle .table .turn').attr('data-visible', '0');
   }
 
@@ -352,6 +359,15 @@ class Game {
           }
           break;
         }
+        case 'pass': {
+          if (isBlink) {
+            $('.left .panel[data-id="game"] .layer[data-id="pass"] .button[data-id="discard"]').attr('data-highlighted', '1');
+            $('.left .panel[data-id="game"] .layer[data-id="pass"] .button[data-id="pass"]').attr('data-highlighted', '1');
+          } else {
+            //$(`.middle .table[data-player="${activePlayer.id}"] .turn`).attr('data-visible', '1');
+          }
+          break;
+        }
       }
     }
     if (duration == 0) {
@@ -367,11 +383,11 @@ class Game {
     let self = this;
     There.clearNamedTimer('card-discard');
     There.clearNamedTimer('card-draw');
-    There.clearNamedTimer('card-pick');
+    There.clearNamedTimer('card-answer');
     self.discardId = null;
     self.drawId = null;
     self.drawIds = null;
-    self.pickId = null;
+    self.answerId = null;
   }
 
   discardCard(id) {
@@ -452,30 +468,30 @@ class Game {
     self.drawIds = null;
   }
 
-  pickSuit(id) {
+  answerPrompt(id) {
     let self = this;
-    if (self.state != 'prompt' || !self.isActivePlayer) {
+    if ((self.state != 'prompt' && self.state != 'pass') || !self.isActivePlayer) {
       return;
     }
-    self.setState('promptsend');
-    self.pickId = id;
+    self.setState(`${self.state}send`);
+    self.answerId = id;
     self.uiid++;
     There.sendEventMessageToClient(9, {
       action: id,
       uiid: self.uiid,
     });
-    There.setNamedTimer('card-pick', 5000, function() {
-      self.revertPickSuit();
+    There.setNamedTimer('card-answer', 5000, function() {
+      self.revertAnswerPrompt();
     });
   }
 
-  revertPickSuit() {
+  revertAnswerPrompt() {
     let self = this;
-    if (self.pickId == null) {
+    if (self.answerId == null) {
       return;
     }
     There.data.channels.game.notify();
-    self.pickId = null;
+    self.answerId = null;
   }
 
   callOne() {
@@ -556,19 +572,21 @@ $(document).ready(function() {
     if (There.data.game.state != 'prompt') {
       return;
     }
-    There.data.game.pickSuit($(this).attr('data-action'));
+    There.data.game.answerPrompt($(this).attr('data-answer'));
   });
 
   $('.left .panel[data-id="game"] .layer[data-id="pass"] .button[data-id="discard"]').on('click', function() {
     if (There.data.game.state != 'pass') {
       return;
     }
+    There.data.game.answerPrompt(100);
   });
 
   $('.left .panel[data-id="game"] .layer[data-id="pass"] .button[data-id="pass"]').on('click', function() {
     if (There.data.game.state != 'pass') {
       return;
     }
+    There.data.game.answerPrompt(101);
   });
 
   $('.middle .button[data-id="one"]').on('click', function() {

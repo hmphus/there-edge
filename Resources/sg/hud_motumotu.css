@@ -125,15 +125,17 @@
   display:inline-block;
 }
 
-.hud:not([data-gamestate="prompt"]):not([data-gamestate="pass"]) .left .panel[data-id="game"] .layer[data-id="game"] {
+.hud:not([data-isactiveplayer="1"][data-gamestate^="prompt"]):not([data-isactiveplayer="1"][data-gamestate^="pass"]) .left .panel[data-id="game"] .layer[data-id="game"] {
   display:inline-block;
 }
 
-.hud[data-gamestate="prompt"] .left .panel[data-id="game"] .layer[data-id="prompt"] {
+.hud[data-isactiveplayer="1"][data-gamestate="prompt"] .left .panel[data-id="game"] .layer[data-id="prompt"],
+.hud[data-isactiveplayer="1"][data-gamestate="promptsend"] .left .panel[data-id="game"] .layer[data-id="prompt"] {
   display:inline-block;
 }
 
-.hud[data-gamestate="pass"] .left .panel[data-id="game"] .layer[data-id="pass"] {
+.hud[data-isactiveplayer="1"][data-gamestate="pass"] .left .panel[data-id="game"] .layer[data-id="pass"],
+.hud[data-isactiveplayer="1"][data-gamestate="passsend"] .left .panel[data-id="game"] .layer[data-id="pass"] {
   display:inline-block;
 }
 
@@ -410,7 +412,7 @@
   content:' ';
 }
 
-.cardset[data-deck="motu"] .card[data-new="1"]::after {
+.hud:not([data-isactiveplayer="1"][data-gamestate^="pass"]) .cardset[data-deck="motu"] .card[data-new="1"]::after {
   position:absolute;
   left:0px;
   right:0px;
@@ -419,4 +421,12 @@
   background-color:rgba(255, 255, 255, 0.5);
   pointer-events:none;
   content:' ';
+}
+
+.hud[data-isactiveplayer="1"][data-gamestate^="pass"] .cardset .card[data-selected="1"] {
+  top:0px;
+}
+
+.hud[data-isactiveplayer="1"][data-gamestate^="pass"] .cardset .card[data-new="1"] {
+  top:-5px;
 }
