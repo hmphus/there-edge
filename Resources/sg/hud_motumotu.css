@@ -164,18 +164,16 @@
 
 .middle .table[data-player="1"] .title {
   position:absolute;
-  left:72px;
+  left:75px;
   top:3px;
+  width:300px;
   height:14px;
   line-height:14px;
   font-size:11px;
   font-weight:bold;
+  text-align:center;
   color:#fff;
   pointer-events:none;
-}
-
-.middle .table[data-player="1"] .title .count {
-  font-weight:normal;
 }
 
 .middle .table[data-player="1"] .cardset[data-id^="hand"] {
@@ -232,7 +230,7 @@
 .middle .table[data-player="1"] .deck .title {
   left:5px;
   right:5px;
-  text-align:center;
+  width:auto;
 }
 
 .middle .table[data-player="1"] .deck .cardset[data-id="spot"] {
