@@ -102,7 +102,6 @@ class CardSet {
           }
         }
         if (self.id == 'hand') {
-          $('.middle .table[data-player="1"] .title .count[data-id="hand"]').text(self.cards.length > 0 ?`(${self.cards.length})` : '');
           const width1 = $(self.element).innerWidth();
           const width2 = $(self.element).find('.card').outerWidth();
           let overlap = 1;
@@ -113,6 +112,9 @@ class CardSet {
             }
           }
           $(self.element).find('.card').css('--overlap', `${overlap}px`);
+        }
+        if (self.id.startsWith('count')) {
+          $(self.element).text(self.cards.length);
         }
         There.data.game.clearRevertTimers();
       }
@@ -134,32 +136,6 @@ class CardSet {
   }
 }
 
-/*class Score {
-  constructor(id) {
-    let self = this;
-    const selector = `.left .panel[data-id="score"] .section[data-team="${id}"]`;
-    self.element = $(selector);
-    self.playersText = new EllipsisText(`${selector} .players span`);
-    self.pointsDiv = $(selector).find('span[data-id="points"]');
-    self.bagsDiv = $(selector).find('span[data-id="bags"]');
-  }
-
-  set players(text) {
-    let self = this;
-    self.playersText.value = text;
-  }
-
-  set points(value) {
-    let self = this;
-    $(self.pointsDiv).text(value.toLocaleString());
-  }
-
-  set bags(value) {
-    let self = this;
-    $(self.bagsDiv).text(value.toLocaleString());
-  }
-}*/
-
 class Game {
   constructor() {
     let self = this;
@@ -174,13 +150,6 @@ class Game {
       spot: null,
       players: [],
     };
-    /*There.data.scores = [
-      new Score(1),
-      new Score(2),
-      new Score(3),
-      new Score(4),
-    ];*/
-    //There.fsCommand('devtools');
   }
 
   onData(name, data) {
@@ -215,26 +184,20 @@ class Game {
             There.data.channels.cardset.notify();
           }
         }
-        $('.hud').attr('data-isactiveplayer', self.isActivePlayer ? '1' : '0');
+        $('.hud').attr('data-isactiveplayer', self.isActivePlayer ? '1' : '0').attr('data-isreversed', self.isReversed ? '1' : '0');
         $('.left .panel[data-id="game"] .layer[data-id="game"] .button[data-id="newgame"]').attr('data-enabled', self.isHost ? '1' : '0');
         $('.left .panel[data-id="game"] .layer[data-id="game"] .button[data-id="deal"]').attr('data-enabled', self.isActivePlayer && self.state == 'deal' ? '1' : '0');
         $('.left .panel[data-id="game"] .layer[data-id="game"] .button[data-id="discard"]').attr('data-enabled', self.isActivePlayer && self.state == 'discard' ? '1' : '0');
         $('.left .panel[data-id="game"] .layer[data-id="game"] .button[data-id="draw1"]').attr('data-enabled', self.isActivePlayer && self.state == 'discard' ? '1' : '0');
         $('.left .panel[data-id="game"] .layer[data-id="game"] .button[data-id="draw2"]').attr('data-enabled', self.isActivePlayer && self.state == 'draw' ? '1' : '0');
-        /*
         for (let player of self.players) {
           {
-            let playerDiv = $(`.left .panel[data-id="tricks"] .players .player[data-player="${player.id}"]`);
-            $(playerDiv).text(player.name);
-          }
-          {
             let tableDiv = $(`.middle .table[data-player="${player.id}"]`);
+            $(tableDiv).attr('data-ingame', player.inGame ? '1' : '0');
             $(tableDiv).find('.player').text(player.name);
-            $(tableDiv).find('.stats span[data-id="bid"]').text(player.bid == null ? '--' : (player.bid == 0 ? 'Nil' : player.bid));
-            $(tableDiv).find('.stats span[data-id="tricks"]').text(player.tricks == null ? '--' : player.tricks);
+            $(tableDiv).find('.info .score').text(player.game == null ? '--' : player.game.toLocaleString());
           }
         }
-        */
         if (There.data.cardsets.hand == null) {
           There.data.cardsets.hand = new CardSet('hand', `hand${self.thisPlayer + 1}`, {
             selectable: true,
@@ -242,11 +205,9 @@ class Game {
           There.data.cardsets.spot = new CardSet('spot', `spot`, {
             sorted: false,
           });
-          /*
           self.players.forEach(function(e, i) {
-            There.data.cardsets.players.push(new CardSet(`played${e.id}`, `played${i + 1}`));
+            There.data.cardsets.players.push(new CardSet(`count${e.id}`, `hand${i + 1}`));
           });
-          */
           if (There.data.channels?.cardset?.data != undefined) {
             There.data.channels.cardset.notify();
           }
@@ -330,7 +291,7 @@ class Game {
           if (isBlink) {
             $('.left .panel[data-id="game"] .layer[data-id="game"] .button[data-id="deal"]').attr('data-highlighted', '1');
           } else {
-            //$(`.middle .table[data-player="${activePlayer.id}"] .turn`).attr('data-visible', '1');
+            $(`.middle .table[data-player="${activePlayer.id}"] .turn`).attr('data-visible', '1');
           }
           break;
         }
@@ -339,7 +300,7 @@ class Game {
             $('.left .panel[data-id="game"] .layer[data-id="game"] .button[data-id="discard"]').attr('data-highlighted', '1');
             $('.left .panel[data-id="game"] .layer[data-id="game"] .button[data-id="draw1"]').attr('data-highlighted', '1');
           } else {
-            //$(`.middle .table[data-player="${activePlayer.id}"] .turn`).attr('data-visible', '1');
+            $(`.middle .table[data-player="${activePlayer.id}"] .turn`).attr('data-visible', '1');
           }
           break;
         }
@@ -347,7 +308,7 @@ class Game {
           if (isBlink) {
             $('.left .panel[data-id="game"] .layer[data-id="game"] .button[data-id="draw2"]').attr('data-highlighted', '1');
           } else {
-            //$(`.middle .table[data-player="${activePlayer.id}"] .turn`).attr('data-visible', '1');
+            $(`.middle .table[data-player="${activePlayer.id}"] .turn`).attr('data-visible', '1');
           }
           break;
         }
@@ -355,7 +316,7 @@ class Game {
           if (isBlink) {
             $('.left .panel[data-id="game"] .layer[data-id="prompt"] .cardset').attr('data-highlighted', '1');
           } else {
-            //$(`.middle .table[data-player="${activePlayer.id}"] .turn`).attr('data-visible', '1');
+            $(`.middle .table[data-player="${activePlayer.id}"] .turn`).attr('data-visible', '1');
           }
           break;
         }
@@ -364,7 +325,7 @@ class Game {
             $('.left .panel[data-id="game"] .layer[data-id="pass"] .button[data-id="discard"]').attr('data-highlighted', '1');
             $('.left .panel[data-id="game"] .layer[data-id="pass"] .button[data-id="pass"]').attr('data-highlighted', '1');
           } else {
-            //$(`.middle .table[data-player="${activePlayer.id}"] .turn`).attr('data-visible', '1');
+            $(`.middle .table[data-player="${activePlayer.id}"] .turn`).attr('data-visible', '1');
           }
           break;
         }
