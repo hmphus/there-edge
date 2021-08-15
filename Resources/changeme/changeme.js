@@ -651,7 +651,7 @@ There.init({
         $(divItem).attr('data-id', entry.poid);
         $(divItem).attr('data-selected', entry.wearing ? '1' : '0');
         $(divItem).attr('data-unwearable', entry.unwearable ? '1' : '0');
-        $(divIcon).css('background-image', `url(iconspng/${entry.icon}.png)`);
+        $(divIcon).css('background-image', `url(https://www.hmph.us/there/changeme/${entry.poid}/${entry.icon}.png)`);
         $(divName).text(entry.name);
         if (entry.unwearable) {
           $(divStatus).text('Cannot be worn');
