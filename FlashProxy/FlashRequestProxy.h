@@ -39,7 +39,7 @@ protected:
     virtual HRESULT STDMETHODCALLTYPE OnObjectAvailable(REFIID riid, IUnknown *punk) override {return E_NOTIMPL;}
     virtual HRESULT STDMETHODCALLTYPE Read(void *pv, ULONG cb, ULONG *pcbRead) override;
     virtual HRESULT STDMETHODCALLTYPE Write(const void *pv, ULONG cb, ULONG *pcbWritten) override {return E_NOTIMPL;}
-    virtual HRESULT STDMETHODCALLTYPE Seek(LARGE_INTEGER dlibMove, DWORD dwOrigin, ULARGE_INTEGER *plibNewPosition) override {return E_NOTIMPL;}
+    virtual HRESULT STDMETHODCALLTYPE Seek(LARGE_INTEGER dlibMove, DWORD dwOrigin, ULARGE_INTEGER *plibNewPosition) override;
     virtual HRESULT STDMETHODCALLTYPE SetSize(ULARGE_INTEGER libNewSize) override {return E_NOTIMPL;}
     virtual HRESULT STDMETHODCALLTYPE CopyTo(IStream *pstm, ULARGE_INTEGER cb, ULARGE_INTEGER *pcbRead, ULARGE_INTEGER *pcbWritten) override {return E_NOTIMPL;}
     virtual HRESULT STDMETHODCALLTYPE Commit(DWORD grfCommitFlags) override {return E_NOTIMPL;}
@@ -61,4 +61,5 @@ protected:
     CComBSTR                                             m_mimeType;
     CComBSTR                                             m_contentType;
     ULONG                                                m_size;
+    ULONG                                                m_position;
 };

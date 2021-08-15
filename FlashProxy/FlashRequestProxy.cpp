@@ -27,7 +27,8 @@ FlashRequestProxy::FlashRequestProxy(ICoreWebView2Environment *environment, ICor
     m_binding(),
     m_mimeType(),
     m_contentType(),
-    m_size(0)
+    m_size(0),
+    m_position(0)
 {
 }
 
@@ -239,9 +240,23 @@ HRESULT STDMETHODCALLTYPE FlashRequestProxy::Read(void *pv, ULONG cb, ULONG *pcb
             *pcbRead = m_size;
 
         m_size -= *pcbRead;
+        m_position += *pcbRead;
     }
 
     return hr;
+}
+
+HRESULT STDMETHODCALLTYPE FlashRequestProxy::Seek(LARGE_INTEGER dlibMove, DWORD dwOrigin, ULARGE_INTEGER *plibNewPosition)
+{
+    if (dwOrigin == STREAM_SEEK_SET && dlibMove.QuadPart == 0 && m_position == 0)
+    {
+        if (plibNewPosition != nullptr)
+            plibNewPosition->QuadPart = 0;
+
+        return S_OK;
+    }
+
+    return E_NOTIMPL;
 }
 
 HRESULT FlashRequestProxy::DetermineContentType(const WCHAR *uri)
