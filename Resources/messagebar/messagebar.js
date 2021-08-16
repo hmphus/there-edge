@@ -31,6 +31,38 @@ There.init({
         There.displayMessage(0);
       }
     }
+
+    if (name == 'there_proxyversion') {
+      There.fetchVersionJson(value);
+    }
+  },
+
+  fetchVersionJson: function(version) {
+    $.ajax({
+      url: 'https://www.hmph.us/there/edge/info.json',
+      dataType: 'json',
+      success: function(json) {
+        if (json.version != version) {
+          There.data.messages.push({
+            id: '0',
+            type: 'Info',
+            priority: '1',
+            text: `ThereEdge ${json.version} is now available for download.`,
+            sound: '1',
+            timeout: '30.0',
+            buttons: [{
+              id: '0',
+              text: 'View',
+              url: json.url,
+            }, {
+              id: '1',
+              text: 'Later',
+            }],
+          });
+          There.displayTopMessage();
+        }
+      },
+    });
   },
 
   fetchMessagesXml: function() {
@@ -266,10 +298,14 @@ There.init({
       return;
     }
     message.response = message.buttons.length > 1 ? ` You responded "${button.text}".` : '';
-    There.fsCommand('messageBarResponse', {
-      id: message.id,
-      button: button.id,
-    });
+    if (message.id != '0') {
+      There.fsCommand('messageBarResponse', {
+        id: message.id,
+        button: button.id,
+      });
+    } else if (button.url != undefined) {
+      There.fsCommand('browser', button.url);
+    }
     There.log(`MessageBar: message response sent with id=${message.id} button=${button.id}`);
     There.data.hasTimeout = false;
     There.showNextMessage();
@@ -299,10 +335,12 @@ There.init({
     if (message != undefined && There.data.hasTimeout) {
       There.data.hasTimeout = false;
       message.response = ` Message timed out.`;
-      There.fsCommand('messageBarResponse', {
-        id: message.id,
-        timeout: 1,
-      });
+      if (message.id != '0') {
+        There.fsCommand('messageBarResponse', {
+          id: message.id,
+          timeout: 1,
+        });
+      }
       There.log(`MessageBar: message timed out with id=${message.id}`);
     }
     if (index < There.data.messages.length) {

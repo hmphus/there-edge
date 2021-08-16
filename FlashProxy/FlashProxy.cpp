@@ -29,6 +29,7 @@
 #define WM_FLASHPROXY_GET_IDENTITY       (WM_USER + 4)
 
 FlashProxyModule g_AtlModule;
+HINSTANCE g_Instance;
 WCHAR FlashProxyModule::g_WindowClassName[] = L"ThereEdgeFlashProxy";
 
 void Log(const WCHAR *format, ...)
@@ -54,6 +55,7 @@ void Log(const WCHAR *format, ...)
 
 extern "C" BOOL WINAPI DllMain(HINSTANCE hInstance, DWORD dwReason, LPVOID lpReserved)
 {
+    g_Instance = hInstance;
     return g_AtlModule.DllMain(dwReason, lpReserved);
 }
 
@@ -443,6 +445,32 @@ HRESULT STDMETHODCALLTYPE FlashProxyModule::DoVerb(LONG iVerb, LPMSG lpmsg, IOle
                 SetVariable(L"There_WindowWidth", value);
                 _ltow_s(bounds.bottom - bounds.top, value, _countof(value), 10);
                 SetVariable(L"There_WindowHeight", value);
+            }
+
+            {
+                HRSRC source = FindResource(g_Instance, MAKEINTRESOURCE(VS_VERSION_INFO), RT_VERSION);
+                if (source != nullptr)
+                {
+                    HGLOBAL resource = LoadResource(g_Instance, source);
+                    if (resource != nullptr)
+                    {
+                        void *data = LockResource(resource);
+                        if (data != nullptr)
+                        {
+                            VS_FIXEDFILEINFO *version = nullptr;
+                            UINT size = 0;
+                            if (VerQueryValue(data, L"\\", (void**)&version, &size) && version != nullptr && size >= sizeof(VS_FIXEDFILEINFO))
+                            {
+                                WCHAR value[100];
+                                _snwprintf_s(value, _countof(value), L"%u.%u.%u",
+                                             version->dwFileVersionMS >> 16 & 0xFFFF,
+                                             version->dwFileVersionMS & 0xFFFF,
+                                             version->dwFileVersionLS >> 16 & 0xFFFF);
+                                SetVariable(L"There_ProxyVersion", value);
+                            }
+                        }
+                    }
+                }
             }
 
             {
