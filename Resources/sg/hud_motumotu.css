@@ -71,6 +71,7 @@
 
 .left .panel[data-id="game"] .layer[data-id="prompt"] .cardset .card {
   margin-left:0px;
+  box-shadow:none;
 }
 
 .left .panel[data-id="game"] .layer[data-id="prompt"] .cardset[data-highlighted="1"] .card::after {
@@ -246,6 +247,7 @@
   position:absolute;
   left:0px;
   margin:0px;
+  box-shadow:none;
 }
 
 .middle .table[data-player="1"] .deck .cardset[data-id="spot"]::before {

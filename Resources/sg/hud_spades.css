@@ -138,7 +138,8 @@
 }
 
 .left .panel[data-id="tricks"] .cardset .card {
-  margin:0px
+  margin:0px;
+  box-shadow:none;
 }
 
 .hud[data-gamestate="bid"][data-isactiveplayer="1"] .left .panel[data-id="game"] .logo,
@@ -276,6 +277,10 @@
   width:27px;
   height:37px;
   text-align:center;
+}
+
+.middle .table .cardset[data-id^="played"] .card {
+  box-shadow:none;
 }
 
 .middle .table .cardset[data-id^="played"][data-highlighted="1"] {

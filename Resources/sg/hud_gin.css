@@ -225,6 +225,7 @@
   position:absolute;
   left:0px;
   margin:0px;
+  box-shadow:none;
 }
 
 .middle .table .deck .cardset[data-id="deck"] .card:last-of-type span:nth-of-type(3) {
@@ -240,8 +241,7 @@
   text-align:center;
 }
 
-.middle .table .deck .cardset[data-id="deck"] .card:not(:last-of-type),
-.middle .table .deck .cardset[data-id="spot"] .card:not(:last-of-type) {
+.middle .table .deck .cardset[data-id="spot"] .card {
   box-shadow:none;
 }
 
