@@ -145,6 +145,8 @@ class Game {
         self.isDealer = (Number(gameData.dealer) - 1 == self.thisPlayer && self.thisPlayer >= 0);
         self.isHost = (Number(gameData.host) - 1 == self.thisPlayer && self.thisPlayer >= 0);
         $('.hud').attr('data-isactiveplayer', self.isActivePlayer ? '1' : '0');
+        $('.hud').attr('data-isdealer', self.isDealer ? '1' : '0');
+        $('.hud').attr('data-ishost', self.isHost ? '1' : '0');
         /*
         $('.left .panel[data-id="game"] .button[data-id="newgame"]').attr('data-enabled', self.isHost ? '1' : '0');
         $('.left .panel[data-id="game"] .button[data-id="deal"]').attr('data-enabled', self.isActivePlayer && self.state == 'deal' ? '1' : '0');

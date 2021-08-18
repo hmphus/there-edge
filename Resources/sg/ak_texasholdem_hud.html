@@ -11,22 +11,60 @@
 <script src="hud_holdem.js"></script>
 </head>
 <body>
-<div class="hud">
+<div class="hud" data-gamestate="wait" data-prompt="paystakes" data-ingame="1" data-inround="0" data-isactiveplayer="1" data-isdealer="1" data-ishost="1" data-bettype="1" data-loc12="1" data-loc21="1" data-loc22="1" data-loc100="1">
 <div class="left">
 <div class="tabs">
-<div class="tab" data-id="game" data-selected="1">Game</div>
-<div class="tab" data-id="play">Play</div>
+<div class="tab" data-id="game">Game</div>
+<div class="tab" data-id="play" data-selected="1">Play</div>
 <div class="tab" data-id="messages">Messages</div>
 </div>
 <div class="panels">
-<div class="panel" data-id="game" data-selected="1">
+<div class="panel" data-id="game">
 <div class="logo"></div>
 <div class="button large" data-id="newgame">New Game</div>
 <div class="button large" data-id="rules">Rules</div>
 <div class="button large" data-id="options">Options</div>
 <div class="button large" data-id="profile">Profile</div>
 </div>
-<div class="panel" data-id="play"></div>
+<div class="panel" data-id="play" data-selected="1">
+<div class="layer" data-id="play">
+<div class="logo"></div>
+<div class="button large" data-button="action" data-id="continuestakes">Continue</div>
+<div class="button large" data-button="action" data-id="agreetostakes1">Place Chips</div>
+<div class="button large" data-button="action" data-id="agreetostakes2">Refill Stack</div>
+<div class="button large" data-button="action" data-id="deal">Deal</div>
+<div class="button large" data-button="action" data-id="dealflop">Deal Flop</div>
+<div class="button large" data-button="action" data-id="dealturn">Deal Turn</div>
+<div class="button large" data-button="action" data-id="dealriver">Deal River</div>
+<div class="button large" data-button="action" data-id="blind">Blind <span class="bet"></span></div>
+<div class="button large" data-button="action" data-id="check">Check</div>
+<div class="button large" data-button="action" data-id="call">Call <span class="bet"></span></div>
+<div class="button large" data-button="action" data-id="showcards">Show Cards</div>
+<div class="button large" data-button="action" data-id="playagain1">Game Over</div>
+<div class="button large" data-button="action" data-id="playagain2">New Deal</div>
+<div class="button large" data-button="actionb" data-id="agreetostakes">Refill Stack</div>
+<div class="button large" data-button="actionb" data-id="goin">Go In</div>
+<div class="button large" data-button="actionb" data-id="goout">Sit Out</div>
+<div class="button large" data-button="actionb" data-id="bet">Bet <span class="bet"></span></div>
+<div class="button large" data-button="actionb" data-id="betnolimit">Bet</div>
+<div class="button large" data-button="actionb" data-id="raise">Raise <span class="bet"></span></div>
+<div class="button large" data-button="actionb" data-id="raisenolimit">Raise</div>
+<div class="button large" data-button="allin" data-id="buychips">Buy Chips</div>
+<div class="button large" data-button="allin" data-id="allin">All In</div>
+<div class="button large" data-button="fold" data-id="goin">Go In</div>
+<div class="button large" data-button="fold" data-id="goout">Sit Out</div>
+<div class="button large" data-button="fold" data-id="buychips">Buy Chips</div>
+<div class="button large" data-button="fold" data-id="fold">Fold</div>
+<div class="button large" data-button="fold" data-id="newgame">New Game</div>
+</div>
+<div class="layer" data-id="showprompt">
+<div class="prompt">Show your cards?</div>
+<div class="buttons">
+<div class="button medium" data-id="yes">Yes</div>
+<div class="button medium" data-id="no">No</div>
+</div>
+</div>
+</div>
 <div class="panel" data-id="messages"><div class="messages"></div></div>
 </div>
 </div>
