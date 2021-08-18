@@ -133,6 +133,15 @@ class Game {
           return {
             id: null,
             name: e.avname.trim(),
+            prompt: e.hudprompt.trim(),
+            pot: Number(e.pot),
+            potWin: Number(e.potwin),
+            bet: Number(e.currentbet),
+            winnings: Number(e.winnings),
+            chips: Number(e.chips),
+            isFolded: e.folded == 1,
+            inRound: e.inround == 1,
+            inGame: e.ingame == 1,
           };
         });
         self.thisPlayer = playerData.player.findIndex(e => e.avoid == There.variables.there_pilotdoid);
@@ -144,9 +153,131 @@ class Game {
         self.isActivePlayer = (self.activePlayer == self.thisPlayer && self.thisPlayer >= 0);
         self.isDealer = (Number(gameData.dealer) - 1 == self.thisPlayer && self.thisPlayer >= 0);
         self.isHost = (Number(gameData.host) - 1 == self.thisPlayer && self.thisPlayer >= 0);
-        $('.hud').attr('data-isactiveplayer', self.isActivePlayer ? '1' : '0');
-        $('.hud').attr('data-isdealer', self.isDealer ? '1' : '0');
-        $('.hud').attr('data-ishost', self.isHost ? '1' : '0');
+        {
+          const player = self.players[self.thisPlayer];
+          self.raiseBet = Number(gameData.currentbet) + Number(gameData.roundbet);
+          self.playerCall = Number(gameData.currentbet) - player.bet;
+          self.playerRaise = self.raiseBet - player.bet;
+          self.canCall = player.chips >= self.playerCall;
+          self.canRaise = player.chips >= self.playerRaise && (Number(gameData.maxnumraises) == 0 || Number(gameData.numraises) < Number(gameData.maxnumraises));
+          self.canBlind = player.chips >= Number(gameData.roundbet);
+          self.canPlayAgain = Number(gameData.maxnumrounds) == 0 || (Number(gameData.numrounds) < Number(gameData.maxnumrounds));
+          $('.hud').attr('data-isactiveplayer', self.isActivePlayer ? '1' : '0');
+          $('.hud').attr('data-isdealer', self.isDealer ? '1' : '0');
+          $('.hud').attr('data-ishost', self.isHost ? '1' : '0');
+          $('.hud').attr('data-inround', player.inRound ? '1' : '0');
+          $('.hud').attr('data-ingame', player.inGame ? '1' : '0');
+          $('.hud').attr('data-prompt', player.prompt);
+          $('.hud').attr('data-bettype', gameData.bettype == 1 ? '1' : '0');
+          $('.hud').attr('data-playagain', self.canPlayAgain ? '1' : '0');
+          $('.hud').attr('data-cancall', self.canCall ? '1' : '0');
+          $('.hud').attr('data-canraise', self.canRaise ? '1' : '0');
+          $('.hud').attr('data-canblind', self.canBlind ? '1' : '0');
+          $('.left .panel[data-id="play"] .button[data-button]').attr('data-enabled', '1');
+          switch (self.state) {
+            case 'pregame': {
+              $('.left .panel[data-id="play"] .button[data-button="fold"]').attr('data-enabled', self.isHost && There.variables.restricthost != 1 ? '1' : '0');
+              break;
+            }
+            case 'wait': {
+              if (!player.inRound) {
+                if (player.prompt.startsWith('refillstakes')) {
+                  $('.left .panel[data-id="play"] .button[data-button="action"]').attr('data-enabled', player.inGame && !player.inRound ? '1' : '0');
+                  $('.left .panel[data-id="play"] .button[data-button="actionb"]').attr('data-enabled', player.inGame && !player.inRound ? '1' : '0');
+                }
+                if (player.prompt.startsWith('paystakes')) {
+                  $('.left .panel[data-id="play"] .button[data-button="action"]').attr('data-enabled', player.inGame && !player.inRound ? '1' : '0');
+                }
+              } else {
+                $('.left .panel[data-id="play"] .button[data-button="action"]').attr('data-enabled', '0');
+              }
+              break;
+            }
+            case 'deal': {
+              if (!player.inRound) {
+                if (player.prompt.startsWith('refillstakes')) {
+                  $('.left .panel[data-id="play"] .button[data-button="action"]').attr('data-enabled', player.inGame && !player.inRound ? '1' : '0');
+                  $('.left .panel[data-id="play"] .button[data-button="actionb"]').attr('data-enabled', player.inGame && !player.inRound ? '1' : '0');
+                }
+                if (player.prompt.startsWith('paystakes')) {
+                  $('.left .panel[data-id="play"] .button[data-button="action"]').attr('data-enabled', player.inGame && !player.inRound ? '1' : '0');
+                }
+              } else {
+                $('.left .panel[data-id="play"] .button[data-button="action"]').attr('data-enabled', self.isDealer && self.isActivePlayer && There.variables.restrictdeal != 1 ? '1' : '0');
+              }
+              break;
+            }
+            case 'deal1': {
+              $('.left .panel[data-id="play"] .button[data-button="action"]').attr('data-enabled', self.isDealer && self.isActivePlayer ? '1' : '0');
+              break;
+            }
+            case 'deal2': {
+              $('.left .panel[data-id="play"] .button[data-button="action"]').attr('data-enabled', self.isDealer && self.isActivePlayer ? '1' : '0');
+              break;
+            }
+            case 'deal3': {
+              $('.left .panel[data-id="play"] .button[data-button="action"]').attr('data-enabled', self.isDealer && self.isActivePlayer ? '1' : '0');
+              break;
+            }
+            case 'join': {
+              break;
+            }
+            case 'pause': {
+              break;
+            }
+            case 'blind': {
+              const amount = gameData.currentbet == 0 ? Number(gameData.roundbet) / 2 : Number(gameData.roundbet);
+              $('.left .panel[data-id="play"] .button[data-button="action"][data-id="blind"] .amount').text(amount.toLocaleString());
+              $('.left .panel[data-id="play"] .button[data-button="action"]').attr('data-enabled', self.isActivePlayer ? '1' : '0');
+              break;
+            }
+            case 'bet': {
+              $('.left .panel[data-id="play"] .button[data-button="actionb"][data-id="bet"] .amount').text(Number(gameData.roundbet).toLocaleString());
+              $('.left .panel[data-id="play"] .button[data-button="action"]').attr('data-enabled', self.isActivePlayer ? '1' : '0');
+              $('.left .panel[data-id="play"] .button[data-button="actionb"]').attr('data-enabled', self.isActivePlayer ? '1' : '0');
+              $('.left .panel[data-id="play"] .button[data-button="fold"]').attr('data-enabled', self.isActivePlayer ? '1' : '0');
+              $('.left .panel[data-id="play"] .button[data-button="allin"]').attr('data-enabled', self.isActivePlayer ? '1' : '0');
+              break;
+            }
+            case 'check': {
+              $('.left .panel[data-id="play"] .button[data-button="actionb"][data-id="raise"] .amount').text(self.raiseBet.toLocaleString());
+              $('.left .panel[data-id="play"] .button[data-button="action"]').attr('data-enabled', self.isActivePlayer ? '1' : '0');
+              $('.left .panel[data-id="play"] .button[data-button="actionb"]').attr('data-enabled', self.isActivePlayer ? '1' : '0');
+              $('.left .panel[data-id="play"] .button[data-button="fold"]').attr('data-enabled', self.isActivePlayer ? '1' : '0');
+              $('.left .panel[data-id="play"] .button[data-button="allin"]').attr('data-enabled', self.isActivePlayer ? '1' : '0');
+              break;
+            }
+            case 'call': {
+              $('.left .panel[data-id="play"] .button[data-button="action"][data-id="call"] .amount').text(Number(gameData.currentbet).toLocaleString());
+              $('.left .panel[data-id="play"] .button[data-button="actionb"][data-id="raise"] .amount').text(self.raiseBet.toLocaleString());
+              $('.left .panel[data-id="play"] .button[data-button="action"]').attr('data-enabled', self.isActivePlayer ? '1' : '0');
+              $('.left .panel[data-id="play"] .button[data-button="actionb"]').attr('data-enabled', self.isActivePlayer ? '1' : '0');
+              $('.left .panel[data-id="play"] .button[data-button="fold"]').attr('data-enabled', self.isActivePlayer ? '1' : '0');
+              $('.left .panel[data-id="play"] .button[data-button="allin"]').attr('data-enabled', self.isActivePlayer ? '1' : '0');
+              break;
+            }
+            case 'allin': {
+              $('.left .panel[data-id="play"] .button[data-button="fold"]').attr('data-enabled', self.isActivePlayer ? '1' : '0');
+              $('.left .panel[data-id="play"] .button[data-button="allin"]').attr('data-enabled', self.isActivePlayer ? '1' : '0');
+              break;
+            }
+            case 'showdown': {
+              $('.left .panel[data-id="play"] .button[data-button="action"]').attr('data-enabled', self.isActivePlayer ? '1' : '0');
+              $('.left .panel[data-id="play"] .button[data-button="fold"]').attr('data-enabled', self.isActivePlayer ? '1' : '0');
+              break;
+            }
+            case 'endgame': {
+              $('.left .panel[data-id="play"] .button[data-button="action"]').attr('data-enabled', self.isActivePlayer && self.isHost && self.canPlayAgain ? '1' : '0');
+              $('.left .panel[data-id="play"] .button[data-button="fold"]').attr('data-enabled', self.isHost && There.variables.restricthost != 1 ? '1' : '0');
+              break;
+            }
+            case 'gameover': {
+              $('.left .panel[data-id="play"] .button[data-button="action"]').attr('data-enabled', '0');
+              $('.left .panel[data-id="play"] .button[data-button="fold"]').attr('data-enabled', self.isHost && There.variables.restricthost != 1 ? '1' : '0');
+              break;
+            }
+          }
+        }
         /*
         $('.left .panel[data-id="game"] .button[data-id="newgame"]').attr('data-enabled', self.isHost ? '1' : '0');
         $('.left .panel[data-id="game"] .button[data-id="deal"]').attr('data-enabled', self.isActivePlayer && self.state == 'deal' ? '1' : '0');
@@ -287,6 +418,69 @@ class Game {
       });
     }
     */
+  }
+
+  onVariable(name, value) {
+    let self = this;
+    if (self.ruffle == undefined) {
+      self.ruffle = {
+        queue: [],
+        player: null,
+        isReady: false,
+      };
+      //There.fsCommand('devtools');
+      for (let key in There.variables) {
+        self.ruffle.queue.push({
+          name: key,
+          value: There.variables[key],
+        });
+      }
+    }
+    self.ruffle.queue.push({
+      name: name,
+      value: value,
+    });
+    if (self.ruffle.player == null) {
+      if (name != 'dataversion') {
+        return;
+      }
+      const ruffle = window.RufflePlayer.newest();
+      self.ruffle.player = ruffle.createPlayer();
+      self.ruffle.player.config = {
+        autoplay: 'on',
+        unmuteOverlay: 'hidden',
+        contextMenu: false,
+      };
+      self.ruffle.player.onFSCommand = function(command, query) {
+        if (command == 'setTextureBitDepth' || command == 'setStageWidthHeight' || command == 'setWidthHeight' || command == 'beginDragWindow') {
+          return;
+        }
+        There.fsCommand(command, query);
+        if (self.ruffle.isReady == false) {
+          self.ruffle.isReady = true;
+          setTimeout(function() {
+            self.forwardRuffleVariables();
+          }, 0);
+        }
+      };
+      $('.middle').append(self.ruffle.player);
+      self.ruffle.player.load({
+        url: `http://${There.variables.there_resourceshost}/resources/sg/ak_texasholdem_hud.swf`,
+        allowScriptAccess: true,
+      });
+      return;
+    }
+    self.forwardRuffleVariables();
+  }
+
+  forwardRuffleVariables() {
+    let self = this;
+    if (self.ruffle.isReady) {
+      while (self.ruffle.queue.length > 0) {
+        const entry = self.ruffle.queue.shift();
+        self.ruffle.player.instance.set_variable(`_root.${entry.name}`, entry.value);
+      }
+    }
   }
 }
 
