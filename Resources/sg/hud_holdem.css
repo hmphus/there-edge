@@ -45,28 +45,28 @@
   display:none;
 }
 
-.left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="fold"] {
+.left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="f"] {
   position:absolute;
   left:67px;
   top:7px;
   display:none;
 }
 
-.left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="allin"] {
+.left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="i"] {
   position:absolute;
   left:67px;
   top:34px;
   display:none;
 }
 
-.left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="action"] {
+.left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="a"] {
   position:absolute;
   left:135px;
   top:7px;
   display:none;
 }
 
-.left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="actionb"] {
+.left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="b"] {
   position:absolute;
   left:135px;
   top:34px;
@@ -97,101 +97,101 @@
   justify-content:space-between;
 }
 
-.hud[data-gamestate="pregame"][data-ishost="1"] .left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="fold"][data-id="newgame"] {
+.hud[data-gamestate="pregame"][data-ishost="1"] .left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="f"][data-id="newgame"] {
   display:inline-block;
 }
 
-.hud[data-gamestate="wait"][data-inround="0"][data-prompt="refillstakes"] .left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="action"][data-id="continuestakes"],
-.hud[data-gamestate="wait"][data-inround="0"][data-prompt="refillstakes"] .left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="actionb"][data-id="agreetostakes"],
-.hud[data-gamestate="wait"][data-inround="0"][data-prompt="refillstakesno"] .left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="action"][data-id="continuestakes"],
-.hud[data-gamestate="wait"][data-inround="0"][data-prompt="refillstakesno"] .left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="actionb"][data-id="agreetostakes"],
-.hud[data-gamestate="wait"][data-inround="0"][data-prompt="paystakes"] .left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="action"][data-id="agreetostakes1"],
-.hud[data-gamestate="wait"][data-inround="0"][data-prompt="paystakesno"] .left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="action"][data-id="agreetostakes1"],
-.hud[data-gamestate="wait"][data-inround="0"]:not([data-prompt="hide"]) .left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="allin"][data-id="buychips"],
-.hud[data-gamestate="wait"][data-inround="0"]:not([data-prompt="hide"])[data-ingame="0"] .left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="fold"][data-id="goin"],
-.hud[data-gamestate="wait"][data-inround="0"]:not([data-prompt="hide"])[data-ingame="1"] .left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="fold"][data-id="goout"],
-.hud[data-gamestate="wait"][data-inround="1"][data-isactiveplayer="1"][data-isdealer="1"] .left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="action"][data-id="deal"],
-.hud[data-gamestate="wait"][data-inround="1"][data-prompt="paidstakes"][data-ingame="0"] .left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="fold"][data-id="goin"],
-.hud[data-gamestate="wait"][data-inround="1"][data-prompt="paidstakes"][data-ingame="1"] .left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="fold"][data-id="goout"] {
+.hud[data-gamestate="wait"][data-inround="0"][data-prompt="refillstakes"] .left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="a"][data-id="continuestakes"],
+.hud[data-gamestate="wait"][data-inround="0"][data-prompt="refillstakes"] .left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="b"][data-id="agreetostakes"],
+.hud[data-gamestate="wait"][data-inround="0"][data-prompt="refillstakesno"] .left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="a"][data-id="continuestakes"],
+.hud[data-gamestate="wait"][data-inround="0"][data-prompt="refillstakesno"] .left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="b"][data-id="agreetostakes"],
+.hud[data-gamestate="wait"][data-inround="0"][data-prompt="paystakes"] .left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="a"][data-id="agreetostakes1"],
+.hud[data-gamestate="wait"][data-inround="0"][data-prompt="paystakesno"] .left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="a"][data-id="agreetostakes1"],
+.hud[data-gamestate="wait"][data-inround="0"]:not([data-prompt="hide"]) .left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="i"][data-id="buychips"],
+.hud[data-gamestate="wait"][data-inround="0"]:not([data-prompt="hide"])[data-ingame="0"] .left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="f"][data-id="goin"],
+.hud[data-gamestate="wait"][data-inround="0"]:not([data-prompt="hide"])[data-ingame="1"] .left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="f"][data-id="goout"],
+.hud[data-gamestate="wait"][data-inround="1"][data-isactiveplayer="1"][data-isdealer="1"] .left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="a"][data-id="deal"],
+.hud[data-gamestate="wait"][data-inround="1"][data-prompt="paidstakes"][data-ingame="0"] .left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="f"][data-id="goin"],
+.hud[data-gamestate="wait"][data-inround="1"][data-prompt="paidstakes"][data-ingame="1"] .left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="f"][data-id="goout"] {
   display:inline-block;
 }
 
-.hud[data-gamestate="deal"][data-inround="0"][data-prompt="refillstakes"] .left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="action"][data-id="continuestakes"],
-.hud[data-gamestate="deal"][data-inround="0"][data-prompt="refillstakes"] .left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="actionb"][data-id="agreetostakes"],
-.hud[data-gamestate="deal"][data-inround="0"][data-prompt="refillstakesno"] .left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="action"][data-id="continuestakes"],
-.hud[data-gamestate="deal"][data-inround="0"][data-prompt="refillstakesno"] .left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="actionb"][data-id="agreetostakes"],
-.hud[data-gamestate="deal"][data-inround="0"][data-prompt="paystakes"] .left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="action"][data-id="agreetostakes1"],
-.hud[data-gamestate="deal"][data-inround="0"][data-prompt="paystakesno"] .left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="action"][data-id="agreetostakes1"],
-.hud[data-gamestate="deal"][data-inround="0"]:not([data-prompt="hide"]) .left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="allin"][data-id="buychips"],
-.hud[data-gamestate="deal"][data-inround="0"]:not([data-prompt="hide"])[data-ingame="0"] .left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="fold"][data-id="goin"],
-.hud[data-gamestate="deal"][data-inround="0"]:not([data-prompt="hide"])[data-ingame="1"] .left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="fold"][data-id="goout"],
-.hud[data-gamestate="deal"][data-inround="1"][data-isactiveplayer="1"][data-isdealer="1"] .left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="action"][data-id="deal"],
-.hud[data-gamestate="deal"][data-inround="1"][data-prompt="paidstakes"][data-ingame="0"] .left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="fold"][data-id="goin"],
-.hud[data-gamestate="deal"][data-inround="1"][data-prompt="paidstakes"][data-ingame="1"] .left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="fold"][data-id="goout"] {
+.hud[data-gamestate="deal"][data-inround="0"][data-prompt="refillstakes"] .left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="a"][data-id="continuestakes"],
+.hud[data-gamestate="deal"][data-inround="0"][data-prompt="refillstakes"] .left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="b"][data-id="agreetostakes"],
+.hud[data-gamestate="deal"][data-inround="0"][data-prompt="refillstakesno"] .left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="a"][data-id="continuestakes"],
+.hud[data-gamestate="deal"][data-inround="0"][data-prompt="refillstakesno"] .left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="b"][data-id="agreetostakes"],
+.hud[data-gamestate="deal"][data-inround="0"][data-prompt="paystakes"] .left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="a"][data-id="agreetostakes1"],
+.hud[data-gamestate="deal"][data-inround="0"][data-prompt="paystakesno"] .left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="a"][data-id="agreetostakes1"],
+.hud[data-gamestate="deal"][data-inround="0"]:not([data-prompt="hide"]) .left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="i"][data-id="buychips"],
+.hud[data-gamestate="deal"][data-inround="0"]:not([data-prompt="hide"])[data-ingame="0"] .left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="f"][data-id="goin"],
+.hud[data-gamestate="deal"][data-inround="0"]:not([data-prompt="hide"])[data-ingame="1"] .left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="f"][data-id="goout"],
+.hud[data-gamestate="deal"][data-inround="1"][data-isactiveplayer="1"][data-isdealer="1"] .left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="a"][data-id="deal"],
+.hud[data-gamestate="deal"][data-inround="1"][data-prompt="paidstakes"][data-ingame="0"] .left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="f"][data-id="goin"],
+.hud[data-gamestate="deal"][data-inround="1"][data-prompt="paidstakes"][data-ingame="1"] .left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="f"][data-id="goout"] {
   display:inline-block;
 }
 
-.hud[data-gamestate="deal1"][data-isactiveplayer="1"][data-isdealer="1"] .left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="action"][data-id="dealflop"],
-.hud[data-gamestate="deal2"][data-isactiveplayer="1"][data-isdealer="1"] .left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="action"][data-id="dealturn"],
-.hud[data-gamestate="deal3"][data-isactiveplayer="1"][data-isdealer="1"] .left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="action"][data-id="dealriver"] {
+.hud[data-gamestate="deal1"][data-isactiveplayer="1"][data-isdealer="1"] .left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="a"][data-id="dealflop"],
+.hud[data-gamestate="deal2"][data-isactiveplayer="1"][data-isdealer="1"] .left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="a"][data-id="dealturn"],
+.hud[data-gamestate="deal3"][data-isactiveplayer="1"][data-isdealer="1"] .left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="a"][data-id="dealriver"] {
   display:inline-block;
 }
 
-.hud[data-gamestate="join"][data-cancall="0"] .left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="action"][data-id="agreetostakes1"],
-.hud[data-gamestate="join"][data-cancall="1"] .left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="action"][data-id="agreetostakes2"],
-.hud[data-gamestate="join"][data-inround="0"] .left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="actionb"][data-id="goin"],
-.hud[data-gamestate="join"][data-inround="1"] .left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="actionb"][data-id="goout"],
-.hud[data-gamestate="join"] .left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="fold"][data-id="buychips"] {
+.hud[data-gamestate="join"][data-cancall="0"] .left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="a"][data-id="agreetostakes1"],
+.hud[data-gamestate="join"][data-cancall="1"] .left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="a"][data-id="agreetostakes2"],
+.hud[data-gamestate="join"][data-inround="0"] .left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="b"][data-id="goin"],
+.hud[data-gamestate="join"][data-inround="1"] .left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="b"][data-id="goout"],
+.hud[data-gamestate="join"] .left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="f"][data-id="buychips"] {
   display:inline-block;
 }
 
-.hud[data-gamestate="blind"] .left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="action"][data-id="blind"] {
+.hud[data-gamestate="blind"] .left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="a"][data-id="blind"] {
   display:inline-block;
 }
 
-.hud[data-gamestate="bet"] .left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="action"][data-id="check"],
-.hud[data-gamestate="bet"][data-canblind="1"][data-bettype="0"] .left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="actionb"][data-id="betnolimit"],
-.hud[data-gamestate="bet"][data-canblind="1"][data-bettype="1"] .left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="actionb"][data-id="bet"],
-.hud[data-gamestate="bet"] .left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="allin"][data-id="allin"],
-.hud[data-gamestate="bet"] .left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="fold"][data-id="fold"] {
+.hud[data-gamestate="bet"] .left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="a"][data-id="check"],
+.hud[data-gamestate="bet"][data-canblind="1"][data-bettype="0"] .left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="b"][data-id="betnolimit"],
+.hud[data-gamestate="bet"][data-canblind="1"][data-bettype="1"] .left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="b"][data-id="bet"],
+.hud[data-gamestate="bet"] .left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="i"][data-id="allin"],
+.hud[data-gamestate="bet"] .left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="f"][data-id="fold"] {
   display:inline-block;
 }
 
-.hud[data-gamestate="check"] .left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="action"][data-id="check"],
-.hud[data-gamestate="check"][data-canraise="1"][data-bettype="0"] .left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="actionb"][data-id="raisenolimit"],
-.hud[data-gamestate="check"][data-canraise="1"][data-bettype="1"] .left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="actionb"][data-id="raise"],
-.hud[data-gamestate="check"] .left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="allin"][data-id="allin"],
-.hud[data-gamestate="check"] .left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="fold"][data-id="fold"] {
+.hud[data-gamestate="check"] .left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="a"][data-id="check"],
+.hud[data-gamestate="check"][data-canraise="1"][data-bettype="0"] .left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="b"][data-id="raisenolimit"],
+.hud[data-gamestate="check"][data-canraise="1"][data-bettype="1"] .left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="b"][data-id="raise"],
+.hud[data-gamestate="check"] .left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="i"][data-id="allin"],
+.hud[data-gamestate="check"] .left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="f"][data-id="fold"] {
   display:inline-block;
 }
 
-.hud[data-gamestate="call"] .left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="action"][data-id="call"],
-.hud[data-gamestate="call"][data-canraise="1"][data-bettype="0"] .left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="actionb"][data-id="raisenolimit"],
-.hud[data-gamestate="call"][data-canraise="1"][data-bettype="1"] .left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="actionb"][data-id="raise"],
-.hud[data-gamestate="call"] .left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="allin"][data-id="allin"],
-.hud[data-gamestate="call"] .left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="fold"][data-id="fold"] {
+.hud[data-gamestate="call"] .left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="a"][data-id="call"],
+.hud[data-gamestate="call"][data-canraise="1"][data-bettype="0"] .left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="b"][data-id="raisenolimit"],
+.hud[data-gamestate="call"][data-canraise="1"][data-bettype="1"] .left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="b"][data-id="raise"],
+.hud[data-gamestate="call"] .left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="i"][data-id="allin"],
+.hud[data-gamestate="call"] .left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="f"][data-id="fold"] {
   display:inline-block;
 }
 
-.hud[data-gamestate="allin"] .left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="allin"][data-id="allin"],
-.hud[data-gamestate="allin"] .left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="fold"][data-id="fold"] {
+.hud[data-gamestate="allin"] .left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="i"][data-id="allin"],
+.hud[data-gamestate="allin"] .left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="f"][data-id="fold"] {
   display:inline-block;
 }
 
-.hud[data-gamestate="showdown"] .left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="action"][data-id="showcards"],
-.hud[data-gamestate="showdown"] .left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="fold"][data-id="fold"] {
+.hud[data-gamestate="showdown"] .left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="a"][data-id="showcards"],
+.hud[data-gamestate="showdown"] .left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="f"][data-id="fold"] {
   display:inline-block;
 }
 
-.hud[data-gamestate="endgame"][data-playagain="0"] .left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="action"][data-id="playagain1"],
-.hud[data-gamestate="endgame"][data-ishost="1"][data-playagain="1"] .left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="action"][data-id="playagain2"],
-.hud[data-gamestate="endgame"][data-ishost="1"] .left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="fold"][data-id="newgame"] {
+.hud[data-gamestate="endgame"][data-playagain="0"] .left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="a"][data-id="playagain1"],
+.hud[data-gamestate="endgame"][data-ishost="1"][data-playagain="1"] .left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="a"][data-id="playagain2"],
+.hud[data-gamestate="endgame"][data-ishost="1"] .left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="f"][data-id="newgame"] {
   display:inline-block;
 }
 
-.hud[data-gamestate="gameover"][data-playagain="0"] .left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="action"][data-id="playagain1"],
-.hud[data-gamestate="gameover"][data-ishost="1"] .left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="action"][data-id="playagain1"],
-.hud[data-gamestate="gameover"][data-ishost="1"] .left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="fold"][data-id="newgame"] {
+.hud[data-gamestate="gameover"][data-playagain="0"] .left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="a"][data-id="playagain1"],
+.hud[data-gamestate="gameover"][data-ishost="1"] .left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="a"][data-id="playagain1"],
+.hud[data-gamestate="gameover"][data-ishost="1"] .left .panel[data-id="play"] .layer[data-id="play"] .button[data-button="f"][data-id="newgame"] {
   display:inline-block;
 }
 
