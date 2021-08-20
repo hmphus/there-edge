@@ -176,13 +176,21 @@ class Game {
           $('.hud').attr('data-cancall', self.canCall ? '1' : '0');
           $('.hud').attr('data-canraise', self.canRaise ? '1' : '0');
           $('.hud').attr('data-canblind', self.canBlind ? '1' : '0');
+          $('.hud').attr('data-confirm', '');
           $('.left .panel[data-id="play"] .button[data-button]').attr('data-enabled', '1');
           switch (self.state) {
             case 'pregame': {
               $('.left .panel[data-id="play"] .button[data-button="f"]').attr('data-enabled', self.isHost && There.variables.restricthost != 1 ? '1' : '0');
               break;
             }
+            case "showprompt": {
+              if (self.isActivePlayer) {
+                $('.hud').attr('data-confirm', 'showprompt');
+              }
+              break;
+            }
             case 'wait': {
+              $('.left .tabs .tab[data-id="play"]').trigger('click');
               if (!thisPlayer.inRound) {
                 if (thisPlayer.prompt.startsWith('refillstakes')) {
                   $('.left .panel[data-id="play"] .button[data-button="a"]').attr('data-enabled', thisPlayer.inGame && !thisPlayer.inRound ? '1' : '0');
@@ -197,6 +205,7 @@ class Game {
               break;
             }
             case 'deal': {
+              $('.left .tabs .tab[data-id="play"]').trigger('click');
               if (!thisPlayer.inRound) {
                 if (thisPlayer.prompt.startsWith('refillstakes')) {
                   $('.left .panel[data-id="play"] .button[data-button="a"]').attr('data-enabled', thisPlayer.inGame && !thisPlayer.inRound ? '1' : '0');
@@ -320,7 +329,7 @@ class Game {
         if (url.pathname.toLowerCase() == '/uirej') {
           if (url.searchParams.get('uiid') == self.uiid && url.searchParams.get('avoid') == There.variables.there_pilotdoid) {
             if (self.actionId != null) {
-              self.revertPlayAction();
+              self.revertDoAction();
             }
           }
         }
@@ -353,7 +362,6 @@ class Game {
     $('.left .panel[data-id="game"] .button').attr('data-highlighted', '0');
     $('.left .panel[data-id="play"] .button[data-button]').attr('data-highlighted', '0');
     //$('.middle .table .turn').attr('data-visible', '0');
-    //$('.cardset[data-id^="played"]').attr('data-highlighted', '0');
   }
 
   showIndicators() {
@@ -444,11 +452,11 @@ class Game {
 
   clearRevertTimers() {
     let self = this;
-    There.clearNamedTimer('action-play');
+    There.clearNamedTimer('do-action');
     self.actionId = null;
   }
 
-  playAction(button, command, data) {
+  doAction(button, command, data) {
     let self = this;
     if (self.actionId != null) {
       return;
@@ -459,12 +467,12 @@ class Game {
     There.sendEventMessageToClient(command, Object.assign({}, {
       uiid: self.uiid,
     }, data ?? {}));
-    There.setNamedTimer('action-play', 5000, function() {
-      self.revertPlayAction();
+    There.setNamedTimer('do-action', 5000, function() {
+      self.revertDoAction();
     });
   }
 
-  revertPlayAction() {
+  revertDoAction() {
     let self = this;
     if (self.actionId == null) {
       return;
@@ -473,15 +481,156 @@ class Game {
     self.actionId = null;
   }
 
+  doFold() {
+    let self = this;
+    const thisPlayer = self.players[self.thisPlayer];
+    if (thisPlayer.isFolded) {
+      return;
+    }
+    $('.hud').attr('data-confirm', 'fold');
+  }
+
+  doBet() {
+    let self = this;
+    if (!self.isActivePlayer) {
+      return;
+    }
+    $('.hud').attr('data-confirm', 'bet');
+    $('.left .panel[data-id="play"] .layer[data-id="bet"] .amount').data('amount', self.raiseBet).text(self.raiseBet.toLocaleString());
+  }
+
+  doRaise() {
+    let self = this;
+    if (!self.isActivePlayer) {
+      return;
+    }
+    $('.hud').attr('data-confirm', 'raise');
+    $('.left .panel[data-id="play"] .layer[data-id="raise"] .amount').data('amount', self.raiseBet).text(self.raiseBet.toLocaleString());
+  }
+
+  doPromptYes() {
+    let self = this;
+    if (!self.isActivePlayer) {
+      return;
+    }
+    There.sendEventMessageToClient(9, {
+      action: 110,
+    });
+  }
+
+  doPromptNo() {
+    let self = this;
+    if (!self.isActivePlayer) {
+      return;
+    }
+    There.sendEventMessageToClient(9, {
+      action: 111,
+    });
+  }
+
+  doFoldYes() {
+    let self = this;
+    if (!self.isActivePlayer) {
+      return;
+    }
+    There.sendEventMessageToClient(9, {
+      action: 105,
+    });
+  }
+
+  doFoldNo() {
+    let self = this;
+    $('.hud').attr('data-confirm', '');
+  }
+
+  doBetMinus() {
+    let self = this;
+    if (!self.isActivePlayer) {
+      return;
+    }
+    let amount = $('.left .panel[data-id="play"] .layer[data-id="bet"] .amount').data('amount') - self.roundBet;
+    if (amount >= self.raiseBet) {
+      $('.left .panel[data-id="play"] .layer[data-id="bet"] .amount').data('amount', amount).text(amount.toLocaleString());
+    }
+  }
+
+  doBetPlus() {
+    let self = this;
+    const thisPlayer = self.players[self.thisPlayer];
+    if (!self.isActivePlayer) {
+      return;
+    }
+    let amount = $('.left .panel[data-id="play"] .layer[data-id="bet"] .amount').data('amount') + self.roundBet;
+    if (amount < thisPlayer.chips) {
+      $('.left .panel[data-id="play"] .layer[data-id="bet"] .amount').data('amount', amount).text(amount.toLocaleString());
+    }
+  }
+
+  doBetConfirm() {
+    let self = this;
+    if (!self.isActivePlayer) {
+      return;
+    }
+    let amount = $('.left .panel[data-id="play"] .layer[data-id="bet"] .amount').data('amount');
+    There.sendEventMessageToClient(5, {
+      action: amount,
+    });
+  }
+
+  doBetCancel() {
+    let self = this;
+    $('.hud').attr('data-confirm', '');
+  }
+
+  doRaiseMinus() {
+    let self = this;
+    if (!self.isActivePlayer) {
+      return;
+    }
+    let amount = $('.left .panel[data-id="play"] .layer[data-id="raise"] .amount').data('amount') - self.roundBet;
+    if (amount >= self.raiseBet) {
+      $('.left .panel[data-id="play"] .layer[data-id="raise"] .amount').data('amount', amount).text(amount.toLocaleString());
+    }
+  }
+
+  doRaisePlus() {
+    let self = this;
+    const thisPlayer = self.players[self.thisPlayer];
+    if (!self.isActivePlayer) {
+      return;
+    }
+    let amount = $('.left .panel[data-id="play"] .layer[data-id="raise"] .amount').data('amount') + self.roundBet;
+    if (amount < thisPlayer.chips) {
+      $('.left .panel[data-id="play"] .layer[data-id="raise"] .amount').data('amount', amount).text(amount.toLocaleString());
+    }
+  }
+
+  doRaiseConfirm() {
+    let self = this;
+    if (!self.isActivePlayer) {
+      return;
+    }
+    let amount = $('.left .panel[data-id="play"] .layer[data-id="raise"] .amount').data('amount');
+    There.sendEventMessageToClient(8, {
+      action: amount,
+    });
+  }
+
+  doRaiseCancel() {
+    let self = this;
+    $('.hud').attr('data-confirm', '');
+  }
+
   onVariable(name, value) {
     let self = this;
+    /*
     if (self.ruffle == undefined) {
       self.ruffle = {
         queue: [],
         player: null,
         isReady: false,
       };
-      //There.fsCommand('devtools');
+      There.fsCommand('devtools');
       for (let key in There.variables) {
         self.ruffle.queue.push({
           name: key,
@@ -524,6 +673,7 @@ class Game {
       return;
     }
     self.forwardRuffleVariables();
+    */
   }
 
   forwardRuffleVariables() {
@@ -577,14 +727,14 @@ $(document).ready(function() {
     if ($(this).attr('data-enabled') == 0) {
       return;
     }
-    There.data.game.playAction(this, 15);
+    There.data.game.doAction(this, 15);
   });
 
   $('.left .panel[data-id="play"] .button[data-id^="agreetostakes"]').on('click', function() {
     if ($(this).attr('data-enabled') == 0) {
       return;
     }
-    There.data.game.playAction(this, 13);
+    There.data.game.doAction(this, 13);
   });
 
   $('.left .panel[data-id="play"] .button[data-id^="deal"]').on('click', function() {
@@ -633,7 +783,7 @@ $(document).ready(function() {
     if ($(this).attr('data-enabled') == 0) {
       return;
     }
-    There.data.game.playAction(this, 9, {
+    There.data.game.doAction(this, 9, {
       action: 108,
     });
   });
@@ -642,7 +792,7 @@ $(document).ready(function() {
     if ($(this).attr('data-enabled') == 0) {
       return;
     }
-    There.data.game.playAction(this, 9, {
+    There.data.game.doAction(this, 9, {
       action: 109,
     });
   });
@@ -660,7 +810,7 @@ $(document).ready(function() {
     if ($(this).attr('data-enabled') == 0) {
       return;
     }
-    //this.doBetAmount("setup","Bet");
+    There.data.game.doBet();
   });
 
   $('.left .panel[data-id="play"] .button[data-id="raise"]').on('click', function() {
@@ -676,7 +826,7 @@ $(document).ready(function() {
     if ($(this).attr('data-enabled') == 0) {
       return;
     }
-    //this.doBetAmount("setup","Raise");
+    There.data.game.doRaise();
   });
 
   $('.left .panel[data-id="play"] .button[data-id="buychips"]').on('click', function() {
@@ -699,7 +849,7 @@ $(document).ready(function() {
     if ($(this).attr('data-enabled') == 0) {
       return;
     }
-    //this.doFoldButtonClick();
+    There.data.game.doFold();
   });
 
   $('.left .panel[data-id="play"] .button[data-id="newgame"]').on('click', function() {
@@ -708,5 +858,88 @@ $(document).ready(function() {
     }
     There.sendEventMessageToClient(1);
   });
-});
 
+  $('.left .panel[data-id="play"] .layer[data-id="showprompt"] .button[data-id="yes"]').on('click', function() {
+    if ($(this).attr('data-enabled') == 0) {
+      return;
+    }
+    There.data.game.doPromptYes();
+  });
+
+  $('.left .panel[data-id="play"] .layer[data-id="showprompt"] .button[data-id="no"]').on('click', function() {
+    if ($(this).attr('data-enabled') == 0) {
+      return;
+    }
+    There.data.game.doPromptNo();
+  });
+
+  $('.left .panel[data-id="play"] .layer[data-id="fold"] .button[data-id="yes"]').on('click', function() {
+    if ($(this).attr('data-enabled') == 0) {
+      return;
+    }
+    There.data.game.doFoldYes();
+  });
+
+  $('.left .panel[data-id="play"] .layer[data-id="fold"] .button[data-id="no"]').on('click', function() {
+    if ($(this).attr('data-enabled') == 0) {
+      return;
+    }
+    There.data.game.doFoldNo();
+  });
+
+  $('.left .panel[data-id="play"] .layer[data-id="bet"] .button[data-id="minus"]').on('click', function() {
+    if ($(this).attr('data-enabled') == 0) {
+      return;
+    }
+    There.data.game.doBetMinus();
+  });
+
+  $('.left .panel[data-id="play"] .layer[data-id="bet"] .button[data-id="plus"]').on('click', function() {
+    if ($(this).attr('data-enabled') == 0) {
+      return;
+    }
+    There.data.game.doBetPlus();
+  });
+
+  $('.left .panel[data-id="play"] .layer[data-id="bet"] .button[data-id="confirm"]').on('click', function() {
+    if ($(this).attr('data-enabled') == 0) {
+      return;
+    }
+    There.data.game.doBetConfirm();
+  });
+
+  $('.left .panel[data-id="play"] .layer[data-id="bet"] .button[data-id="cancel"]').on('click', function() {
+    if ($(this).attr('data-enabled') == 0) {
+      return;
+    }
+    There.data.game.doBetCancel();
+  });
+
+  $('.left .panel[data-id="play"] .layer[data-id="raise"] .button[data-id="minus"]').on('click', function() {
+    if ($(this).attr('data-enabled') == 0) {
+      return;
+    }
+    There.data.game.doRaiseMinus();
+  });
+
+  $('.left .panel[data-id="play"] .layer[data-id="raise"] .button[data-id="plus"]').on('click', function() {
+    if ($(this).attr('data-enabled') == 0) {
+      return;
+    }
+    There.data.game.doRaisePlus();
+  });
+
+  $('.left .panel[data-id="play"] .layer[data-id="raise"] .button[data-id="confirm"]').on('click', function() {
+    if ($(this).attr('data-enabled') == 0) {
+      return;
+    }
+    There.data.game.doRaiseConfirm();
+  });
+
+  $('.left .panel[data-id="play"] .layer[data-id="raise"] .button[data-id="cancel"]').on('click', function() {
+    if ($(this).attr('data-enabled') == 0) {
+      return;
+    }
+    There.data.game.doRaiseCancel();
+  });
+});
