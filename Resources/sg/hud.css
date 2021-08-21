@@ -412,6 +412,13 @@ body {
   background-color:#fa0;
 }
 
+.cardset[data-deck="std"] .card[data-id="--"] {
+  width:23px;
+  height:33px;
+  border:2px solid rgba(255, 255, 255, 0.2);
+  background-color:transparent;
+}
+
 .cardset[data-deck="std"] .card[data-id="??"] {
   background-image:url(deck_standard.png);
   background-position:-315px -1px;
@@ -427,7 +434,7 @@ body {
   background-position:-265px -1px;
 }
 
-.cardset[data-deck="std"] .card:not([data-id="??"]):not([data-id="j1"]):not([data-id="j2"]) span {
+.cardset[data-deck="std"] .card:not([data-id="--"]):not([data-id="??"]):not([data-id="j1"]):not([data-id="j2"]) span {
   display:inline-block;
   position:absolute;
   width:16px;

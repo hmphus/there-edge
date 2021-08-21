@@ -284,12 +284,155 @@
   overflow:hidden;
 }
 
-ruffle-player {
+.middle .players {
   position:absolute;
-  left:-53px;
+  left:0px;
+  right:0px;
   top:0px;
-  width:800px;
-  height:99px;
-  transform:scaleX(0.8);
-  transform-origin:left top;
+  height:55px;
+  border-left:1px solid rgba(255, 255, 255, 0.25);
+  border-right:1px solid rgba(0, 0, 0, 0.5);
+  border-bottom:1px solid #000;
+  display:flex;
+  flex-direction:row;
+  justify-content:space-around;
+}
+
+.middle .players .player {
+  position:relative;
+  height:100%;
+  flex:1 1 0;
+  background-clip:content-box;
+  padding-left:1px;
+  padding-right:1px;
+  border-right:1px solid #000;
+  display:none;
+}
+
+.middle .players .player:not([data-player="1"]) {
+  background-color:rgba(0, 0, 0, 0.15);
+}
+
+.middle .players .player::before {
+  position:absolute;
+  left:0px;
+  right:0px;
+  height:100%;
+  border-left:1px solid rgba(255, 255, 255, 0.25);
+  border-right:1px solid rgba(0, 0, 0, 0.5);
+  content:' ';
+  pointer-events:none;
+}
+
+.middle .players .player[data-player="1"] {
+  padding-left:0px;
+}
+
+.middle .players .player[data-player="1"]::before {
+  border-left:none;
+}
+
+.hud[data-playercount="4"] .middle .players .player[data-player="1"],
+.hud[data-playercount="4"] .middle .players .player[data-player="2"],
+.hud[data-playercount="4"] .middle .players .player[data-player="3"],
+.hud[data-playercount="4"] .middle .players .player[data-player="4"],
+.hud[data-playercount="8"] .middle .players .player[data-player="1"],
+.hud[data-playercount="8"] .middle .players .player[data-player="2"],
+.hud[data-playercount="8"] .middle .players .player[data-player="3"],
+.hud[data-playercount="8"] .middle .players .player[data-player="4"],
+.hud[data-playercount="8"] .middle .players .player[data-player="5"],
+.hud[data-playercount="8"] .middle .players .player[data-player="6"],
+.hud[data-playercount="8"] .middle .players .player[data-player="7"],
+.hud[data-playercount="8"] .middle .players .player[data-player="8"] {
+  display:inline-block;
+}
+
+.hud[data-playercount="4"] .middle .players .player[data-player="4"],
+.hud[data-playercount="8"] .middle .players .player[data-player="8"] {
+  padding-right:0px;
+  border-right:none;
+}
+
+.hud[data-playercount="4"] .middle .players .player[data-player="4"]::before,
+.hud[data-playercount="8"] .middle .players .player[data-player="8"]::before {
+  border-right:none;
+}
+
+.middle .table {
+  position:absolute;
+  left:0px;
+  right:0px;
+  bottom:0px;
+  height:42px;
+  font-size:0px;
+  border-left:1px solid rgba(255, 255, 255, 0.25);
+  border-right:1px solid rgba(0, 0, 0, 0.5);
+  border-top:1px solid rgba(255, 255, 255, 0.25);
+}
+
+.middle .table .stats {
+  position:absolute;
+  left:11px;
+  top:0px;
+  width:260px;
+  display:flex;
+  flex-direction:row;
+  justify-content:space-between;
+}
+
+.middle .table .stats span {
+  font-size:11px;
+  font-weight:bold;
+  text-align:center;
+  color:#fff;
+}
+
+.middle .table .message {
+  position:absolute;
+  left:11px;
+  bottom:5px;
+  width:300px;
+  height:27px;
+  line-height:12px;
+  font-size:11px;
+  color:#fff;
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-evenly;
+}
+
+.middle .table .cardset[data-id="hand"] {
+  position:absolute;
+  right:165px;
+  bottom:3px;
+  font-size:0px;
+  display:flex;
+  flex-direction:row;
+  justify-content:flex-start;
+}
+
+.middle .table .cardset[data-id="spot"] {
+  position:absolute;
+  right:8px;
+  bottom:3px;
+  font-size:0px;
+  display:flex;
+  flex-direction:row;
+  justify-content:flex-start;
+}
+
+.middle .table .cardset[data-id="hand"] .card,
+.middle .table .cardset[data-id="spot"] .card {
+  margin-left:2px;
+  box-shadow:none;
+}
+
+.middle .table .divider {
+  position:absolute;
+  right:157px;
+  top:0px;
+  bottom:0px;
+  width:0px;
+  border-left:1px solid rgba(0, 0, 0, 0.5);
+  border-right:1px solid rgba(255, 255, 255, 0.25);
 }
