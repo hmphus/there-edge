@@ -284,7 +284,7 @@
   overflow:hidden;
 }
 
-.middle .players {
+.middle .top {
   position:absolute;
   left:0px;
   right:0px;
@@ -295,10 +295,11 @@
   border-bottom:1px solid #000;
   display:flex;
   flex-direction:row;
+  flex-wrap:nowrap;
   justify-content:space-around;
 }
 
-.middle .players .player {
+.middle .top .table {
   position:relative;
   height:100%;
   flex:1 1 0;
@@ -306,59 +307,202 @@
   padding-left:1px;
   padding-right:1px;
   border-right:1px solid #000;
+  font-size:0px;
   display:none;
 }
 
-.middle .players .player:not([data-player="1"]) {
+.middle .top .table:not([data-player="1"]) {
   background-color:rgba(0, 0, 0, 0.15);
 }
 
-.middle .players .player::before {
+.middle .top .table::before {
   position:absolute;
   left:0px;
   right:0px;
-  height:100%;
+  top:0px;
+  bottom:0px;
   border-left:1px solid rgba(255, 255, 255, 0.25);
   border-right:1px solid rgba(0, 0, 0, 0.5);
+  border-bottom:1px solid rgba(0, 0, 0, 0.5);
   content:' ';
   pointer-events:none;
 }
 
-.middle .players .player[data-player="1"] {
+.middle .top .table[data-player="1"] {
   padding-left:0px;
 }
 
-.middle .players .player[data-player="1"]::before {
+.middle .top .table[data-player="1"]::before {
   border-left:none;
 }
 
-.hud[data-playercount="4"] .middle .players .player[data-player="1"],
-.hud[data-playercount="4"] .middle .players .player[data-player="2"],
-.hud[data-playercount="4"] .middle .players .player[data-player="3"],
-.hud[data-playercount="4"] .middle .players .player[data-player="4"],
-.hud[data-playercount="8"] .middle .players .player[data-player="1"],
-.hud[data-playercount="8"] .middle .players .player[data-player="2"],
-.hud[data-playercount="8"] .middle .players .player[data-player="3"],
-.hud[data-playercount="8"] .middle .players .player[data-player="4"],
-.hud[data-playercount="8"] .middle .players .player[data-player="5"],
-.hud[data-playercount="8"] .middle .players .player[data-player="6"],
-.hud[data-playercount="8"] .middle .players .player[data-player="7"],
-.hud[data-playercount="8"] .middle .players .player[data-player="8"] {
+.hud[data-playercount="4"] .middle .top .table {
+  width:25%;
+}
+
+.hud[data-playercount="8"] .middle .top .table {
+  width:12.5%;
+}
+
+.hud[data-playercount="4"] .middle .top .table[data-player="1"],
+.hud[data-playercount="4"] .middle .top .table[data-player="2"],
+.hud[data-playercount="4"] .middle .top .table[data-player="3"],
+.hud[data-playercount="4"] .middle .top .table[data-player="4"],
+.hud[data-playercount="8"] .middle .top .table[data-player="1"],
+.hud[data-playercount="8"] .middle .top .table[data-player="2"],
+.hud[data-playercount="8"] .middle .top .table[data-player="3"],
+.hud[data-playercount="8"] .middle .top .table[data-player="4"],
+.hud[data-playercount="8"] .middle .top .table[data-player="5"],
+.hud[data-playercount="8"] .middle .top .table[data-player="6"],
+.hud[data-playercount="8"] .middle .top .table[data-player="7"],
+.hud[data-playercount="8"] .middle .top .table[data-player="8"] {
   display:inline-block;
 }
 
-.hud[data-playercount="4"] .middle .players .player[data-player="4"],
-.hud[data-playercount="8"] .middle .players .player[data-player="8"] {
+.hud[data-playercount="4"] .middle .top .table[data-player="4"],
+.hud[data-playercount="8"] .middle .top .table[data-player="8"] {
   padding-right:0px;
   border-right:none;
 }
 
-.hud[data-playercount="4"] .middle .players .player[data-player="4"]::before,
-.hud[data-playercount="8"] .middle .players .player[data-player="8"]::before {
+.hud[data-playercount="4"] .middle .top .table[data-player="4"]::before,
+.hud[data-playercount="8"] .middle .top .table[data-player="8"]::before {
   border-right:none;
 }
 
-.middle .table {
+.middle .top .table .title {
+  position:relative;
+  left:0px;
+  right:0px;
+  top:0px;
+  height:18px;
+  display:flex;
+  flex-direction:row;
+  flex-wrap:nowrap;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.middle .top .table .turn {
+  width:16px;
+  height:13px;
+  flex-shrink:0;
+  display:none;
+}
+
+.middle .top .table .turn[data-visible="0"],
+.middle .top .table .turn[data-visible="1"] {
+  display:inline-block;
+}
+
+.middle .top .table .turn[data-visible="1"] {
+  background-image:url(hud.png);
+  background-position:-51px -285px;
+}
+
+.middle .top .table .icons {
+  flex-shrink:0;
+}
+
+.middle .top .table .player {
+  padding-left:2px;
+  padding-right:2px;
+  line-height:18px;
+  font-size:11px;
+  color:#fff;
+  text-align:left;
+  font-weight:bold;
+  white-space:nowrap;
+  text-overflow:ellipsis;
+  overflow:hidden;
+  flex-grow:1;
+}
+
+.middle .top .table .player[data-leader="1"] {
+  font-style:italic;
+}
+
+.middle .top .table .play {
+  position:relative;
+  left:0px;
+  right:0px;
+  padding-left:2px;
+  padding-right:2px;
+  height:12px;
+  line-height:12px;
+  font-size:11px;
+  color:#fff;
+  text-align:left;
+}
+
+.middle .top .table .bet {
+  position:relative;
+  left:0px;
+  right:0px;
+  padding-left:2px;
+  padding-right:2px;
+  height:12px;
+  line-height:12px;
+  font-size:11px;
+  color:#fff;
+  text-align:left;
+}
+
+.middle .top .table .chips {
+  position:relative;
+  left:0px;
+  right:0px;
+  padding-left:2px;
+  padding-right:2px;
+  height:12px;
+  line-height:12px;
+  font-size:11px;
+  color:#fff;
+  text-align:right;
+}
+
+.middle .top .table .cardset[data-id^="hand"] {
+  position:absolute;
+  left:0px;
+  bottom:2px;
+  font-size:0px;
+  display:none;
+  flex-direction:row;
+  justify-content:flex-start;
+  transform-origin:bottom left;
+  transform:scale(0.6);
+}
+
+.middle .top .table .cardset[data-id^="hand"] .card {
+  margin-left:2px;
+  box-shadow:none;
+}
+
+.hud[data-gamestate="showdown"] .middle .top .table[data-play="showcards"] .cardset[data-id^="hand"],
+.hud[data-gamestate="endgame"] .middle .top .table .cardset[data-id^="hand"],
+.hud[data-gamestate="gameover"] .middle .top .table .cardset[data-id^="hand"] {
+  display:flex;
+}
+
+.hud:not([data-gamestate="wait"]):not([data-gamestate="deal"]) .middle .top .table[data-ingame="0"] *,
+.hud[data-gamestate="wait"] .middle .top .table[data-ingame="0"][data-inseat="0"] *,
+.hud[data-gamestate="deal"] .middle .top .table[data-ingame="0"][data-inseat="0"] * {
+  display:none;
+}
+
+.hud[data-gamestate="showdown"] .middle .top .table[data-play="showcards"] .bet,
+.hud[data-gamestate="endgame"] .middle .top .table .bet,
+.hud[data-gamestate="gameover"] .middle .top .table .bet {
+  visibility:hidden;
+}
+
+.hud[data-gamestate="showdown"] .middle .top .table .chips,
+.hud[data-gamestate="endgame"] .middle .top .table .chips,
+.hud[data-gamestate="gameover"] .middle .top .table .chips {
+  visibility:hidden;
+}
+
+.middle .bottom {
   position:absolute;
   left:0px;
   right:0px;
@@ -370,7 +514,7 @@
   border-top:1px solid rgba(255, 255, 255, 0.25);
 }
 
-.middle .table .stats {
+.middle .bottom .stats {
   position:absolute;
   left:11px;
   top:0px;
@@ -380,14 +524,14 @@
   justify-content:space-between;
 }
 
-.middle .table .stats span {
+.middle .bottom .stats span {
   font-size:11px;
   font-weight:bold;
   text-align:center;
   color:#fff;
 }
 
-.middle .table .message {
+.middle .bottom .message {
   position:absolute;
   left:11px;
   bottom:5px;
@@ -401,7 +545,7 @@
   justify-content:space-evenly;
 }
 
-.middle .table .cardset[data-id="hand"] {
+.middle .bottom .cardset[data-id="hand"] {
   position:absolute;
   right:165px;
   bottom:3px;
@@ -411,7 +555,7 @@
   justify-content:flex-start;
 }
 
-.middle .table .cardset[data-id="spot"] {
+.middle .bottom .cardset[data-id="spot"] {
   position:absolute;
   right:8px;
   bottom:3px;
@@ -421,13 +565,13 @@
   justify-content:flex-start;
 }
 
-.middle .table .cardset[data-id="hand"] .card,
-.middle .table .cardset[data-id="spot"] .card {
+.middle .bottom .cardset[data-id="hand"] .card,
+.middle .bottom .cardset[data-id="spot"] .card {
   margin-left:2px;
   box-shadow:none;
 }
 
-.middle .table .divider {
+.middle .bottom .divider {
   position:absolute;
   right:157px;
   top:0px;

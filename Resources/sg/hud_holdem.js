@@ -61,7 +61,8 @@ class Game {
           return {
             id: null,
             name: e.avname.trim(),
-            prompt: e.hudprompt.trim(),
+            prompt: e.hudprompt == null ? '' : e.hudprompt.trim().toLowerCase(),
+            lastPlay: e.lastplay == null ? '' : e.lastplay.trim().toLowerCase(),
             pot: Number(e.pot),
             potWin: Number(e.potwin),
             bet: Number(e.currentbet),
@@ -70,6 +71,9 @@ class Game {
             isFolded: e.folded == 1,
             inRound: e.inround == 1,
             inGame: e.ingame == 1,
+            inSeat: e.avoid > 0,
+            isLeader: Number(gameData.leader) - 1 == i,
+            isHost: Number(gameData.host) - 1 == i,
           };
         });
         self.thisPlayer = playerData.player.findIndex(e => e.avoid == There.variables.there_pilotdoid);
@@ -217,33 +221,47 @@ class Game {
           }
         }
         $('.left .panel[data-id="game"] .button[data-id="newgame"]').attr('data-enabled', self.isHost && There.variables.restricthost != 1 ? '1' : '0');
-        $('.middle .table .stats span[data-id="pot"]').text(Number(gameData.pot).toLocaleString());
-        $('.middle .table .stats span[data-id="chips"]').text(thisPlayer.chips.toLocaleString());
-        $('.middle .table .stats span[data-id="winnings"]').text(thisPlayer.winnings.toLocaleString());
-        /*
+        $('.middle .bottom .stats span[data-id="pot"]').text(Number(gameData.pot).toLocaleString());
+        $('.middle .bottom .stats span[data-id="chips"]').text(thisPlayer.chips.toLocaleString());
+        $('.middle .bottom .stats span[data-id="winnings"]').text(thisPlayer.winnings.toLocaleString());
         for (let player of self.players) {
           {
-            let playerDiv = $(`.left .panel[data-id="tricks"] .players .player[data-player="${player.id}"]`);
-            $(playerDiv).text(player.name);
-          }
-          {
-            let tableDiv = $(`.middle .table[data-player="${player.id}"]`);
-            $(tableDiv).find('.player').text(player.name);
-            $(tableDiv).find('.stats span[data-id="bid"]').text(player.bid == null ? '--' : (player.bid == 0 ? 'Nil' : player.bid));
-            $(tableDiv).find('.stats span[data-id="tricks"]').text(player.tricks == null ? '--' : player.tricks);
+            const playTitles = {
+              fold: 'Folded',
+              bet: 'Opened',
+              call: 'Called',
+              check: 'Checked',
+              raise: 'Raised',
+              allin: 'All In',
+              win: `Won ${player.potWin.toLocaleString()}`,
+              win2: `Won ${player.potWin.toLocaleString()}`,
+              win3: `Won ${player.potWin.toLocaleString()}`,
+              deal: 'Dealt',
+              blind: 'Blind',
+              wait: 'Waiting',
+              join: 'Joined',
+              notin: 'Sat Out',
+              ineligible: 'Ineligible',
+              eliminated: 'Eliminated',
+            };
+            let tableDiv = $(`.middle .top .table[data-player="${player.id}"]`);
+            $(tableDiv).attr('data-ingame', player.inGame == 1 ? '1' : '0');
+            $(tableDiv).attr('data-inseat', player.inSeat == 1 ? '1' : '0');
+            $(tableDiv).attr('data-play', player.lastPlay);
+            $(tableDiv).find('.player').text(player.name).attr('data-leader', player.isLeader ? '1' : '0').attr('data-host', player.isHost ? '1' : '0');
+            $(tableDiv).find('.play').text(playTitles[player.lastPlay] ?? '');
+            $(tableDiv).find('.bet').text(self.state == 'showdown' ? (player.pot > 0 ? player.pot.toLocaleString() : '') : (player.bet > 0 ? player.bet.toLocaleString() : ''));
+            $(tableDiv).find('.chips').text(player.chips > 0 ? player.chips.toLocaleString() : '');
           }
         }
-        */
         if (There.data.cardsets.spot == null) {
           There.data.cardsets.spot = new CardSet('spot', 'spot', {
             count: 5,
           });
           There.data.cardsets.hand = new CardSet('hand', `hand${self.thisPlayer + 1}`);
-          /*
           self.players.forEach(function(e, i) {
-            There.data.cardsets.players.push(new CardSet(`played${e.id}`, `played${i + 1}`));
+            There.data.cardsets.players.push(new CardSet(`hand${e.id}`, `hand${i + 1}`));
           });
-          */
           if (There.data.channels?.cardset?.data != undefined) {
             There.data.channels.cardset.notify();
           }
@@ -289,14 +307,14 @@ class Game {
     let self = this;
     $('.left .panel[data-id="game"] .button').attr('data-highlighted', '0');
     $('.left .panel[data-id="play"] .button[data-button]').attr('data-highlighted', '0');
-    //$('.middle .table .turn').attr('data-visible', '0');
+    $('.middle .top .table .turn').attr('data-visible', '');
   }
 
   showIndicators() {
     let self = this;
     let duration = 0;
     let isBlink = false;
-    if (self.isActivePlayer && self.state != 'playsend') {
+    if (self.isActivePlayer) {
       if (self.blinkCount % 2 == 0) {
         duration = 2000;
         isBlink = false;
@@ -328,8 +346,9 @@ class Game {
                 $('.left .panel[data-id="play"] .button[data-button="a"]:not([data-enabled="0"])').attr('data-highlighted', '1');
               }
             }
+            $(`.middle .top .table[data-player="${activePlayer.id}"] .turn`).attr('data-visible', '0');
           } else {
-            //$(`.middle .table[data-player="${activePlayer.id}"] .turn`).attr('data-visible', '1');
+            $(`.middle .top .table[data-player="${activePlayer.id}"] .turn`).attr('data-visible', '1');
           }
           break;
         }
@@ -346,8 +365,9 @@ class Game {
             } else {
               $('.left .panel[data-id="play"] .button[data-button="a"]:not([data-enabled="0"])').attr('data-highlighted', '1');
             }
+            $(`.middle .top .table[data-player="${activePlayer.id}"] .turn`).attr('data-visible', '0');
           } else {
-            //$(`.middle .table[data-player="${activePlayer.id}"] .turn`).attr('data-visible', '1');
+            $(`.middle .top .table[data-player="${activePlayer.id}"] .turn`).attr('data-visible', '1');
           }
           break;
         }
@@ -362,8 +382,9 @@ class Game {
             $('.left .panel[data-id="play"] .button[data-button="a"]:not([data-enabled="0"])').attr('data-highlighted', '1');
             $('.left .panel[data-id="play"] .button[data-button="b"]:not([data-enabled="0"])').attr('data-highlighted', '1');
             $('.left .panel[data-id="play"] .button[data-button="i"]:not([data-enabled="0"])').attr('data-highlighted', '1');
+            $(`.middle .top .table[data-player="${activePlayer.id}"] .turn`).attr('data-visible', '0');
           } else {
-            //$(`.middle .table[data-player="${activePlayer.id}"] .turn`).attr('data-visible', '1');
+            $(`.middle .top .table[data-player="${activePlayer.id}"] .turn`).attr('data-visible', '1');
           }
           break;
         }
