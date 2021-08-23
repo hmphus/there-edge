@@ -402,6 +402,69 @@
 
 .middle .top .table .icons {
   flex-shrink:0;
+  display:flex;
+  flex-direction:row;
+  flex-wrap:nowrap;
+  align-items:center;
+  justify-content:flex-start;
+}
+
+.middle .top .table .icons .icon[data-id] {
+  display:inline-block;
+  margin-left:2px;
+  background-image:url(hud_holdem.png);
+  background-position-y:0px;
+}
+
+.middle .top .table .icons .icon[data-id="fold"] {
+  width:11px;
+  height:11px;
+  background-position-x:0px;
+}
+
+.middle .top .table .icons .icon[data-id="win"],
+.middle .top .table .icons .icon[data-id="win2"],
+.middle .top .table .icons .icon[data-id="win3"] {
+  width:13px;
+  height:12px;
+  background-position-x:-11px;
+}
+
+.middle .top .table .icons .icon[data-id="check"] {
+  width:12px;
+  height:12px;
+  background-position-x:-24px;
+}
+
+.middle .top .table .icons .icon[data-id="bet"],
+.middle .top .table .icons .icon[data-id="call"] {
+  width:14px;
+  height:14px;
+  background-position-x:-36px;
+}
+
+.middle .top .table .icons .icon[data-id="raise"] {
+  width:18px;
+  height:17px;
+  background-position-x:-50px;
+}
+
+.middle .top .table .icons .icon[data-id="allin"] {
+  width:18px;
+  height:17px;
+  background-position-x:-68px;
+}
+
+.middle .top .table .icons .icon[data-id="blind"] {
+  width:15px;
+  height:15px;
+  background-position-x:-86px;
+}
+
+.middle .top .table .icons .icon[data-id="dealer"] {
+  width:14px;
+  height:14px;
+  background-position-x:-101px;
 }
 
 .middle .top .table .player {
@@ -476,6 +539,13 @@
 .middle .top .table .cardset[data-id^="hand"] .card {
   margin-left:2px;
   box-shadow:none;
+}
+
+.middle .top .table .button[data-id="fold"] {
+  position:absolute;
+  left:calc(50% - 26px);
+  top:calc(50% - 9px);
+  display:none;
 }
 
 .hud[data-gamestate="showdown"] .middle .top .table[data-play="showcards"] .cardset[data-id^="hand"],

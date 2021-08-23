@@ -73,15 +73,17 @@ class Game {
             inGame: e.ingame == 1,
             inSeat: e.avoid > 0,
             isLeader: Number(gameData.leader) - 1 == i,
+            isDealer: Number(gameData.dealer) - 1 == i,
             isHost: Number(gameData.host) - 1 == i,
           };
         });
+        self.activePlayer = Number(gameData.currentplayer) - 1;
         self.thisPlayer = playerData.player.findIndex(e => e.avoid == There.variables.there_pilotdoid);
         self.players.forEach(function(e, i) {
           e.id = ((i + self.players.length - self.thisPlayer) % self.players.length) + 1;
         });
+        const activePlayer = self.players[self.activePlayer];
         const thisPlayer = self.players[self.thisPlayer];
-        self.activePlayer = Number(gameData.currentplayer) - 1;
         self.setState(gameData.state.toLowerCase());
         self.isActivePlayer = (self.activePlayer == self.thisPlayer && self.thisPlayer >= 0);
         self.isDealer = (Number(gameData.dealer) - 1 == self.thisPlayer && self.thisPlayer >= 0);
@@ -252,6 +254,19 @@ class Game {
             $(tableDiv).find('.play').text(playTitles[player.lastPlay] ?? '');
             $(tableDiv).find('.bet').text(self.state == 'showdown' ? (player.pot > 0 ? player.pot.toLocaleString() : '') : (player.bet > 0 ? player.bet.toLocaleString() : ''));
             $(tableDiv).find('.chips').text(player.chips > 0 ? player.chips.toLocaleString() : '');
+            $(tableDiv).find('.icons').empty();
+            if (player.isDealer) {
+              let icon = $('<div class="icon"></div>');
+              $(icon).attr('data-id', 'dealer');
+              $(tableDiv).find('.icons').append($(icon));
+            }
+            if (player.id != activePlayer.id || self.state == 'wait' || self.state == 'endgame' || self.state == 'gameover') {
+              if (player.lastPlay != '' || player.isFolded) {
+                let icon = $('<div class="icon"></div>');
+                $(icon).attr('data-id', player.isFolded ? 'fold' : player.lastPlay);
+                $(tableDiv).find('.icons').append($(icon));
+              }
+            }
           }
         }
         if (There.data.cardsets.spot == null) {
@@ -825,5 +840,11 @@ $(document).ready(function() {
       return;
     }
     There.data.game.doRaiseCancel();
+  });
+
+  $('.middle .top .table .button[data-id="fold"]').on('click', function() {
+    if ($(this).attr('data-enabled') == 0) {
+      return;
+    }
   });
 });
