@@ -548,6 +548,10 @@
   display:none;
 }
 
+.hud:not([data-gamestate="wait"]):not([data-gamestate="deal"])[data-canforcefold="1"] .middle .top .table[data-isaway="1"] .button[data-id="fold"] {
+  display:inline-block;
+}
+
 .hud[data-gamestate="showdown"] .middle .top .table[data-play="showcards"] .cardset[data-id^="hand"],
 .hud[data-gamestate="endgame"] .middle .top .table .cardset[data-id^="hand"],
 .hud[data-gamestate="gameover"] .middle .top .table .cardset[data-id^="hand"] {

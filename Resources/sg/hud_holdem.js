@@ -108,8 +108,9 @@ class Game {
         $('.hud').attr('data-cancall', self.canCall ? '1' : '0');
         $('.hud').attr('data-canraise', self.canRaise ? '1' : '0');
         $('.hud').attr('data-canblind', self.canBlind ? '1' : '0');
-        $('.hud').attr('data-confirm', '');
+        $('.hud').attr('data-canforcefold', self.isHost && There.variables.restrictfold != 1 ? '1' : '0');
         $('.hud').attr('data-playercount', gameData.maxnumplayers);
+        $('.hud').attr('data-confirm', '');
         $('.left .panel[data-id="play"] .button[data-button]').attr('data-enabled', '1');
         switch (self.state) {
           case 'pregame': {
@@ -247,8 +248,9 @@ class Game {
               eliminated: 'Eliminated',
             };
             let tableDiv = $(`.middle .top .table[data-player="${player.id}"]`);
-            $(tableDiv).attr('data-ingame', player.inGame == 1 ? '1' : '0');
-            $(tableDiv).attr('data-inseat', player.inSeat == 1 ? '1' : '0');
+            $(tableDiv).attr('data-ingame', player.inGame ? '1' : '0');
+            $(tableDiv).attr('data-inseat', player.inSeat ? '1' : '0');
+            $(tableDiv).attr('data-isaway', !player.inSeat && player.id == activePlayer.id && !player.isFolded && player.inRound && !player.isHost ? '1' : '0');
             $(tableDiv).attr('data-play', player.lastPlay);
             $(tableDiv).find('.player').text(player.name).attr('data-leader', player.isLeader ? '1' : '0').attr('data-host', player.isHost ? '1' : '0');
             $(tableDiv).find('.play').text(playTitles[player.lastPlay] ?? '');
@@ -846,5 +848,6 @@ $(document).ready(function() {
     if ($(this).attr('data-enabled') == 0) {
       return;
     }
+    There.sendEventMessageToClient(16);
   });
 });
