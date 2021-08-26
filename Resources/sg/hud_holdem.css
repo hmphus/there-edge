@@ -548,6 +548,13 @@
   display:none;
 }
 
+.hud:not([data-gamestate="wait"]):not([data-gamestate="deal"])[data-canforcefold="1"] .middle .top .table[data-isaway="1"] .play,
+.hud:not([data-gamestate="wait"]):not([data-gamestate="deal"])[data-canforcefold="1"] .middle .top .table[data-isaway="1"] .bet,
+.hud:not([data-gamestate="wait"]):not([data-gamestate="deal"])[data-canforcefold="1"] .middle .top .table[data-isaway="1"] .chips,
+.hud:not([data-gamestate="wait"]):not([data-gamestate="deal"])[data-canforcefold="1"] .middle .top .table[data-isaway="1"] .cardset[data-id^="hand"] {
+  opacity:0.2;
+}
+
 .hud:not([data-gamestate="wait"]):not([data-gamestate="deal"])[data-canforcefold="1"] .middle .top .table[data-isaway="1"] .button[data-id="fold"] {
   display:inline-block;
 }
