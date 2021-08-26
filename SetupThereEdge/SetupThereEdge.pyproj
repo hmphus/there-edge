@@ -12,7 +12,7 @@
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
   <Target Name="CoreCompile" Inputs="@(Compile)" Outputs="@(Compile->'%(Filename).exe')">
-    <Exec Command="&quot;$(MSBuildExtensionsPath32)\..\..\..\Shared\Python37_86\Scripts\pyinstaller.exe&quot; --console --onefile @(Compile)" />
+    <Exec Command="&quot;$(MSBuildExtensionsPath32)\..\..\..\Shared\Python37_86\Scripts\pyinstaller.exe&quot; --console --onefile @(Compile) --version-file version.rs" />
   </Target>
   <Target Name="BeforeBuild" />
   <Target Name="AfterBuild" />

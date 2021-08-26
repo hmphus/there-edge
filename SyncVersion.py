@@ -41,7 +41,7 @@ def apply_version_rc(name, version):
                 ','.join(version.split('.') + ['0']),
             )
             lines[i] = line
-
+            continue
         match = re.match(r'^( +)VALUE "([A-Za-z]+)Version",', line)
         if match is not None:
             line = '%sVALUE "%sVersion", "%s.0"' % (
@@ -50,6 +50,7 @@ def apply_version_rc(name, version):
                 version,
             )
             lines[i] = line
+            continue
     with open('%s/%s.rc' % (name, name), 'w', encoding='utf-16') as file:
         file.write('\n'.join(lines) + '\n')
 
@@ -64,9 +65,36 @@ def apply_version_py(name, version):
         file.write('\n'.join(lines))
 
 
+def apply_version_rs(name, version):
+    with open('%s/version.rs' % name, 'r') as file:
+        lines = [l.rstrip('\n') for l in file.readlines()]
+    for (i, line) in enumerate(lines):
+        match = re.match(r'^( +(?:file|prod)vers=\()[0-9]+, [0-9]+, [0-9]+, [0-9]+(\).*$)', line)
+        if match is not None:
+            line = '%s%s%s' % (
+                match.group(1),
+                ', '.join(version.split('.') + ['0']),
+                match.group(2),
+            )
+            lines[i] = line
+            continue
+        match = re.match(r'^( +StringStruct\(u\'(?:File|Product)Version\', u\')[.0-9]+(\'\).*$)', line)
+        if match is not None:
+            line = '%s%s.0%s' % (
+                match.group(1),
+                version,
+                match.group(2),
+            )
+            lines[i] = line
+            continue
+    with open('%s/version.rs' % name, 'w') as file:
+        file.write('\n'.join(lines) + '\n')
+
+
 if __name__ == '__main__':
     version = get_version()
     print('Version: %s' % version)
     apply_version_rc('BrowserProxy', version)
     apply_version_rc('FlashProxy', version)
     apply_version_py('SetupThereEdge', version)
+    apply_version_rs('SetupThereEdge', version)
