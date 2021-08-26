@@ -238,6 +238,7 @@ protected:
     LONG                                     m_maskRectCount;
     WCHAR                                    m_encodeBuffer[10000];
     Identity                                 m_identity;
+    UINT32                                   m_visibilityMask;
     CComBSTR                                 m_url;
     CComBSTR                                 m_userDataFolder;
     CComSafeArray<BSTR>                      m_variables;
@@ -254,4 +255,5 @@ protected:
     EventRegistrationToken                   m_navigationCompletedToken;
     BOOL                                     m_ready;
     BOOL                                     m_visible;
+    BOOL                                     m_hidden;
 };

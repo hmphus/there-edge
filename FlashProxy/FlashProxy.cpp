@@ -123,6 +123,7 @@ FlashProxyModule::FlashProxyModule():
     m_maskRectCount(0),
     m_encodeBuffer(),
     m_identity(Identity::Unknown),
+    m_visibilityMask(0),
     m_url(),
     m_userDataFolder(),
     m_variables(),
@@ -138,7 +139,8 @@ FlashProxyModule::FlashProxyModule():
     m_webResourceRequestedToken(),
     m_navigationCompletedToken(),
     m_ready(false),
-    m_visible(false)
+    m_visible(false),
+    m_hidden(false)
 {
     WNDCLASSEX childClass = {0};
     childClass.cbSize = sizeof(WNDCLASSEX);
@@ -476,7 +478,7 @@ HRESULT STDMETHODCALLTYPE FlashProxyModule::DoVerb(LONG iVerb, LPMSG lpmsg, IOle
             {
                 m_proxyWnd = CreateWindowEx(WS_EX_TRANSPARENT, g_WindowClassName, L"",
                                             WS_CHILD | WS_CLIPCHILDREN | WS_CLIPSIBLINGS,
-                                            m_pos.cx, m_pos.cy, m_size.cx, m_size.cy,
+                                            m_pos.cx, m_pos.cy, max(1, m_size.cx), max(1, m_size.cy),
                                             m_clientWnd, nullptr, GetModuleHandle(nullptr), nullptr);
                 if (m_proxyWnd == nullptr)
                     return E_FAIL;
@@ -1033,8 +1035,8 @@ HRESULT FlashProxyModule::SetRect(const RECT &rect)
     if (rect.left == m_pos.cx && rect.top == m_pos.cy)
         flags |= SWP_NOMOVE;
 
-    LONG width = rect.right > rect.left ? rect.right - rect.left : 1;
-    LONG height = rect.bottom > rect.top ? rect.bottom - rect.top : 1;
+    LONG width = rect.right - rect.left;
+    LONG height = rect.bottom - rect.top;
 
     if (width == m_size.cx && height == m_size.cy)
         flags |= SWP_NOSIZE;
@@ -1051,8 +1053,8 @@ HRESULT FlashProxyModule::SetRect(const RECT &rect)
     if (m_proxyWnd == nullptr)
         return S_OK;
 
-    SetWindowPos(m_proxyWnd, nullptr, m_pos.cx, m_pos.cy, m_size.cx, m_size.cy, flags | SWP_NOZORDER | SWP_NOACTIVATE);
-
+    SetWindowPos(m_proxyWnd, nullptr, m_pos.cx, m_pos.cy, max(1, m_size.cx), max(1, m_size.cy), flags | SWP_NOZORDER | SWP_NOACTIVATE);
+    SetVisibility(m_visibilityMask);
     GuessToolbarVisibility();
 
     if (m_controller != nullptr)
@@ -1245,19 +1247,26 @@ void FlashProxyModule::SetVisibility(UINT32 visibilityMask)
 {
     BOOL visible = true;
 
+    m_visibilityMask = visibilityMask;
+
     if (IsToolbar())
     {
         if (((UINT32)m_identity & visibilityMask) == 0)
             visible = false;
     }
 
-    if (visible == m_visible)
+    BOOL hidden = m_size.cx == 0 || m_size.cy == 0;
+
+    if (m_visible == visible && m_hidden == hidden)
         return;
 
     m_visible = visible;
+    m_hidden = hidden;
 
     if (m_proxyWnd == nullptr)
         return;
+
+    visible = visible && !hidden;
 
     ShowWindow(m_proxyWnd, visible ? SW_SHOWNA : SW_HIDE);
 

@@ -26,9 +26,13 @@ There.init({
     }
 
     if (name == 'there_msgbaropened') {
-      $('.messagebar').attr(name.replace('there_', 'data-'), value);
-      if (value == 1 && There.data.currentIndex == undefined) {
-        There.displayMessage(0);
+      if (value == 1) {
+        There.showMessageBar();
+        if (There.data.currentIndex == undefined) {
+          There.displayMessage(0);
+        }
+      } else {
+        There.hideMessageBar();
       }
     }
 
@@ -361,15 +365,26 @@ There.init({
   },
 
   showMessageBar: function() {
-    $('.messagebar').attr('data-msgbaropened', '1');
-    There.fsCommand('setMask', {
-      rects: '0,0,800,58',
-    });
+    if ($('.messagebar').attr('data-msgbaropened') != 1) {
+      $('.messagebar').attr('data-msgbaropened', '1');
+      There.clearNamedTimer('animator');
+      There.fsCommand('setWidthHeight', {
+        width: 800,
+        height: 58,
+      });
+    }
   },
 
   hideMessageBar: function() {
-    $('.messagebar').attr('data-msgbaropened', '0');
-    There.fsCommand('setMask');
+    if ($('.messagebar').attr('data-msgbaropened') != 0) {
+      $('.messagebar').attr('data-msgbaropened', '0');
+      There.setNamedTimer('animator', 500, function() {
+        There.fsCommand('setWidthHeight', {
+          width: 0,
+          height: 0,
+        });
+      });
+    }
   },
 });
 
