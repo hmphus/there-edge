@@ -1,16 +1,6 @@
 There.init({
-  data: {
-    queue: [],
-    isReady: false,
-  },
-
   onReady: function() {
     There.fsCommand('setStageWidthHeight', {
-      width: 375,
-      height: 260,
-    });
-
-    There.fsCommand('setWidthHeight', {
       width: 375,
       height: 260,
     });
@@ -18,47 +8,77 @@ There.init({
     There.fsCommand('setTextureBitDepth', {
       depth: 32,
     });
+
+    new ResizeObserver(function(entries) {
+      const rect = entries[0].contentRect;
+      There.fsCommand('setWidthHeight', {
+        width: rect.width,
+        height: rect.height,
+      });
+    }).observe($('.trade')[0]);
   },
 
   onVariable: function(name, value) {
-    There.data.queue.push({name: name, value: value});
-    if (There.data.player == undefined) {
-      if (name != 'there_ready') {
-        return;
-      }
-      const ruffle = window.RufflePlayer.newest();
-      There.data.player = ruffle.createPlayer();
-      There.data.player.config = {
-        autoplay: 'on',
-        unmuteOverlay: 'hidden',
-        contextMenu: false,
-        backgroundColor: '#0000',
-      };
-      There.data.player.onFSCommand = function(command, query) {
-        There.fsCommand(command, query);
-        if (There.data.isReady == false) {
-          There.data.isReady = true;
-          setTimeout(There.forwardRuffleVariables, 0);
-        }
-      };
-      $('body').append(There.data.player);
-      There.data.player.load({
-        url: `http://${There.variables.there_resourceshost}/resources/trade/trade.swf`,
-        allowScriptAccess: true,
-      }).then(function() {
-        $('ruffle-player').attr('data-ready', '1');
-      });
-      return;
+    if (name == 'there_teleporting') {
+      $('.trade').attr(name.replace('there_', 'data-'), value);
     }
-    There.forwardRuffleVariables();
-  },
 
-  forwardRuffleVariables: function() {
-    if (There.data.isReady) {
-      while (There.data.queue.length > 0) {
-        const entry = There.data.queue.shift();
-        There.data.player.instance.set_variable(`_root.${entry.name}`, entry.value);
-      }
+    if (name == 'there_ready' && value == 1) {
     }
   },
+});
+
+$(document).ready(function() {
+  $('.titlebar').on('mousedown', function(event) {
+    There.fsCommand('beginDragWindow');
+    event.preventDefault();
+    event.stopPropagation();
+  });
+
+  $('.titlebar .button').on('mouseover', function() {
+    There.playSound('control rollover');
+  }).on('mousedown', function(event) {
+    There.playSound('control down');
+    event.stopPropagation();
+  }).on('mouseup', function() {
+    There.playSound('control up');
+  });
+
+  $('.footer .button').on('mouseover', function() {
+    There.playSound('save button');
+  }).on('mousedown', function(event) {
+    There.playSound('control down');
+    event.stopPropagation();
+  }).on('mouseup', function() {
+    There.playSound('control up');
+  });
+
+  $('.titlebar .buttons .button[data-id="bar"]').on('click', function() {
+    $('.trade').attr('data-state', 'bar');
+  }).on('mousedown', function(event) {
+    event.stopPropagation();
+  });
+
+  $('.titlebar .buttons .button[data-id="full"]').on('click', function() {
+    $('.trade').attr('data-state', 'full');
+  }).on('mousedown', function(event) {
+    event.stopPropagation();
+  });
+
+  $('.titlebar .buttons .button[data-id="help"]').on('click', function() {
+    There.fsCommand('browser', {
+      target: 'There_Help',
+      urlGen: 'HelpTradeUrl',
+    });
+  }).on('mousedown', function(event) {
+    event.stopPropagation();
+  });
+
+  $('.titlebar .buttons .button[data-id="close"]').on('click', function() {
+    There.fsCommand('changeState', {
+      AvatarState: 5,
+    });
+  }).on('mousedown', function(event) {
+    event.stopPropagation();
+  });
 });

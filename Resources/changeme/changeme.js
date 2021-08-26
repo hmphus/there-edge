@@ -981,7 +981,7 @@ $(document).ready(function() {
   });
 
   $('.titlebar .buttons .button, .sections .section .tab, .footer .button, .areas .area').on('mousedown', function() {
-      There.clearContextMenu();
+    There.clearContextMenu();
   });
 
   $('.contextmenu').on('mousemove', function(event) {

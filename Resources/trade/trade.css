@@ -8,11 +8,203 @@ body {
   overflow:hidden;
 }
 
-ruffle-player {
-  width: 375px;
-  height: 260px;
+.trade {
+  position:absolute;
+  left:0px;
+  top:0px;
+  width:372px;
+  height:256px;
+  background-color:rgba(200, 200, 200, 0.6);
+  border-radius:5px;
+  overflow:hidden;
+  transition-property:opacity;
+  transition-duration:250ms;
 }
 
-ruffle-player:not([data-ready="1"]) {
+.trade[data-teleporting="1"] {
+  opacity:0;
+  pointer-events:none;
+}
+
+.trade[data-state="bar"] {
+  height:25px;
+}
+
+.trade .titlebar {
+  position:absolute;
+  left:0px;
+  right:0px;
+  top:0px;
+  height:23px;
+  line-height:23px;
+  font-size:0px;
+  padding-left:5px;
+  border-top-left-radius:5px;
+  border-top-right-radius:5px;
+  border:1px solid #808080;
+  background-image:url(trade.png);
+  background-position:0px 0px;
+}
+
+.trade[data-state="bar"] .titlebar {
+  border-bottom-left-radius:5px;
+  border-bottom-right-radius:5px;
+  background-position:0px -23px;
+}
+
+.trade .titlebar span {
+  font-size:13px;
+}
+
+.trade .titlebar .buttons {
+  position:absolute;
+  top:4px;
+  right:5px;
+  display:inline-block;
+  font-size:0px;
+}
+
+.trade .titlebar .buttons .button {
+  display:inline-block;
+  margin-left:1px;
+  width:14px;
+  height:13px;
+  border:1px solid #666;
+  border-radius:3px;
+  background-image:url(trade.png);
+  background-position-x:-328px;
+  z-index:2;
+}
+
+.trade .titlebar .buttons .button[data-id="close"] {
+  background-position-y:-54px;
+}
+
+.trade .titlebar .buttons .button[data-id="help"] {
+  background-position-y:-67px;
+}
+
+.trade .titlebar .buttons .button[data-id="bar"],
+.trade .titlebar .buttons .button[data-id="full"] {
   display:none;
+}
+
+.trade[data-state="full"] .titlebar .buttons .button[data-id="bar"] {
+  display:inline-block;
+  background-position-y:-80px;
+}
+
+.trade[data-state="bar"] .titlebar .buttons .button[data-id="full"] {
+  display:inline-block;
+  background-position-y:-93px;
+}
+
+.trade .titlebar .buttons .button:hover {
+  background-position-x:-342px;
+}
+
+.trade .titlebar .buttons .button:hover:active {
+  background-position-x:-356px;
+}
+
+.trade .footer {
+  position:absolute;
+  left:0px;
+  right:0px;
+  bottom:0px;
+  height:37px;
+  padding-left:2px;
+  font-size:0px;
+  display:flex;
+  justify-content:flex-start;
+  pointer-events:none;
+}
+
+.trade[data-state="bar"] .footer {
+  display:none;
+}
+
+.trade .footer .button {
+  display:none;
+  margin-left:2px;
+  height:18px;
+  line-height:18px;
+  padding:1px;
+  border:1px solid #666;
+  border-radius:6px;
+  vertical-align:top;
+  background-image:url(trade.png);
+  background-position-y:-31px;
+  font-size:11px;
+  text-align:center;
+  pointer-events:all;
+}
+
+.trade .footer .button:hover {
+  text-shadow:1px 1px 1px #0006;
+}
+
+.trade .footer .button:hover:active {
+  text-shadow:0px 0px 2px #0006;
+  padding:2px 0px 0px 2px;
+}
+
+.trade .footer .button[data-enabled="0"],
+.trade .footer .button[data-enabled="0"]:hover,
+.trade .footer .button[data-enabled="0"]:active {
+  color:#7dbbca;
+  text-shadow:1px 1px 0px rgba(255, 255, 255, 0.5);
+  pointer-events:none;
+}
+
+.trade .footer .button.medium {
+  width:56px;
+  background-position:0px -54px;
+}
+
+.trade .footer .button.medium:hover {
+  background-position-x:-58px;
+}
+
+.trade .footer .button.medium:hover:active {
+  background-position-x:-116px;
+}
+
+.trade .footer .button.medium[data-enabled="0"],
+.trade .footer .button.medium[data-enabled="0"]:hover,
+.trade .footer .button.medium[data-enabled="0"]:active {
+  background-position-x:-174px;
+}
+
+.trade .footer .button.huge {
+  width:114px;
+  background-position:0px -74px;
+}
+
+.trade .footer .button.huge:hover {
+  background-position:-116px -74px;
+}
+
+.trade .footer .button.huge:hover:active {
+  background-position:0px -94px;
+}
+
+.trade .footer .button.huge[data-enabled="0"],
+.trade .footer .button.huge[data-enabled="0"]:hover,
+.trade .footer .button.huge[data-enabled="0"]:active {
+  background-position:-116px -94px;
+}
+
+.trade .footer .bar {
+  position:absolute;
+  left:0px;
+  right:0px;
+  bottom:0px;
+  height:7px;
+  font-size:0px;
+  border-bottom-left-radius:5px;
+  border-bottom-right-radius:5px;
+  border:1px solid #808080;
+  background-image:url(trade.png);
+  background-position:0px -46px;
 }

@@ -213,7 +213,7 @@ body {
 
 .changeme[data-state="full"] .titlebar .buttons .button[data-id="bar"] {
   display:inline-block;
-  background-position-y:-974px;;
+  background-position-y:-974px;
 }
 
 .changeme[data-state="bar"] .titlebar .buttons .button[data-id="full"] {
