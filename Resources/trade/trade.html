@@ -9,7 +9,7 @@
 <script src="trade.js"></script>
 </head>
 <body>
-<div class="trade" data-state="full" data-step="">
+<div class="trade" data-state="full" data-givestep="1" data-takestep="1">
 <div class="titlebar">
 <span>Trade Session</span>
 <div class="buttons">
@@ -18,6 +18,26 @@
 <div class="button" data-id="full"></div>
 <div class="button" data-id="close"></div>
 </div>
+</div>
+<div class="intro">
+Add or remove items by clicking Trade in your<br>
+My Things or ChangeMe menu.
+</div>
+<div class="panel" data-id="give">
+<div class="title">I am giving:</div>
+<div class="items" data-count="0"></div>
+<div class="status" data-id="default">Trade Status:</div>
+<div class="status" data-id="trading">Trade Status: TRADING</div>
+<div class="status" data-id="offer">Trade Status: OFFER</div>
+<div class="status" data-id="confirmed">Trade Status: CONFIRMED</div>
+</div>
+<div class="panel" data-id="take">
+<div class="title">I am getting:</div>
+<div class="items" data-count="0"></div>
+<div class="status" data-id="default">Trade Status:</div>
+<div class="status" data-id="trading">Trade Status: TRADING</div>
+<div class="status" data-id="offer">Trade Status: OFFER</div>
+<div class="status" data-id="confirmed">Trade Status: CONFIRMED</div>
 </div>
 <div class="footer">
 <div class="button medium" data-id="offer" data-enabled="0">Offer</div>

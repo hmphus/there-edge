@@ -107,6 +107,117 @@ body {
   background-position-x:-356px;
 }
 
+.trade .intro {
+  position:absolute;
+  left:0px;
+  right:0px;
+  top:28px;
+  line-height:13px;
+  font-size:12px;
+  text-align:center;
+}
+
+.trade .panel {
+  position:absolute;
+  top:57px;
+  width:178px;
+  height:157px;
+  border:1px solid #666;
+  border-radius:4px;
+  overflow:hidden;
+}
+
+.trade .panel[data-id="give"] {
+  left:4px;
+}
+
+.trade .panel[data-id="take"] {
+  right:4px;
+}
+
+.trade .panel .title {
+  position:absolute;
+  left:0px;
+  right:0px;
+  top:0px;
+  height:14px;
+  line-height:14px;
+  padding:0px 4px;
+  border-bottom:1px solid #666;
+  background-color:#c4f0f8;
+  font-size:11px;
+  text-align:center;
+}
+
+.trade .panel .items {
+  position:absolute;
+  left:0px;
+  right:0px;
+  top:15px;
+  bottom:15px;
+  background-color:#fff;
+  overflow-y:scroll;
+}
+
+.trade .panel .items .item {
+  position:relative;
+  width:100%;
+  height:32px;
+  border-bottom:1px dashed #999;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+}
+
+.trade .panel[data-id="give"] .items .item[data-hover="1"],
+.trade .panel[data-id="give"] .items .item:hover {
+  background-color:#f0f0f0;
+}
+
+.trade .panel .items[data-count="2"] .item:last-of-type {
+  border-bottom:none;
+}
+
+.trade .panel .items .item span {
+  display:block;
+  font-size:10px;
+  margin:0px 8px;
+}
+
+.trade .panel .status {
+  position:absolute;
+  left:0px;
+  right:0px;
+  bottom:0px;
+  height:14px;
+  line-height:14px;
+  padding:0px 4px;
+  border-top:1px solid #666;
+  font-size:11px;
+  text-align:left;
+  display:none;
+}
+
+.trade:not([data-givestep="2"]):not([data-givestep="3"]):not([data-givestep="4"]) .panel[data-id="give"] .status[data-id="default"],
+.trade:not([data-takestep="2"]):not([data-takestep="3"]):not([data-takestep="4"]) .panel[data-id="take"] .status[data-id="default"],
+.trade[data-givestep="2"] .panel[data-id="give"] .status[data-id="trading"],
+.trade[data-takestep="2"] .panel[data-id="take"] .status[data-id="trading"] {
+  background-color:#c4f0f8;
+  display:inline-block;
+}
+
+.trade[data-givestep="3"] .panel[data-id="give"] .status[data-id="offer"],
+.trade[data-takestep="3"] .panel[data-id="take"] .status[data-id="offer"] {
+  background-color:#9d7;
+  display:inline-block;
+}
+
+.trade[data-givestep="4"] .panel[data-id="give"] .status[data-id="confirmed"],
+.trade[data-takestep="4"] .panel[data-id="take"] .status[data-id="confirmed"] {
+  background-color:#fda;
+  display:inline-block;
+}
+
 .trade .footer {
   position:absolute;
   left:0px;
@@ -125,7 +236,6 @@ body {
 }
 
 .trade .footer .button {
-  display:none;
   margin-left:2px;
   height:18px;
   line-height:18px;
@@ -138,6 +248,7 @@ body {
   font-size:11px;
   text-align:center;
   pointer-events:all;
+  display:none;
 }
 
 .trade .footer .button:hover {
@@ -195,12 +306,27 @@ body {
   background-position:-116px -94px;
 }
 
+.trade[data-givestep="2"] .footer .button[data-id="offer"] {
+  display:inline-block;
+}
+
+.trade[data-givestep="3"] .footer .button[data-id="retract"],
+.trade[data-givestep="4"] .footer .button[data-id="retract"] {
+  display:inline-block;
+}
+
+.trade[data-givestep="2"] .footer .button[data-id="confirm"],
+.trade[data-givestep="3"] .footer .button[data-id="confirm"],
+.trade[data-givestep="4"] .footer .button[data-id="confirm"] {
+  display:inline-block;
+}
+
 .trade .footer .bar {
   position:absolute;
   left:0px;
   right:0px;
   bottom:0px;
-  height:7px;
+  height:8px;
   font-size:0px;
   border-bottom-left-radius:5px;
   border-bottom-right-radius:5px;
