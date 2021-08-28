@@ -851,6 +851,12 @@ HRESULT FlashProxyModule::OnWebMessageReceived(ICoreWebView2 *sender, ICoreWebVi
     if (_wcsicmp(bcommand, L"beginDragWindow") == 0)
         return E_NOTIMPL;
 
+    if (_wcsicmp(bcommand, L"getKeyboardFocus") == 0)
+    {
+        if (m_inplaceSite != nullptr)
+            m_inplaceSite->SetFocus(true);
+    }
+
     VARIANTARG vargs[2];
     vargs[0].vt = VT_BSTR;
     vargs[0].bstrVal = bquery;
