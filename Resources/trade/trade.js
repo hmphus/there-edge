@@ -97,6 +97,8 @@ There.init({
     }
     let index = data.findIndex(e => e.doid == There.variables.there_pilotdoid);
     if (index >= 0) {
+      const menu = Object.assign({}, There.data.menu);
+      There.clearContextMenu();
       let infoGive = data[index];
       let infoTake = data[1 - index];
       $('.trade').attr('data-givestep', infoGive.state).attr('data-takestep', infoTake.state);
@@ -133,33 +135,100 @@ There.init({
             });
           }
         }
-        let itemsDiv = $(`.trade .panel[data-id="${panel.id}"] .items`);
-        $(itemsDiv).empty();
+        let divItems = $(`.trade .panel[data-id="${panel.id}"] .items`);
+        $(divItems).empty();
         if (items.length == 0) {
-          $(itemsDiv).attr('data-count', '0');
+          $(divItems).attr('data-count', '0');
         } else if (items.length < 4) {
-          $(itemsDiv).attr('data-count', '1');
+          $(divItems).attr('data-count', '1');
         } else {
-          $(itemsDiv).attr('data-count', '2');
+          $(divItems).attr('data-count', '2');
         }
         for (let item of items) {
-          let itemDiv = $('<div class="item"></div>');
-          $(itemDiv).data('poid', item.poid);
+          let divItem = $('<div class="item"></div>');
+          $(divItem).data('poid', item.poid);
           for (let span of item.spans) {
-            let itemSpan = $('<span></span>');
-            $(itemSpan).text(span);
-            $(itemDiv).append($(itemSpan));
+            let spanItem = $('<span></span>');
+            $(spanItem).text(span);
+            $(divItem).append($(spanItem));
           }
-          $(itemsDiv).append($(itemDiv));
+          $(divItems).append($(divItem));
+          if (panel.id == 'give') {
+            $(divItem).on('mouseover', function() {
+              const timeout = $('.contextmenu').attr('data-active') == 1 ? 500 : 350;
+              There.setNamedTimer('context-menu', timeout, function() {
+                if (There.data.menu.poid != item.poid) {
+                  There.setupContextMenu(divItem, item.poid);
+                }
+              });
+            }).on('mousemove', function(event) {
+              event.stopPropagation();
+            });
+          }
+        }
+        if (panel.id == 'give' && menu.poid != undefined) {
+          const divItem = $(divItems).find(`.item[data-id=${menu.poid}]`).first();
+          if ($(divItem).length > 0) {
+            const top = $(divItem).offset().top;
+            if (menu.top == top) {
+              There.setupContextMenu(divItem, menu.poid);
+            }
+          }
         }
       }
     }
+  },
+
+  clearContextMenu: function() {
+    There.clearNamedTimer('context-menu');
+    $('.contextmenu').attr('data-active', '0');
+    $('.trade .panel .items .item').attr('data-hover', '0');
+    There.data.menu = {};
+  },
+
+  setupContextMenu: function(divItem, poid) {
+    let divContextMenu = $('.contextmenu');
+    $(divContextMenu).find('.item').remove();
+    $('.trade .panel .items .item').attr('data-hover', '0');
+    let divMenuItem = $('<div class="item"></div>');
+    let divSound = $('<div class="sound"></div>');
+    $(divMenuItem).attr('data-enabled', '1');
+    $(divSound).text('Remove');
+    $(divMenuItem).append($(divSound)).appendTo($(divContextMenu));
+
+    $(divSound).on('mouseover', function() {
+      There.playSound('enabled menu item rollover');
+    });
+    $(divMenuItem).on('mousedown', function(event) {
+      event.stopPropagation();
+    }).on('click', function() {
+      There.playSound('menu item activate');
+      if (poid > 0) {
+        There.fsCommand('removeObject', {
+          Object: poid,
+        });
+      } else {
+        There.fsCommand('setTherebucks', {
+          Amount: 0,
+        });
+      }
+    });
+    const maxY = $('.trade').height() - $(divContextMenu).height() - 4;
+    const top = $(divItem).offset().top;
+    const y = Math.min(top + 7, maxY);
+    $(divContextMenu).css('top', y).attr('data-active', '1');
+    $(divItem).attr('data-hover', '1');
+    There.data.menu = {
+      poid: poid,
+      top: top,
+    };
   },
 });
 
 $(document).ready(function() {
   $('.titlebar').on('mousedown', function(event) {
     There.fsCommand('beginDragWindow');
+    There.clearContextMenu();
     event.preventDefault();
     event.stopPropagation();
   });
@@ -238,5 +307,28 @@ $(document).ready(function() {
     });
     $('.footer .button[data-id="retract"]').attr('data-enabled', '0');
     $('.footer .button[data-id="confirm"]').attr('data-enabled', '0');
+  });
+
+  $('.titlebar .buttons .button').on('mousedown', function() {
+    There.clearContextMenu();
+  });
+
+  $('.contextmenu').on('mousemove', function(event) {
+    There.clearNamedTimer('context-menu');
+    event.stopPropagation();
+  });
+
+  $('.trade').on('mouseleave', function(event) {
+    There.setNamedTimer('context-menu', 500, function() {
+      There.clearContextMenu();
+    });
+  }).on('mousemove', function() {
+    There.setNamedTimer('context-menu', 350, function() {
+      There.clearContextMenu();
+    });
+  });
+
+  $('.trade .panel .items').on('scroll', function() {
+    There.clearContextMenu();
   });
 });

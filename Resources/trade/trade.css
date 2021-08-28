@@ -334,3 +334,52 @@ body {
   background-image:url(trade.png);
   background-position:0px -46px;
 }
+
+.contextmenu {
+  display:none;
+  position:absolute;
+  left:110px;
+  top:74px;
+  box-shadow:2px 2px 3px #0006;
+  z-index:5;
+}
+
+.trade[data-state="full"] .contextmenu[data-active="1"] {
+  display:block;
+}
+
+.contextmenu .item {
+  margin-top:-1px;
+  width:68px;
+  height:14px;
+  background-color:#fff;
+  font-size:11px;
+  border:1px solid #666;
+}
+
+.contextmenu .item:first-of-type {
+  margin-top:0px;
+}
+
+.contextmenu .item:hover {
+  background-color:#f0f0f0;
+}
+
+.contextmenu .item:hover:active {
+  background-color:#c4f0f8;
+}
+
+.contextmenu .item[data-enabled="0"]:hover,
+.contextmenu .item[data-enabled="0"]:active,
+.contextmenu .item[data-enabled="0"] {
+  color:#ccc;
+  background-color:#fff;
+  pointer-events:none;
+}
+
+.contextmenu .item .sound {
+  padding-left:6px;
+  width:62px;
+  height:14px;
+  pointer-events:auto;
+}
