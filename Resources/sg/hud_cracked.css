@@ -1,0 +1,76 @@
+.left .panel[data-id="game"] .logo {
+  position:absolute;
+  left:5px;
+  top:0px;
+  width:54px;
+  height:60px;
+  background-image:url(logo_cracked.png);
+}
+
+.left .panel[data-id="game"] .button[data-id="newgame"] {
+  position:absolute;
+  left:67px;
+  top:7px;
+}
+
+.left .panel[data-id="game"] .button[data-id="rules"] {
+  position:absolute;
+  left:67px;
+  top:34px;
+}
+
+.left .panel[data-id="game"] .button[data-id="start"],
+.left .panel[data-id="game"] .button[data-id="submit"] {
+  position:absolute;
+  left:135px;
+  top:7px;
+  display:none;
+}
+
+.hud[data-gamestate="start"] .left .panel[data-id="game"] .button[data-id="start"] {
+  display:inline-block;
+}
+
+.hud[data-gamestate="play"] .left .panel[data-id="game"] .button[data-id="submit"] {
+  display:inline-block;
+}
+
+.middle {
+  display:flex;
+  flex-direction:row;
+  height:100%;
+}
+
+.middle .section {
+  position:relative;
+  height:100%;
+}
+
+.middle .section[data-index="1"] {
+  width:212px;
+}
+
+.middle .section[data-index="2"] {
+  width:59px;
+  border-left:1px solid #000;
+  border-right:1px solid #000;
+}
+
+.middle .section[data-index="3"] {
+  width:274px;
+}
+
+.middle .section::before {
+  position:absolute;
+  left:0px;
+  right:0px;
+  height:100%;
+  border-left:1px solid rgba(255, 255, 255, 0.25);
+  border-right:1px solid rgba(0, 0, 0, 0.5);
+  content:' ';
+  pointer-events:none;
+}
+
+.button.mood {
+  display:none;
+}

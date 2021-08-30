@@ -15,6 +15,9 @@ class Channel {
     if (self.name == 'event') {
       text = text.replace(/(<query>.+)&(.+<\/query>)/, '$1&amp;$2');
     }
+    if (self.name == 'player') {
+      text = text.replaceAll(/(<\/?)([0-9]+>)/g, '$1n$2');
+    }
     const xml = self.parser.parseFromString(text, 'text/xml');
     const xmlAnswer = xml.getElementsByTagName('Answer')[0];
     const xmlResult = xmlAnswer.getElementsByTagName('Result')[0];
