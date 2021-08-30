@@ -696,12 +696,15 @@ HRESULT STDMETHODCALLTYPE FlashProxyModule::put_WMode(BSTR pVal)
 
 HRESULT STDMETHODCALLTYPE FlashProxyModule::SetVariable(BSTR name, BSTR value)
 {
+    if (name == nullptr)
+        return E_INVALIDARG;
+
     CComBSTR encName;
     if (FAILED(Encode(name, encName)))
         return E_FAIL;
 
     CComBSTR encValue;
-    if (FAILED(Encode(value, encValue)))
+    if (FAILED(Encode(value == nullptr ? L"" : value, encValue)))
         return E_FAIL;
 
     CComBSTR uri;
