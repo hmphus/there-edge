@@ -3,7 +3,7 @@ class Game {
     let self = this;
     self.uiid = 1000;
     There.data.listeners.push(self);
-    There.fsCommand('devtools');
+    //There.fsCommand('devtools');
   }
 
   onData(name, data) {
@@ -30,13 +30,11 @@ class Game {
         $('.hud').attr('data-isactiveplayer', self.isActivePlayer ? '1' : '0');
         $('.left .panel[data-id="game"] .button[data-id="newgame"]').attr('data-enabled', self.isHost ? '1' : '0');
         $('.left .panel[data-id="game"] .button[data-id="start"]').attr('data-enabled', self.isActivePlayer && self.state == 'start' ? '1' : '0');
-        /*
         for (let player of self.players) {
-          let tableDiv = $(`.middle .table[data-player="${player.id}"]`);
-          $(tableDiv).find('.player').text(player.name);
-          $(tableDiv).find('.stats span[data-id="game"]').text(player.game == null ? '--' : player.game);
+          let boardDiv = $(`.middle .section:nth-of-type(3) .board[data-player="${player.id}"]`);
+          $(boardDiv).find('.player').text(player.name);
+          //$(tableDiv).find('.stats span[data-id="game"]').text(player.game == null ? '--' : player.game);
         }
-        */
         self.showIndicators();
       }
     }
@@ -75,7 +73,7 @@ class Game {
   clearIndicators() {
     let self = this;
     $('.left .panel[data-id="game"] .button').attr('data-highlighted', '0');
-    //$('.middle .table .turn').attr('data-visible', '0');
+    $('.middle .section:nth-of-type(3) .board .turn').attr('data-visible', '');
   }
 
   showIndicators() {
@@ -102,8 +100,18 @@ class Game {
         case 'start': {
           if (isBlink) {
             $('.left .panel[data-id="game"] .button[data-id="start"]').attr('data-highlighted', '1');
+            $(`.middle .section:nth-of-type(3) .board[data-player="${activePlayer.id}"] .turn`).attr('data-visible', '0');
           } else {
-            //$(`.middle .table[data-player="${activePlayer.id}"] .turn`).attr('data-visible', '1');
+            $(`.middle .section:nth-of-type(3) .board[data-player="${activePlayer.id}"] .turn`).attr('data-visible', '1');
+          }
+          break;
+        }
+        case 'play': {
+          if (isBlink) {
+            $('.left .panel[data-id="game"] .button[data-id="submit"]').attr('data-highlighted', '1');
+            $(`.middle .section:nth-of-type(3) .board[data-player="${activePlayer.id}"] .turn`).attr('data-visible', '0');
+          } else {
+            $(`.middle .section:nth-of-type(3) .board[data-player="${activePlayer.id}"] .turn`).attr('data-visible', '1');
           }
           break;
         }
