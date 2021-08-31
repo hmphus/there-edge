@@ -159,9 +159,22 @@
   background-position:-52px -285px;
 }
 
+.middle .section:nth-of-type(3) .board .column:nth-of-type(1) .icon[data-id="win"] {
+  width:13px;
+  height:12px;
+  flex-shrink:0;
+  margin-right:2px;
+  background-image:url(hud_holdem.png);
+  background-position:-11px 0px;
+}
+
+.middle .section:nth-of-type(3) .board .column:nth-of-type(1) .player[data-leader="1"] {
+  font-style:italic;
+}
+
 .middle .section:nth-of-type(3) .board .column:nth-of-type(2) {
   width:80px;
-  justify-content:center;
+  justify-content:flex-start;
   border-left:1px solid rgba(255, 255, 255, 0.25);
   border-right:1px solid rgba(0, 0, 0, 0.5);
 }
@@ -177,6 +190,22 @@
   flex-grow:1;
   justify-content:flex-end;
   border-left:1px solid rgba(255, 255, 255, 0.25);
+}
+
+.middle .section:nth-of-type(3) .board[data-status="1"] .column:nth-of-type(2) span,
+.middle .section:nth-of-type(3) .board[data-status="1"] .column:nth-of-type(3) span {
+  color:#0f0;
+}
+
+.middle .section:nth-of-type(3) .board[data-status="2"] .column:nth-of-type(2) span,
+.middle .section:nth-of-type(3) .board[data-status="2"] .column:nth-of-type(3) span {
+  color:#f00;
+  font-weight:bold;
+}
+
+.middle .section:nth-of-type(3) .board[data-status="3"] .column:nth-of-type(2) span,
+.middle .section:nth-of-type(3) .board[data-status="3"] .column:nth-of-type(3) span {
+  color:#ffa500;
 }
 
 .button.mood {

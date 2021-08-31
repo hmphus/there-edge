@@ -16,24 +16,44 @@ class Game {
           return {
             id: null,
             name: e.avname.trim(),
+            round: e.roundpoints == '' ? null : Number(e.roundpoints),
+            game: e.gamepoints == '' ? null : Number(e.gamepoints),
+            last: {
+              word: e.lastword.trim().toLowerCase(),
+              play: e.lastplay.trim().toLowerCase(),
+              points: e.lastwordpoints == '' ? null : Number(e.lastwordpoints),
+              status: e.lastwordstatus == '' ? 0 : Number(e.lastwordstatus),
+            },
+            isLeader: Number(gameData.leader) - 1 == i,
+            isDealer: Number(gameData.dealer) - 1 == i,
+            isHost: Number(gameData.host) - 1 == i,
+            isLoser: Number(gameData.loser) - 1 == i,
           };
         });
+        self.activePlayer = Number(gameData.currentplayer) - 1;
         self.thisPlayer = playerData.player.findIndex(e => e.avoid == There.variables.there_pilotdoid);
         self.players.forEach(function(e, i) {
           e.id = ((i + self.players.length - self.thisPlayer) % self.players.length) + 1;
         });
-        self.activePlayer = Number(gameData.currentplayer) - 1;
+        const activePlayer = self.players[self.activePlayer];
         self.setState(gameData.state.toLowerCase());
         self.isActivePlayer = (self.activePlayer == self.thisPlayer && self.thisPlayer >= 0);
         self.isDealer = (Number(gameData.dealer) - 1 == self.thisPlayer && self.thisPlayer >= 0);
         self.isHost = (Number(gameData.host) - 1 == self.thisPlayer && self.thisPlayer >= 0);
         $('.hud').attr('data-isactiveplayer', self.isActivePlayer ? '1' : '0');
+        $('.hud').attr('data-isdealer', self.isDealer ? '1' : '0');
+        $('.hud').attr('data-ishost', self.isHost ? '1' : '0');
         $('.left .panel[data-id="game"] .button[data-id="newgame"]').attr('data-enabled', self.isHost ? '1' : '0');
         $('.left .panel[data-id="game"] .button[data-id="start"]').attr('data-enabled', self.isActivePlayer && self.state == 'start' ? '1' : '0');
+        $('.left .panel[data-id="game"] .button[data-id="submit"]').attr('data-enabled', self.isActivePlayer && self.state == 'submit' ? '1' : '0');
         for (let player of self.players) {
           let boardDiv = $(`.middle .section:nth-of-type(3) .board[data-player="${player.id}"]`);
-          $(boardDiv).find('.player').text(player.name);
-          //$(tableDiv).find('.stats span[data-id="game"]').text(player.game == null ? '--' : player.game);
+          $(boardDiv).attr('data-status', player.isLoser ? '2' : (player.id == activePlayer.id ? player.last.status : '0'));
+          $(boardDiv).find('.icon').attr('data-id', player.last.play);
+          $(boardDiv).find('.player').text(player.name).attr('data-leader', player.isLeader ? '1' : '0').attr('data-host', player.isHost ? '1' : '0');
+          $(boardDiv).find('.word').text(player.last.word.substr(0, 1).toUpperCase() + player.last.word.substr(1));
+          $(boardDiv).find('.points').text((player.last.points ?? 0) == 0 ? '' : player.last.points.toLocaleString());
+          $(boardDiv).find('.score').text((player.game ?? 0) == 0 ? '' : player.game.toLocaleString());
         }
         self.showIndicators();
       }
