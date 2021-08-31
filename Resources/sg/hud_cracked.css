@@ -62,6 +62,69 @@
   width:212px;
 }
 
+.middle .section:nth-of-type(1) .title {
+  position:absolute;
+  left:11px;
+  right:11px;
+  top:5px;
+  height:17px;
+  line-height:17px;
+  font-size:11px;
+  font-weight:bold;
+  text-align:center;
+  color:#000;
+  display:none;
+}
+
+.hud[data-gamestate="start"] .middle .section:nth-of-type(1) .title {
+  background-color:rgba(255, 255, 255, 0.45);
+  display:inline-block;
+}
+
+.hud[data-gamestate="play"] .middle .section:nth-of-type(1) .title,
+.hud[data-gamestate="endgame"] .middle .section:nth-of-type(1) .title {
+  background-color:var(--color, rgba(255, 255, 255, 0.45));
+  display:inline-block;
+}
+
+.middle .section:nth-of-type(1) input[type="text"] {
+  position:absolute;
+  left:11px;
+  top:29px;
+  width:calc(100% - 28px);
+  height:21px;
+  border:1px solid #000;
+  border-radius:0px;
+  font-size:14px;
+  font-weight:bold;
+  outline:none;
+  color:#fff;
+  background-color:rgba(0, 0, 0, 0.5);
+  display:none;
+}
+
+.hud[data-gamestate="play"] .section:nth-of-type(1) input[type="text"] {
+  display:block;
+}
+
+.hud[data-gamestate="play"] .section:nth-of-type(1) input[type="text"][data-status="1"] {
+  background-color:rgba(0, 255, 0, 0.5);
+}
+
+.hud[data-gamestate="play"] .section:nth-of-type(1) input[type="text"][data-status="2"] {
+  background-color:rgba(255, 0, 0, 0.5);
+}
+
+.middle .section:nth-of-type(1) input[type="text"]::placeholder {
+  color:#fff;
+  opacity:0.75;
+  font-weight:normal;
+}
+
+.hud:not([data-isactiveplayer="1"]) .middle .section:nth-of-type(1) input[type="text"]::placeholder {
+  visibility:hidden;
+}
+
 .middle .section:nth-of-type(1) .message {
   position:absolute;
   left:11px;
@@ -80,6 +143,43 @@
   width:59px;
   border-left:1px solid #000;
   border-right:1px solid #000;
+}
+
+.middle .section:nth-of-type(2) .title {
+  position:absolute;
+  left:2px;
+  right:2px;
+  top:4px;
+  font-size:11px;
+  text-align:center;
+  white-space:nowrap;
+  color:#fff;
+}
+
+.middle .section:nth-of-type(2) .egg {
+  position:absolute;
+  left:12px;
+  top:27px;
+  width:35px;
+  height:50px;
+  background-image:url(hud_cracked.png);
+  background-position-x:0px;
+  display:none;
+}
+
+.hud[data-timer="1"] .middle .section:nth-of-type(2) .egg {
+  background-position-y:0px;
+  display:inline-block;
+}
+
+.hud[data-timer="2"] .middle .section:nth-of-type(2) .egg {
+  background-position-y:-50px;
+  display:inline-block;
+}
+
+.hud[data-timer="3"] .middle .section:nth-of-type(2) .egg {
+  background-position-y:-100px;
+  display:inline-block;
 }
 
 .middle .section:nth-of-type(3) {
@@ -164,8 +264,8 @@
   height:12px;
   flex-shrink:0;
   margin-right:2px;
-  background-image:url(hud_holdem.png);
-  background-position:-11px 0px;
+  background-image:url(hud_cracked.png);
+  background-position:0px -150px;
 }
 
 .middle .section:nth-of-type(3) .board .column:nth-of-type(1) .player[data-leader="1"] {

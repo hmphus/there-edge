@@ -3,7 +3,13 @@ class Game {
     let self = this;
     self.uiid = 1000;
     There.data.listeners.push(self);
-    //There.fsCommand('devtools');
+  }
+
+  onVariable(name, value) {
+    let self = this;
+    if (name == 'challengetext') {
+      $('.middle .section:nth-of-type(1) .title').text(value);
+    }
   }
 
   onData(name, data) {
@@ -36,6 +42,7 @@ class Game {
           e.id = ((i + self.players.length - self.thisPlayer) % self.players.length) + 1;
         });
         const activePlayer = self.players[self.activePlayer];
+        const thisPlayer = self.players[self.thisPlayer];
         self.setState(gameData.state.toLowerCase());
         self.isActivePlayer = (self.activePlayer == self.thisPlayer && self.thisPlayer >= 0);
         self.isDealer = (Number(gameData.dealer) - 1 == self.thisPlayer && self.thisPlayer >= 0);
@@ -43,9 +50,13 @@ class Game {
         $('.hud').attr('data-isactiveplayer', self.isActivePlayer ? '1' : '0');
         $('.hud').attr('data-isdealer', self.isDealer ? '1' : '0');
         $('.hud').attr('data-ishost', self.isHost ? '1' : '0');
+        $('.hud').attr('data-timer', gameData.timerstate);
         $('.left .panel[data-id="game"] .button[data-id="newgame"]').attr('data-enabled', self.isHost ? '1' : '0');
         $('.left .panel[data-id="game"] .button[data-id="start"]').attr('data-enabled', self.isActivePlayer && self.state == 'start' ? '1' : '0');
-        $('.left .panel[data-id="game"] .button[data-id="submit"]').attr('data-enabled', self.isActivePlayer && self.state == 'submit' ? '1' : '0');
+        $('.left .panel[data-id="game"] .button[data-id="submit"]').attr('data-enabled', self.isActivePlayer && self.state == 'play' ? '1' : '0');
+        $('.middle .section:nth-of-type(1) .title').css('--color', gameData.challengecolor.length == 6 ? `#${gameData.challengecolor}` : '');
+        $('.middle .section:nth-of-type(1) input[type="text"]').attr('data-status', thisPlayer.last.status);
+        $('.middle .section:nth-of-type(2) .title').text(gameData.round == 0 ? '' : `Round ${gameData.round}`);
         for (let player of self.players) {
           let boardDiv = $(`.middle .section:nth-of-type(3) .board[data-player="${player.id}"]`);
           $(boardDiv).attr('data-status', player.isLoser ? '2' : (player.id == activePlayer.id ? player.last.status : '0'));
@@ -82,6 +93,14 @@ class Game {
     $('.hud').attr('data-gamestate', self.state);
     self.resetIndicators();
     self.clearRevertTimers();
+    if (self.state == 'start') {
+      $('.middle .section:nth-of-type(1) input[type="text"]').val('');
+    }
+    if (self.state == 'play') {
+      requestAnimationFrame(function() {
+        There.fsCommand('getKeyboardFocus');
+      });
+    }
   }
 
   resetIndicators() {
@@ -180,8 +199,19 @@ $(document).ready(function() {
     if ($(this).attr('data-enabled') == 0) {
       return;
     }
+    const value = $('.middle .section:nth-of-type(1) input[type="text"]').val().toLowerCase();
+    if (value == '') {
+      There.data.messages.addMessage(0, `Please type your word in the box.`);
+      return;
+    }
     There.sendEventMessageToClient(10, {
-      arg: '',
+      arg: value,
     });
+  });
+
+  $('.middle .section:nth-of-type(1) input[type="text"]').on('keypress', function(event) {
+    if (event.which == 13) {
+      $('.left .panel[data-id="game"] .button[data-id="submit"]').trigger('click');
+    }
   });
 });
