@@ -242,7 +242,7 @@ class Game {
     if (self.state == state) {
       return;
     }
-    if (state == 'endgame' && self.state == undefined) {
+    if (state == 'endgame' && self.state != undefined) {
       There.playSound('cards game over');
     }
     self.state = state;
