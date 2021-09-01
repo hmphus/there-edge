@@ -162,6 +162,7 @@
   top:27px;
   width:35px;
   height:50px;
+  transform-origin:bottom;
   background-image:url(hud_cracked.png);
   background-position-x:0px;
   display:none;
@@ -175,11 +176,39 @@
 .hud[data-timer="2"] .middle .section:nth-of-type(2) .egg {
   background-position-y:-50px;
   display:inline-block;
+  animation-name:shake;
+  animation-duration:3s;
+  animation-timing-function:ease-in-out;
+  animation-iteration-count:infinite;
 }
 
 .hud[data-timer="3"] .middle .section:nth-of-type(2) .egg {
   background-position-y:-100px;
   display:inline-block;
+}
+
+@keyframes shake {
+  0% {
+    transform:rotate(0deg);
+  }
+  2% {
+    transform:rotate(6deg);
+  }
+  4% {
+    transform:rotate(-5.4deg);
+  }
+  6% {
+    transform:rotate(4.8deg);
+  }
+  8% {
+    transform:rotate(-4.2deg);
+  }
+  10% {
+    transform:rotate(0deg);
+  }
+  100% {
+    transform:rotate(0deg);
+  }
 }
 
 .middle .section:nth-of-type(3) {
