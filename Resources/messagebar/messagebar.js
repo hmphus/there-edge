@@ -46,7 +46,7 @@ There.init({
       url: 'https://www.hmph.us/there/edge/info.json',
       dataType: 'json',
       success: function(json) {
-        if (json.version != version) {
+        if (json.version.split('.').map(e => e.padStart(3, '0')).join('') > version.split('.').map(e => e.padStart(3, '0')).join('')) {
           There.data.messages.push({
             id: '0',
             type: 'Info',
