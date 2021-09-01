@@ -5,13 +5,6 @@ class Game {
     There.data.listeners.push(self);
   }
 
-  onVariable(name, value) {
-    let self = this;
-    if (name == 'challengetext') {
-      $('.middle .section:nth-of-type(1) .title').text(value);
-    }
-  }
-
   onData(name, data) {
     let self = this;
     if (name == 'player' || name == 'game') {
@@ -57,6 +50,21 @@ class Game {
         $('.middle .section:nth-of-type(1) .title').css('--color', gameData.challengecolor.length == 6 ? `#${gameData.challengecolor}` : '');
         $('.middle .section:nth-of-type(1) input[type="text"]').attr('data-status', thisPlayer.last.status);
         $('.middle .section:nth-of-type(2) .title').text(gameData.round == 0 ? '' : `Round ${gameData.round}`);
+        switch (self.state) {
+          case 'start': {
+            $('.middle .section:nth-of-type(1) .title').text(self.getLevelTitle());
+            $('.middle .section:nth-of-type(1) input[type="text"]').val('');
+            break;
+          }
+          case 'play': {
+            $('.middle .section:nth-of-type(1) .title').text(self.getChallengeTitle());
+            break;
+          }
+          case 'endgame': {
+            $('.middle .section:nth-of-type(1) .title').text(self.getChallengeTitle());
+            break;
+          }
+        }
         for (let player of self.players) {
           let boardDiv = $(`.middle .section:nth-of-type(3) .board[data-player="${player.id}"]`);
           $(boardDiv).attr('data-status', player.isLoser ? '2' : (player.id == activePlayer.id ? player.last.status : '0'));
@@ -73,7 +81,6 @@ class Game {
       for (let event of data.event) {
         const url = new URL(There.data.channels.event.data.event[0].query, 'http://host/');
         if (url.pathname.toLowerCase() == '/uirej') {
-
           if (url.searchParams.get('uiid') == self.uiid && url.searchParams.get('avoid') == There.variables.there_pilotdoid) {
           }
         }
@@ -92,10 +99,6 @@ class Game {
     self.state = state;
     $('.hud').attr('data-gamestate', self.state);
     self.resetIndicators();
-    self.clearRevertTimers();
-    if (self.state == 'start') {
-      $('.middle .section:nth-of-type(1) input[type="text"]').val('');
-    }
     if (self.state == 'play') {
       requestAnimationFrame(function() {
         There.fsCommand('getKeyboardFocus');
@@ -165,8 +168,35 @@ class Game {
     }
   }
 
-  clearRevertTimers() {
+  getLevelTitle() {
     let self = this;
+    let gameData = There.data.channels.game.data;
+    switch (Number(gameData.challengeclass)) {
+      case 1: {
+        return 'Level: EasyOver';
+      }
+      case 2: {
+        return 'Level: HardBoiled';
+      }
+      default: {
+        return '';
+      }
+    }
+  }
+
+  getChallengeTitle() {
+    let self = this;
+    let gameData = There.data.channels.game.data;
+    if (gameData.begins != '') {
+      return `Begins with ${gameData.begins.toUpperCase()}`;
+    }
+    if (gameData.contains != '') {
+      return `Contains ${gameData.contains.toUpperCase()}`;
+    }
+    if (gameData.ends != '') {
+      return `Ends with ${gameData.ends.toUpperCase()}`;
+    }
+    return '';
   }
 }
 
