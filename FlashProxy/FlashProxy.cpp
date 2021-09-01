@@ -603,6 +603,12 @@ HRESULT STDMETHODCALLTYPE FlashProxyModule::GetIDsOfNames(REFIID riid, LPOLESTR 
             rgDispId[0] = 1;
             return S_OK;
         }
+
+        if (wcscmp(rgszNames[0], L"onKeyboardFocus") == 0)
+        {
+            rgDispId[0] = 2;
+            return S_OK;
+        }
     }
 
     return DISP_E_UNKNOWNNAME;
@@ -611,39 +617,65 @@ HRESULT STDMETHODCALLTYPE FlashProxyModule::GetIDsOfNames(REFIID riid, LPOLESTR 
 HRESULT STDMETHODCALLTYPE FlashProxyModule::Invoke(DISPID dispIdMember, REFIID riid, LCID lcid, WORD wFlags, DISPPARAMS *pDispParams,
                                                    VARIANT *pVarResult, EXCEPINFO *pExcepInfo, UINT *puArgErr)
 {
-    if (dispIdMember == 1)
+    switch (dispIdMember)
     {
-        if (m_proxyWnd != nullptr)
+        case 1:
         {
-            POINT point;
-            GetCursorPos(&point);
-            ScreenToClient(m_clientWnd, &point);
+            if (m_proxyWnd != nullptr)
+            {
+                POINT point;
+                GetCursorPos(&point);
+                ScreenToClient(m_clientWnd, &point);
 
-            SetCapture(m_proxyWnd);
-            SendMessage(m_clientWnd, WM_LBUTTONDOWN, 0, MAKELPARAM(point.x, point.y));
+                SetCapture(m_proxyWnd);
+                SendMessage(m_clientWnd, WM_LBUTTONDOWN, 0, MAKELPARAM(point.x, point.y));
+            }
+
+            CComBSTR bcommand = L"beginDragWindow";
+            CComBSTR bquery = L"";
+
+            VARIANTARG vargs[2];
+            vargs[0].vt = VT_BSTR;
+            vargs[0].bstrVal = bquery;
+            vargs[1].vt = VT_BSTR;
+            vargs[1].bstrVal = bcommand;
+
+            DISPPARAMS params;
+            params.rgvarg = vargs;
+            params.cArgs = _countof(vargs);
+            params.cNamedArgs = 0;
+
+            if (FAILED(InvokeFlashEvent(L"FSCommand", params)))
+                return E_FAIL;
+
+            return S_OK;
         }
 
-        CComBSTR bcommand = L"beginDragWindow";
-        CComBSTR bquery = L"";
+        case 2:
+        {
+            CComBSTR bcommand = L"getKeyboardFocus";
+            CComBSTR bquery = L"";
 
-        VARIANTARG vargs[2];
-        vargs[0].vt = VT_BSTR;
-        vargs[0].bstrVal = bquery;
-        vargs[1].vt = VT_BSTR;
-        vargs[1].bstrVal = bcommand;
+            VARIANTARG vargs[2];
+            vargs[0].vt = VT_BSTR;
+            vargs[0].bstrVal = bquery;
+            vargs[1].vt = VT_BSTR;
+            vargs[1].bstrVal = bcommand;
 
-        DISPPARAMS params;
-        params.rgvarg = vargs;
-        params.cArgs = _countof(vargs);
-        params.cNamedArgs = 0;
+            DISPPARAMS params;
+            params.rgvarg = vargs;
+            params.cArgs = _countof(vargs);
+            params.cNamedArgs = 0;
 
-        if (FAILED(InvokeFlashEvent(L"FSCommand", params)))
-            return E_FAIL;
+            if (FAILED(InvokeFlashEvent(L"FSCommand", params)))
+                return E_FAIL;
 
-        return S_OK;
+            return S_OK;
+        }
+
+        default:
+            return E_NOTIMPL;
     }
-
-    return E_NOTIMPL;
 }
 
 HRESULT STDMETHODCALLTYPE FlashProxyModule::put_Movie(BSTR pVal)

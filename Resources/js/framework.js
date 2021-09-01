@@ -71,8 +71,16 @@ There.fsCommand = function(command, query) {
   }
   if (command == 'beginDragWindow') {
     There.private.isDragging = true;
-    if (window.chrome.webview != undefined) {
+    try {
       window.chrome.webview.hostObjects.sync.client.onBeginDragWindow();
+    } catch (error) {
+    }
+    return;
+  }
+  if (command == 'getKeyboardFocus') {
+    try {
+      window.chrome.webview.hostObjects.sync.client.onKeyboardFocus();
+    } catch (error) {
     }
     return;
   }

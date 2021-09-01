@@ -100,9 +100,7 @@ class Game {
     $('.hud').attr('data-gamestate', self.state);
     self.resetIndicators();
     if (self.state == 'play') {
-      requestAnimationFrame(function() {
-        There.fsCommand('getKeyboardFocus');
-      });
+      There.fsCommand('getKeyboardFocus');
     }
   }
 
@@ -243,5 +241,16 @@ $(document).ready(function() {
     if (event.which == 13) {
       $('.left .panel[data-id="game"] .button[data-id="submit"]').trigger('click');
     }
+  });
+
+  $('.middle .section:nth-of-type(1) input[type="text"]').on('click', function() {
+    if (There.data.game.state != 'play') {
+      return;
+    }
+    if ($(this).is(':focus')) {
+      return;
+    }
+    There.fsCommand('getKeyboardFocus');
+    $(this).focus();
   });
 });
