@@ -2,8 +2,8 @@
 #
 VSVersionInfo(
     ffi=FixedFileInfo(
-        filevers=(0, 9, 11, 0),
-        prodvers=(0, 9, 11, 0),
+        filevers=(0, 9, 12, 0),
+        prodvers=(0, 9, 12, 0),
         mask=0x3f,
         flags=0x0,
         OS=0x40004,
@@ -16,12 +16,12 @@ VSVersionInfo(
             StringTable(u'040904b0', [
                 StringStruct(u'CompanyName', u'Hmph!'),
                 StringStruct(u'FileDescription', u'Setup helper for There Edge'),
-                StringStruct(u'FileVersion', u'0.9.11.0'),
+                StringStruct(u'FileVersion', u'0.9.12.0'),
                 StringStruct(u'InternalName', u'SetupThereEdge.exe'),
                 StringStruct(u'LegalCopyright', u'(c) Hmph!'),
                 StringStruct(u'OriginalFilename', u'SetupThereEdge.exe'),
                 StringStruct(u'ProductName', u'There Edge Setup Helper'),
-                StringStruct(u'ProductVersion', u'0.9.11.0')
+                StringStruct(u'ProductVersion', u'0.9.12.0')
             ])
         ]),
         VarFileInfo([
