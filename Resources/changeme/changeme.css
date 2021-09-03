@@ -1245,16 +1245,19 @@ body {
   display:inline-block;
   width:83px;
   height:6px;
+  padding:5px;
+  margin:-5px;
   background-image:url(changeme.png);
-  background-position:0px -994px;
+  background-position:5px -989px;
+  background-clip:content-box;
 }
 
 .slider .knob {
   display:inline-block;
   position:absolute;
-  margin-left:-5px;
+  margin-left:0px;
   left:0px;
-  top:-2px;
+  top:3px;
   width:8px;
   height:8px;
   background-image:url(changeme.png);

@@ -33,6 +33,17 @@ class ChangeMeSlider {
         self.callback(self, previousValues);
       }
     });
+    $(self.element).on('mousedown', function(event) {
+      if (event.which == 1 && !self.active) {
+        $(self.knob).animate({
+          left: Math.min(Math.max(0, event.offsetX - 5), self.width),
+        }, 200, 'swing', function() {
+          const previousValues = self.values.slice();
+          self.splitValues();
+          self.callback(self, previousValues);
+        });
+      }
+    });
   }
 
   setValue(id, value) {
@@ -894,6 +905,11 @@ $(document).ready(function() {
   $('.areas .area, .sections .section .tab').on('mouseover', function() {
     There.playSound('control rollover');
   }).on('mousedown', function(event) {
+    There.playSound('control down');
+    event.stopPropagation();
+  });
+
+  $('.slider').on('mousedown', function(event) {
     There.playSound('control down');
     event.stopPropagation();
   });
