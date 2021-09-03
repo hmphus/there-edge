@@ -100,7 +100,9 @@ class Game {
     $('.hud').attr('data-gamestate', self.state);
     self.resetIndicators();
     if (self.state == 'play') {
-      There.fsCommand('getKeyboardFocus');
+      window.requestAnimationFrame(function() {
+        There.fsCommand('getKeyboardFocus');
+      });
     }
   }
 
