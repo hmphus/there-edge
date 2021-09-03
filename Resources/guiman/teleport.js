@@ -17,19 +17,23 @@ There.init({
 
   onVariable: function(name, value) {
     if (name == 'there_ready' && value == 1) {
-      There.fetch({
-        path: '/VersionedXmlSvc/veilHints',
-        query: {
-          Oid: There.variables.there_pilotdoid,
-        },
-        dataType: 'xml',
-        success: function(xml) {
-          const xmlAnswer = xml.getElementsByTagName('Answer')[0];
-          const xmlAvatarHints = xmlAnswer.getElementsByTagName('AvatarHints')[0];
-          const xmlHint = xmlAvatarHints.getElementsByTagName('Hint')[0];
-          $('.hint').text(xmlHint.childNodes[0].nodeValue);
-        },
-      });
+      if (There.variables.there_pilotdoid == 0) {
+        $('.hint').text('Welcome to There!');
+      } else {
+        There.fetch({
+          path: '/VersionedXmlSvc/veilHints',
+          query: {
+            Oid: There.variables.there_pilotdoid,
+          },
+          dataType: 'xml',
+          success: function(xml) {
+            const xmlAnswer = xml.getElementsByTagName('Answer')[0];
+            const xmlAvatarHints = xmlAnswer.getElementsByTagName('AvatarHints')[0];
+            const xmlHint = xmlAvatarHints.getElementsByTagName('Hint')[0];
+            $('.hint').text(xmlHint.childNodes[0].nodeValue);
+          },
+        });
+      }
     }
   },
 });
