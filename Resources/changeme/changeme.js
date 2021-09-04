@@ -551,7 +551,7 @@ There.init({
       query: query,
       dataType: 'xml',
       success: function(xml) {
-        There.onWardrobeWearsetXml(xml, key);
+        There.onWardrobeWearsetXml(xml, key, area);
       },
     });
     There.updateWardrobe(section, area);
@@ -560,7 +560,7 @@ There.init({
     });
   },
 
-  onWardrobeWearsetXml: function(xml, key) {
+  onWardrobeWearsetXml: function(xml, key, area) {
     let wearset = {
       poids: [],
     };
@@ -574,6 +574,17 @@ There.init({
     const xmlWearset = xmlAnswer.getElementsByTagName('wearset')[0];
     for (let xmlItem of xmlWearset.getElementsByTagName('item')) {
       wearset.poids.push(Number(xmlItem.getElementsByTagName('poid')[0].childNodes[0].nodeValue));
+    }
+    if (There.data.wearsets[key] != undefined) {
+      // The 3D client is missing the feature from ThereIM that sends update notifications to chat sessions.
+      $.ajax({
+        url: 'https://www.hmph.us/there/api/changeme/update/',
+        method: 'POST',
+        data: {
+          avatar_id: There.variables.there_pilotdoid,
+          area: area,
+        },
+      });
     }
     There.data.wearsets[key] = wearset;
   },
