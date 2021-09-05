@@ -123,6 +123,8 @@ BrowserProxyModule::BrowserProxyModule():
     m_size(),
     m_wnd(nullptr),
     m_url(),
+    m_proxyVersion(),
+    m_browserVersion(),
     m_userDataFolder(),
     m_browserEvents(),
     m_unknownSite(),
@@ -373,6 +375,32 @@ HRESULT STDMETHODCALLTYPE BrowserProxyModule::DoVerb(LONG iVerb, LPMSG lpmsg, IO
             m_wnd = hwndParent;
 
             SetRect(*lprcPosRect);
+
+            {
+                HRSRC source = FindResource(g_Instance, MAKEINTRESOURCE(VS_VERSION_INFO), RT_VERSION);
+                if (source != nullptr)
+                {
+                    HGLOBAL resource = LoadResource(g_Instance, source);
+                    if (resource != nullptr)
+                    {
+                        void *data = LockResource(resource);
+                        if (data != nullptr)
+                        {
+                            VS_FIXEDFILEINFO *version = nullptr;
+                            UINT size = 0;
+                            if (VerQueryValue(data, L"\\", (void**)&version, &size) && version != nullptr && size >= sizeof(VS_FIXEDFILEINFO))
+                            {
+                                WCHAR value[100];
+                                _snwprintf_s(value, _countof(value), L"%u.%u.%u",
+                                             version->dwFileVersionMS >> 16 & 0xFFFF,
+                                             version->dwFileVersionMS & 0xFFFF,
+                                             version->dwFileVersionLS >> 16 & 0xFFFF);
+                                m_proxyVersion = value;
+                            }
+                        }
+                    }
+                }
+            }
 
             {
                 WCHAR userDataFolder[MAX_PATH] = {0};
@@ -659,6 +687,37 @@ HRESULT STDMETHODCALLTYPE BrowserProxyModule::Invoke(HRESULT errorCode, ICoreWeb
 {
     if (environment == nullptr)
         return E_INVALIDARG;
+
+    {
+        WCHAR *version = nullptr;
+        if (FAILED(environment->get_BrowserVersionString(&version)) || version == nullptr)
+            return E_FAIL;
+
+        m_browserVersion = version;
+        CoTaskMemFree(version);
+    }
+
+    {
+        for (HWND wnd = m_wnd; wnd != nullptr; wnd = GetParent(wnd))
+        {
+            WCHAR className[100];
+            if (GetClassName(wnd, className, _countof(className)) == 0)
+                continue;
+
+            if (wcscmp(className, L"ThereTopLevelMdiWindowClass") != 0)
+                continue;
+
+            WCHAR currentTitle[250];
+            if (GetWindowText(wnd, currentTitle, _countof(currentTitle)) > 0 && wcsstr(currentTitle, L"Edge") == nullptr)
+            {
+                WCHAR extendedTitle[250];
+                _snwprintf_s(extendedTitle, _countof(extendedTitle), L"%s (Edge %s %s)", currentTitle, m_proxyVersion.m_str, m_browserVersion.m_str);
+                SetWindowText(wnd, extendedTitle);
+            }
+
+            break;
+        }
+    }
 
     m_environment = environment;
     m_environment->CreateCoreWebView2Controller(m_wnd, this);
