@@ -13,15 +13,23 @@ from argparse import ArgumentParser
 
 if __name__ == '__main__':
     print('ThereEdge %s\n' % VERSION)
+    for i, argv in enumerate(sys.argv):
+        if argv.startswith('--desktop='):
+            if argv[10:] == '1':
+                sys.argv[i] = '--desktop'
+            else:
+                del sys.argv[i]
+            break
     parser = ArgumentParser()
     parser.add_argument('--path', type=str, default='.', help='client path')
     parser.add_argument('--pause', action='store_true', help='pause on error')
     parser.add_argument('--patch', action='store_true', help='patch the client')
     parser.add_argument('--register', action='store_true', help='register the libraries')
     parser.add_argument('--unregister', action='store_true', help='unregister the libraries')
-    parser.add_argument('--shortcut', action='store_true', help='create a shortcut')
+    parser.add_argument('--startmenu', action='store_true', help='create a start menu shortcut')
+    parser.add_argument('--desktop', action='store_true', help='create a desktop shortcut')
     args = parser.parse_args()
-    if not args.patch and not args.register and not args.unregister and not args.shortcut:
+    if not args.patch and not args.register and not args.unregister and not args.startmenu and not args.desktop:
          parser.print_usage()
          sys.exit(0)
     try:
@@ -74,14 +82,23 @@ if __name__ == '__main__':
                     print('Unregistration of %s failed (%s).' % (name, rc))
                 else:
                     print('%s was unregistered successfully.' % name)
-        if args.shortcut:
+        if args.startmenu or args.desktop:
             shortcut = com.CoCreateInstance(shell.CLSID_ShellLink, None, com.CLSCTX_INPROC_SERVER, shell.IID_IShellLink)
             file = shortcut.QueryInterface(com.IID_IPersistFile)
             file.Load(os.path.join(args.path, 'Sign on to There.lnk'))
             shortcut.SetWorkingDirectory(os.path.abspath(args.path))
             shortcut.SetPath(os.path.join(os.path.abspath(args.path), 'ThereEdge.exe'))
-            file.Save(os.path.join(shell.SHGetFolderPath(0, shellcon.CSIDL_PROGRAMS, 0, 0), 'There', 'There (Edge).lnk'), 0)
-            print('The shortcut was created successfully.')
+            count = 0
+            if args.startmenu:
+                file.Save(os.path.join(shell.SHGetFolderPath(0, shellcon.CSIDL_PROGRAMS, 0, 0), 'There', 'There (Edge).lnk'), 0)
+                count += 1
+            if args.desktop:
+                file.Save(os.path.join(shell.SHGetFolderPath(0, shellcon.CSIDL_DESKTOP, 0, 0), 'There (Edge).lnk'), 0)
+                count += 1
+            if count == 1:
+                print('The shortcut was created successfully.')
+            elif count > 1:
+                print('The shortcuts were created successfully.')
     except RuntimeError as e:
         print(e)
         if args.pause:
