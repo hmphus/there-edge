@@ -19,6 +19,7 @@
 #include "ocmm.h"
 #include "wrl.h"
 #include "WebView2.h"
+#include "versionhelpers.h"
 #include "FlashRequestProxy.h"
 #include "FlashProxy_i.h"
 #include "FlashProxy.h"
@@ -476,7 +477,7 @@ HRESULT STDMETHODCALLTYPE FlashProxyModule::DoVerb(LONG iVerb, LPMSG lpmsg, IOle
             }
 
             {
-                m_proxyWnd = CreateWindowEx(WS_EX_TRANSPARENT, g_WindowClassName, L"",
+                m_proxyWnd = CreateWindowEx(IsWindows8OrGreater() ? WS_EX_TRANSPARENT : 0, g_WindowClassName, L"",
                                             WS_CHILD | WS_CLIPCHILDREN | WS_CLIPSIBLINGS,
                                             m_pos.cx, m_pos.cy, max(1, m_size.cx), max(1, m_size.cy),
                                             m_clientWnd, nullptr, GetModuleHandle(nullptr), nullptr);
