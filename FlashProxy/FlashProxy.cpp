@@ -691,11 +691,11 @@ HRESULT STDMETHODCALLTYPE FlashProxyModule::put_Movie(BSTR pVal)
     if (wcscmp(pVal + length, L".swf") != 0)
         return E_FAIL;
 
-    CComBSTR url;
-    if (FAILED(url.Append(pVal, length)))
+    CComBSTR burl;
+    if (FAILED(burl.Append(pVal, length)))
         return E_FAIL;
 
-    WCHAR *name = wcsrchr(url, L'/');
+    WCHAR *name = wcsrchr(burl, L'/');
     if (name != nullptr)
     {
         name++;
@@ -711,10 +711,23 @@ HRESULT STDMETHODCALLTYPE FlashProxyModule::put_Movie(BSTR pVal)
             m_identity = Identity::MessageBar;
     }
 
-   if (FAILED(url.Append(L".html")))
+    if (_wcsnicmp(burl, L"http://127.0.0.1:9999/", 22) == 0 || _wcsnicmp(burl, L"http://localhost:9999/", 22) == 0)
+    {
+        CComBSTR burl2 = burl + 22;
+        if (FAILED(burl2.Append(L"2.html")))
+            return E_FAIL;
+
+        if (GetFileAttributes(burl2) != INVALID_FILE_ATTRIBUTES)
+        {
+            if (FAILED(burl.Append(L"2")))
+                return E_FAIL;
+        }
+    }
+
+   if (FAILED(burl.Append(L".html")))
         return E_FAIL;
 
-    m_url = url;
+    m_url = burl;
 
     if (FAILED(Navigate()))
         return E_FAIL;
