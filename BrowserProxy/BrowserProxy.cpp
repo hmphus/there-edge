@@ -697,26 +697,27 @@ HRESULT STDMETHODCALLTYPE BrowserProxyModule::Invoke(HRESULT errorCode, ICoreWeb
         CoTaskMemFree(version);
     }
 
+    for (HWND wnd = m_wnd; wnd != nullptr; wnd = GetParent(wnd))
     {
-        for (HWND wnd = m_wnd; wnd != nullptr; wnd = GetParent(wnd))
-        {
-            WCHAR className[100];
-            if (GetClassName(wnd, className, _countof(className)) == 0)
-                continue;
+        if (GetWindowLong(wnd, GWL_STYLE) & WS_CHILDWINDOW)
+            continue;
 
-            if (wcscmp(className, L"ThereTopLevelMdiWindowClass") != 0)
-                continue;
-
-            WCHAR currentTitle[250];
-            if (GetWindowText(wnd, currentTitle, _countof(currentTitle)) > 0 && wcsstr(currentTitle, L"Edge") == nullptr)
-            {
-                WCHAR extendedTitle[250];
-                _snwprintf_s(extendedTitle, _countof(extendedTitle), L"%s (Edge %s %s)", currentTitle, m_proxyVersion.m_str, m_browserVersion.m_str);
-                SetWindowText(wnd, extendedTitle);
-            }
-
+        WCHAR className[100];
+        if (GetClassName(wnd, className, _countof(className)) == 0)
             break;
+
+        if (wcscmp(className, L"ThereTopLevelMdiWindowClass") != 0)
+            break;
+
+        WCHAR currentTitle[250];
+        if (GetWindowText(wnd, currentTitle, _countof(currentTitle)) > 0 && wcsstr(currentTitle, L"Edge") == nullptr)
+        {
+            WCHAR extendedTitle[250];
+            _snwprintf_s(extendedTitle, _countof(extendedTitle), L"%s (Edge %s %s)", currentTitle, m_proxyVersion.m_str, m_browserVersion.m_str);
+            SetWindowText(wnd, extendedTitle);
         }
+
+        break;
     }
 
     m_environment = environment;
