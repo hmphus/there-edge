@@ -7,3 +7,342 @@ body {
   text-size-adjust:none;
   overflow:hidden;
 }
+
+.communicator {
+  position:absolute;
+  left:0px;
+  top:0px;
+  width:200px;
+  height:257px;
+  background-color:rgba(200, 200, 200, 0.6);
+  border-radius:5px;
+  overflow:hidden;
+  transition-property:opacity;
+  transition-duration:250ms;
+}
+
+.communicator[data-teleporting="1"] {
+  opacity:0;
+  pointer-events:none;
+}
+
+.communicator[data-state="bar"] {
+  height:25px;
+}
+
+.communicator .titlebar {
+  position:absolute;
+  left:0px;
+  right:0px;
+  top:0px;
+  height:23px;
+  line-height:23px;
+  font-size:0px;
+  padding-left:5px;
+  border-top-left-radius:5px;
+  border-top-right-radius:5px;
+  border:1px solid #808080;
+  background-image:url(communicator.png);
+  background-position:0px 0px;
+}
+
+.communicator[data-state="bar"] .titlebar {
+  border-bottom-left-radius:5px;
+  border-bottom-right-radius:5px;
+  background-position:0px -23px;
+}
+
+.communicator .titlebar span {
+  font-size:13px;
+}
+
+.communicator .titlebar .buttons {
+  position:absolute;
+  top:4px;
+  right:5px;
+  display:inline-block;
+  font-size:0px;
+}
+
+.communicator .titlebar .buttons .button {
+  display:inline-block;
+  margin-left:1px;
+  width:14px;
+  height:13px;
+  border:1px solid #666;
+  border-radius:3px;
+  background-image:url(communicator.png);
+  background-position-x:-198px;
+  z-index:2;
+}
+
+.communicator .titlebar .buttons .button[data-id="close"] {
+  background-position-y:0px;
+}
+
+.communicator .titlebar .buttons .button[data-id="help"] {
+  background-position-y:-13px;
+}
+
+.communicator .titlebar .buttons .button[data-id="bar"],
+.communicator .titlebar .buttons .button[data-id="full"] {
+  display:none;
+}
+
+.communicator[data-state="full"] .titlebar .buttons .button[data-id="bar"] {
+  display:inline-block;
+  background-position-y:-26px;
+}
+
+.communicator[data-state="bar"] .titlebar .buttons .button[data-id="full"] {
+  display:inline-block;
+  background-position-y:-39px;
+}
+
+.communicator .titlebar .buttons .button:hover {
+  background-position-x:-212px;
+}
+
+.communicator .titlebar .buttons .button:hover:active {
+  background-position-x:-226px;
+}
+
+.communicator .items {
+  position:absolute;
+  left:6px;
+  right:6px;
+  top:31px;
+  bottom:43px;
+  background-color:#fff;
+  border:1px solid #666;
+  overflow-y:scroll;
+}
+
+.communicator .items .item {
+  position:relative;
+  width:calc(100% + 7px * (var(--max-indent, 0) - var(--indent, 0)));
+  height:20px;
+  padding-left:calc(7px * var(--indent, 0));
+  display:flex;
+  flex-direction:row;
+  justify-content:flex-start;
+  align-items:center;
+}
+
+.communicator .items .item[data-hover="1"],
+.communicator .items .item:hover {
+  background-color:#f0f0f0;
+}
+
+.communicator .items .item .icon {
+  width:17px;
+  height:16px;
+  margin-left:8px;
+  box-sizing:border-box;
+}
+
+.communicator .items .item[data-type] .icon {
+  background-image:url(communicator.png);
+  background-clip:content-box;
+}
+
+.communicator .items .item[data-type="drawer"][data-drawer="open"] .icon {
+  height:13px;
+  background-position:0px -77px;
+}
+
+.communicator .items .item[data-type="drawer"][data-drawer="closed"] .icon {
+  height:13px;
+  padding-left:3px;
+  background-position:-15px -77px;
+}
+
+.communicator .items .item[data-type="avatar"][data-client="3d"][data-status="available"] .icon {
+  height:15px;
+  padding-left:3px;
+  background-position:-30px -75px;
+}
+
+.communicator .items .item[data-type="avatar"][data-client="3d"][data-status="away"] .icon {
+  height:16px;
+  padding-left:3px;
+  background-position:-76px -74px;
+}
+
+.communicator .items .item[data-type="avatar"][data-client="3d"][data-status="dnd"] .icon {
+  height:16px;
+  padding-left:4px;
+  padding-right:2px;
+  background-position:-90px -74px;
+}
+
+.communicator .items .item[data-type="avatar"][data-client="3d"][data-status="offline"] .icon {
+  height:14px;
+  padding-left:3px;
+  background-position:-103px -76px;
+}
+
+.communicator .items .item[data-type="avatar"][data-client="thereim"][data-status="available"] .icon {
+  height:10px;
+  padding-left:6px;
+  padding-right:1px;
+  background-position:-115px -80px;
+}
+
+.communicator .items .item[data-type="avatar"][data-client="thereim"][data-status="away"] .icon {
+  height:10px;
+  padding-left:6px;
+  padding-right:1px;
+  background-position:-148px -80px;
+}
+
+.communicator .items .item[data-type="avatar"][data-client="thereim"][data-status="dnd"] .icon {
+  height:10px;
+  padding-left:6px;
+  padding-right:1px;
+  background-position:-159px -80px;
+}
+
+.communicator .items .item[data-type="avatar"][data-client="thereim"][data-status="offline"] .icon {
+  height:10px;
+  padding-left:6px;
+  padding-right:1px;
+  background-position:-170px -80px;
+}
+
+.communicator .items .item .name {
+  font-size:11px;
+  margin:0px 8px;
+  white-space:nowrap;
+}
+
+.communicator .footer {
+  position:absolute;
+  left:0px;
+  right:0px;
+  bottom:0px;
+  height:37px;
+  padding-right:6px;
+  font-size:0px;
+  display:flex;
+  justify-content:flex-end;
+  pointer-events:none;
+}
+
+.communicator[data-state="bar"] .footer {
+  display:none;
+}
+
+.communicator .footer .button {
+  margin-left:3px;
+  height:18px;
+  line-height:18px;
+  padding:1px;
+  border:1px solid #666;
+  border-radius:6px;
+  vertical-align:top;
+  background-image:url(communicator.png);
+  background-position-y:-31px;
+  font-size:11px;
+  text-align:center;
+  pointer-events:all;
+}
+
+.communicator .footer .button:hover {
+  text-shadow:1px 1px 1px #0006;
+}
+
+.communicator .footer .button:hover:active {
+  text-shadow:0px 0px 2px #0006;
+  padding:2px 0px 0px 2px;
+}
+
+.communicator .footer .button[data-enabled="0"],
+.communicator .footer .button[data-enabled="0"]:hover,
+.communicator .footer .button[data-enabled="0"]:active {
+  color:#7dbbca;
+  text-shadow:1px 1px 0px rgba(255, 255, 255, 0.5);
+  pointer-events:none;
+}
+
+.communicator .footer .button.medium {
+  width:57px;
+  background-position:0px -54px;
+}
+
+.communicator .footer .button.medium:hover {
+  background-position-x:-59px;
+}
+
+.communicator .footer .button.medium:hover:active {
+  background-position-x:-118px;
+}
+
+.communicator .footer .button.medium[data-enabled="0"],
+.communicator .footer .button.medium[data-enabled="0"]:hover,
+.communicator .footer .button.medium[data-enabled="0"]:active {
+  background-position-x:-177px;
+}
+
+.communicator .footer .bar {
+  position:absolute;
+  left:0px;
+  right:0px;
+  bottom:0px;
+  height:8px;
+  font-size:0px;
+  border-bottom-left-radius:5px;
+  border-bottom-right-radius:5px;
+  border:1px solid #808080;
+  background-image:url(communicator.png);
+  background-position:0px -46px;
+}
+
+.contextmenu {
+  display:none;
+  position:absolute;
+  left:110px;
+  top:74px;
+  box-shadow:2px 2px 3px #0006;
+  z-index:5;
+}
+
+.communicator[data-state="full"] .contextmenu[data-active="1"] {
+  display:block;
+}
+
+.contextmenu .item {
+  margin-top:-1px;
+  width:68px;
+  height:14px;
+  background-color:#fff;
+  font-size:11px;
+  border:1px solid #666;
+}
+
+.contextmenu .item:first-of-type {
+  margin-top:0px;
+}
+
+.contextmenu .item:hover {
+  background-color:#f0f0f0;
+}
+
+.contextmenu .item:hover:active {
+  background-color:#c4f0f8;
+}
+
+.contextmenu .item[data-enabled="0"]:hover,
+.contextmenu .item[data-enabled="0"]:active,
+.contextmenu .item[data-enabled="0"] {
+  color:#ccc;
+  background-color:#fff;
+  pointer-events:none;
+}
+
+.contextmenu .item .sound {
+  padding-left:6px;
+  width:62px;
+  height:14px;
+  pointer-events:auto;
+}
