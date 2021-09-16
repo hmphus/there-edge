@@ -53,6 +53,9 @@ There.init({
       while (There.data.queue.length > 0) {
         const entry = There.data.queue.shift();
         There.data.player.instance.set_variable(`_root.${entry.name}`, entry.value);
+        if (entry.name == 'there_teleporting') {
+          $('ruffle-player').attr(entry.name.replace('there_', 'data-'), entry.value);
+        }
       }
     }
   },
