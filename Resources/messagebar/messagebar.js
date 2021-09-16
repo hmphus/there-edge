@@ -11,8 +11,8 @@ There.init({
     });
 
     There.fsCommand('setWidthHeight', {
-      width: 800,
-      height: 58,
+      width: 0,
+      height: 0,
     });
 
     There.fsCommand('setTextureBitDepth', {
@@ -166,6 +166,7 @@ There.init({
         There.data.messages.splice(index, 1);
       }
     }
+    There.variables.there_msgbaropened = 0;
     There.displayTopMessage();
   },
 
