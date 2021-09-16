@@ -9,5 +9,34 @@
 <script src="volume.js"></script>
 </head>
 <body>
+<div class="volume" data-state="full">
+<div class="titlebar">
+<span>Volume</span>
+<div class="buttons">
+<div class="button" data-id="bar"></div>
+<div class="button" data-id="full"></div>
+<div class="button" data-id="close"></div>
+</div>
+</div>
+<div class="panel">
+<div class="item" data-id="voice" data-name="VoiceVolume">
+<div class="title">Voice</div>
+<div class="slider"><div class="knob"></div></div>
+</div>
+<div class="item" data-id="music" data-name="MusicVolume">
+<div class="title">Music</div>
+<div class="slider"><div class="knob"></div></div>
+</div>
+<div class="item" data-id="environment" data-name="EnvironmentVolume">
+<div class="title">Environment</div>
+<div class="slider"><div class="knob"></div></div>
+</div>
+</div>
+<div class="items"></div>
+<div class="footer">
+<div class="button medium" data-id="mute">Mute</div>
+<div class="bar"></div>
+</div>
+</div>
 </body>
 </html>

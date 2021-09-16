@@ -7,3 +7,240 @@ body {
   text-size-adjust:none;
   overflow:hidden;
 }
+
+.volume {
+  position:absolute;
+  left:0px;
+  top:0px;
+  width:128px;
+  height:176px;
+  background-color:rgba(200, 200, 200, 0.6);
+  border-radius:5px;
+  overflow:hidden;
+  transition-property:opacity;
+  transition-duration:250ms;
+}
+
+.volume[data-teleporting="1"] {
+  opacity:0;
+  pointer-events:none;
+}
+
+.volume[data-state="bar"] {
+  height:25px;
+}
+
+.volume .titlebar {
+  position:absolute;
+  left:0px;
+  right:0px;
+  top:0px;
+  height:23px;
+  line-height:23px;
+  font-size:0px;
+  padding-left:5px;
+  border-top-left-radius:5px;
+  border-top-right-radius:5px;
+  border:1px solid #808080;
+  background-image:url(volume.png);
+  background-position:0px 0px;
+}
+
+.volume[data-state="bar"] .titlebar {
+  border-bottom-left-radius:5px;
+  border-bottom-right-radius:5px;
+  background-position:0px -23px;
+}
+
+.volume .titlebar span {
+  font-size:13px;
+}
+
+.volume .titlebar .buttons {
+  position:absolute;
+  top:4px;
+  right:5px;
+  display:inline-block;
+  font-size:0px;
+}
+
+.volume .titlebar .buttons .button {
+  display:inline-block;
+  margin-left:1px;
+  width:14px;
+  height:13px;
+  border:1px solid #666;
+  border-radius:3px;
+  background-image:url(volume.png);
+  background-position-x:-126px;
+  z-index:2;
+}
+
+.volume[data-state="full"] .titlebar .buttons .button[data-id="close"] {
+  background-position-y:0px;
+}
+
+.volume[data-state="bar"] .titlebar .buttons .button[data-id="close"] {
+  background-position-y:-13px;
+}
+
+.volume .titlebar .buttons .button[data-id="bar"],
+.volume .titlebar .buttons .button[data-id="full"] {
+  display:none;
+}
+
+.volume[data-state="full"] .titlebar .buttons .button[data-id="bar"] {
+  display:inline-block;
+  background-position-y:-26px;
+}
+
+.volume[data-state="bar"] .titlebar .buttons .button[data-id="full"] {
+  display:inline-block;
+  background-position-y:-39px;
+}
+
+.volume .titlebar .buttons .button:hover {
+  background-position-x:-140px;
+}
+
+.volume .titlebar .buttons .button:hover:active {
+  background-position-x:-154px;
+}
+
+.volume .panel {
+  position:absolute;
+  left:0px;
+  right:0px;
+  top:25px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+}
+
+.volume .panel .title {
+  margin-top:6px;
+  height:12px;
+  line-height:12px;
+  font-size:10px;
+  text-align:center;
+  color:#333;
+}
+
+.volume .panel .slider {
+  position:relative;
+  display:inline-block;
+  top:-3px;
+  width:83px;
+  height:6px;
+  padding:5px;
+  margin:-5px;
+  background-image:url(volume.png);
+  background-position:5px -49px;
+  background-clip:content-box;
+}
+
+.volume .panel .slider .knob {
+  display:inline-block;
+  position:absolute;
+  margin-left:0px;
+  left:0px;
+  top:3px;
+  width:8px;
+  height:8px;
+  background-image:url(volume.png);
+  background-position:-126px -52px;
+  border:1px solid #666;
+  border-radius:5px;
+}
+
+.volume .panel .slider .knob:hover {
+  background-position-x:-134px;
+}
+
+.volume .panel .slider .knob:active {
+  background-position-x:-142px;
+}
+
+.volume .panel .item[data-enabled="0"] {
+  opacity:0.5;
+  pointer-events:none;
+}
+
+.volume .footer {
+  position:absolute;
+  left:0px;
+  right:0px;
+  bottom:0px;
+  height:37px;
+  padding-right:6px;
+  font-size:0px;
+  display:flex;
+  justify-content:center;
+  pointer-events:none;
+}
+
+.volume[data-state="bar"] .footer {
+  display:none;
+}
+
+.volume .footer .button {
+  margin-left:3px;
+  height:18px;
+  line-height:18px;
+  padding:1px;
+  border:1px solid #666;
+  border-radius:6px;
+  vertical-align:top;
+  background-image:url(volume.png);
+  font-size:11px;
+  text-align:center;
+  pointer-events:all;
+}
+
+.volume .footer .button:hover {
+  text-shadow:1px 1px 1px #0006;
+}
+
+.volume .footer .button:hover:active {
+  text-shadow:0px 0px 2px #0006;
+  padding:2px 0px 0px 2px;
+}
+
+.volume .footer .button[data-enabled="0"],
+.volume .footer .button[data-enabled="0"]:hover,
+.volume .footer .button[data-enabled="0"]:active {
+  color:#7dbbca;
+  text-shadow:1px 1px 0px rgba(255, 255, 255, 0.5);
+  pointer-events:none;
+}
+
+.volume .footer .button.medium {
+  width:44px;
+  background-position:-168px 0px;
+}
+
+.volume .footer .button.medium[data-engaged="1"] {
+  background-position-x:-214px;
+}
+
+.volume .footer .button.medium:hover {
+  background-position-y:-20px;
+}
+
+.volume .footer .button.medium:hover:active {
+  background-position-y:-40px;
+}
+
+.volume .footer .bar {
+  position:absolute;
+  left:0px;
+  right:0px;
+  bottom:0px;
+  height:8px;
+  font-size:0px;
+  border-bottom-left-radius:5px;
+  border-bottom-right-radius:5px;
+  border:1px solid #808080;
+  background-image:url(volume.png);
+  background-position:0px -46px;
+}
