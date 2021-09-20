@@ -751,6 +751,9 @@ HRESULT STDMETHODCALLTYPE FlashProxyModule::SetVariable(BSTR name, BSTR value)
     if (name == nullptr)
         return E_INVALIDARG;
 
+    if (!IsWindows8OrGreater() && _wcsicmp(name, L"There_TranslucencyEnabled") == 0)
+        value = L"0";
+
     CComBSTR encName;
     if (FAILED(Encode(name, encName)))
         return E_FAIL;
@@ -800,9 +803,7 @@ HRESULT STDMETHODCALLTYPE FlashProxyModule::Invoke(HRESULT errorCode, ICoreWebVi
     if (FAILED(m_view->get_Settings(&settings)) || settings == nullptr)
         return E_FAIL;
 
-#ifndef THERE_DEVTOOLS
-    settings->put_AreDevToolsEnabled(false);
-#endif
+    settings->put_AreDevToolsEnabled(IsDevToolsEnabled());
     settings->put_AreDefaultContextMenusEnabled(false);
     settings->put_AreDefaultScriptDialogsEnabled(false);
     settings->put_IsBuiltInErrorPageEnabled(false);
@@ -882,15 +883,14 @@ HRESULT FlashProxyModule::OnWebMessageReceived(ICoreWebView2 *sender, ICoreWebVi
         CoTaskMemFree(command);
     }
 
-#ifdef THERE_DEVTOOLS
-    if (_wcsicmp(bcommand, L"devtools") == 0)
+    if (_wcsicmp(bcommand, L"openDevTools") == 0)
     {
-        if (sender != nullptr)
-            sender->OpenDevToolsWindow();
+        if (!IsDevToolsEnabled())
+            return E_NOTIMPL;
 
+        sender->OpenDevToolsWindow();
         return S_OK;
     }
-#endif
 
     if (_wcsicmp(bcommand, L"setMask") == 0)
     {
@@ -1337,6 +1337,13 @@ void FlashProxyModule::SetVisibility(UINT32 visibilityMask)
 BOOL FlashProxyModule::IsToolbar()
 {
     return ((UINT32)m_identity & ((UINT32)Identity::ShortcutBar | (UINT32)Identity::FunFinder | (UINT32)Identity::EmotionsBar | (UINT32)Identity::MessageBar)) != 0;
+}
+
+
+BOOL FlashProxyModule::IsDevToolsEnabled()
+{
+    WCHAR value[100];
+    return (GetEnvironmentVariable(L"THEREEDGE_DEVELOPER_TOOLS", value, _countof(value)) > 0 && wcscmp(value, L"1") == 0);
 }
 
 LRESULT FlashProxyModule::BroadcastMessage(UINT Msg, WPARAM wParam, LPARAM lParam)

@@ -221,6 +221,7 @@ protected:
     void GuessToolbarVisibility();
     void SetVisibility(UINT32 visibilityMask = ~0);
     BOOL IsToolbar();
+    BOOL IsDevToolsEnabled();
     LRESULT BroadcastMessage(UINT Msg, WPARAM wParam, LPARAM lParam);
 
 public:
