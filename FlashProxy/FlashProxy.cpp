@@ -654,6 +654,9 @@ HRESULT STDMETHODCALLTYPE FlashProxyModule::Invoke(DISPID dispIdMember, REFIID r
 
         case 2:
         {
+            if (m_inplaceSite != nullptr)
+                m_inplaceSite->SetFocus(true);
+
             CComBSTR bcommand = L"getKeyboardFocus";
             CComBSTR bquery = L"";
 
@@ -670,6 +673,9 @@ HRESULT STDMETHODCALLTYPE FlashProxyModule::Invoke(DISPID dispIdMember, REFIID r
 
             if (FAILED(InvokeFlashEvent(L"FSCommand", params)))
                 return E_FAIL;
+
+            if (m_controller != nullptr)
+                m_controller->MoveFocus(COREWEBVIEW2_MOVE_FOCUS_REASON_PROGRAMMATIC);
 
             return S_OK;
         }
@@ -901,10 +907,7 @@ HRESULT FlashProxyModule::OnWebMessageReceived(ICoreWebView2 *sender, ICoreWebVi
         return E_NOTIMPL;
 
     if (_wcsicmp(bcommand, L"getKeyboardFocus") == 0)
-    {
-        if (m_inplaceSite != nullptr)
-            m_inplaceSite->SetFocus(true);
-    }
+        return E_NOTIMPL;
 
     VARIANTARG vargs[2];
     vargs[0].vt = VT_BSTR;
