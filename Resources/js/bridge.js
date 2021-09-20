@@ -16,7 +16,7 @@ There.init({
         autoplay: 'on',
         unmuteOverlay: 'hidden',
         contextMenu: false,
-        backgroundColor: '#0000',
+        backgroundColor: There.variables.there_translucencyenabled == 1 ? '#0000' : null,
       };
       There.data.player.onFSCommand = function(command, query) {
         There.fsCommand(command, query);
