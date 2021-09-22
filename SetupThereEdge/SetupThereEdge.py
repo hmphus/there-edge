@@ -90,6 +90,10 @@ if __name__ == '__main__':
             shortcut.SetPath(os.path.join(os.path.abspath(args.path), 'ThereEdge.exe'))
             count = 0
             if args.startmenu:
+                try:
+                    os.mkdir(os.path.join(shell.SHGetFolderPath(0, shellcon.CSIDL_PROGRAMS, 0, 0), 'There'))
+                except FileExistsError:
+                    pass
                 file.Save(os.path.join(shell.SHGetFolderPath(0, shellcon.CSIDL_PROGRAMS, 0, 0), 'There', 'There (Edge).lnk'), 0)
                 count += 1
             if args.desktop:
