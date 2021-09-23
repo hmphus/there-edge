@@ -472,6 +472,12 @@ $(document).ready(function() {
 
   $('.panel input[type="text"]').on('keydown keyup change input cut paste', function() {
     There.updateButtonState();
+  }).on('click', function() {
+    if ($(this).is(':hidden') || $(this).is(':focus')) {
+      return;
+    }
+    There.fsCommand('getKeyboardFocus');
+    $(this).focus();
   });
 
   $('.modes[data-id="savelooksetchangeme"] .panel input[type="text"]').on('keypress', function(event) {
