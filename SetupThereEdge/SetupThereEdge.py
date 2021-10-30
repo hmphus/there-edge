@@ -3,7 +3,6 @@
 
 import os
 import sys
-import time
 from version import VERSION
 from uuid import UUID
 from win32com.shell import shell, shellcon
