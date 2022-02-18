@@ -9,7 +9,6 @@ let There = {
     timers: {},
     intervals: {},
     isReady: false,
-    isDragging: false,
   },
 };
 
@@ -70,7 +69,6 @@ There.fsCommand = function(command, query) {
     message += '?' + query;
   }
   if (command == 'beginDragWindow') {
-    There.private.isDragging = true;
     try {
       window.chrome.webview.hostObjects.sync.client.onBeginDragWindow();
     } catch (error) {

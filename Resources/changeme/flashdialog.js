@@ -436,7 +436,9 @@ There.init({
 
 $(document).ready(function() {
   $('.titlebar').on('mousedown', function(event) {
-    There.fsCommand('beginDragWindow');
+    if (event.which == 1) {
+      There.fsCommand('beginDragWindow');
+    }
     There.clearContextMenu();
     event.preventDefault();
     event.stopPropagation();

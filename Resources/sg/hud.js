@@ -369,7 +369,9 @@ $(document).ready(function() {
 
   $('.right .button[data-id="drag"').on('mousedown', function(event) {
     if ($(this).attr('data-enabled') == 1) {
-      There.fsCommand('beginDragWindow');
+      if (event.which == 1) {
+        There.fsCommand('beginDragWindow');
+      }
       There.clearContextMenu();
       event.preventDefault();
       event.stopPropagation();
