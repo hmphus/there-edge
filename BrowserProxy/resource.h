@@ -6,6 +6,7 @@
 #define IDS_PROJNAME                    100
 #define IDR_BROWSERPROXY                101
 #define IDR_COUPLING                    102
+#define IDR_SETTINGS                    103
 
 #define TEXTFILE                        256
 

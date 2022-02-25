@@ -345,15 +345,11 @@ HRESULT VoiceTrainerProxy::ProcessMessage(const WCHAR *path, const WCHAR *query)
             return E_FAIL;
 
         WCHAR *value = wcschr(key, L'=');
-        if (value != nullptr)
-        {
-            *value = 0;
-             value++;
-        }
-        else
-        {
+        if (value == nullptr)
             return E_FAIL;
-        }
+
+        *value = 0;
+        value++;
 
         if (_wcsicmp(key, L"configstate") == 0)
         {

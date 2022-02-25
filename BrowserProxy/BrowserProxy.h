@@ -180,7 +180,7 @@ protected:
     HRESULT ApplyScript(ICoreWebView2 *view, LONG id);
     HRESULT SetDeferral(ICoreWebView2NewWindowRequestedEventArgs *args);
     HRESULT ProcessDeferral();
-    HRESULT GetDefaultPage(WCHAR *path = nullptr);
+    HRESULT GetStartPage(const WCHAR *path = nullptr);
 
 protected:
     ULONG                                              m_refCount;
@@ -199,6 +199,7 @@ protected:
     CComPtr<ICoreWebView2Deferral>                     m_newWindowDeferral;
     CComPtr<ICoreWebView2NewWindowRequestedEventArgs>  m_newWindowArgs;
     CComPtr<VoiceTrainerProxy>                         m_voiceTrainerProxy;
+    CComPtr<SettingsRequestHandler>                    m_settingsRequestHandler;
     EventRegistrationToken                             m_navigationStartingToken;
     EventRegistrationToken                             m_navigationCompletedToken;
     EventRegistrationToken                             m_newWindowRequestedToken;

@@ -184,6 +184,7 @@
     <ClInclude Include="resource.h" />
     <ClInclude Include="BrowserProxy.h" />
     <ClInclude Include="BrowserProxy_i.h" />
+    <ClInclude Include="SettingsRequestHandler.h" />
     <ClInclude Include="VoiceTrainerProxy.h" />
   </ItemGroup>
   <ItemGroup>
@@ -199,6 +200,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Develop|Win32'">
       </PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="SettingsRequestHandler.cpp" />
     <ClCompile Include="VoiceTrainerProxy.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -209,6 +211,7 @@
     <None Include="BrowserProxy.rgs" />
     <None Include="coupling.js" />
     <None Include="packages.config" />
+    <None Include="settings.html" />
   </ItemGroup>
   <ItemGroup>
     <Midl Include="BrowserProxy.idl" />

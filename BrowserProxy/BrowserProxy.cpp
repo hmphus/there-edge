@@ -20,6 +20,7 @@
 #include "wrl.h"
 #include "WebView2.h"
 #include "VoiceTrainerProxy.h"
+#include "SettingsRequestHandler.h"
 #include "BrowserProxy_i.h"
 #include "BrowserProxy.h"
 
@@ -134,6 +135,8 @@ BrowserProxyModule::BrowserProxyModule():
     m_view(),
     m_newWindowDeferral(),
     m_newWindowArgs(),
+    m_voiceTrainerProxy(),
+    m_settingsRequestHandler(),
     m_navigationStartingToken(),
     m_navigationCompletedToken(),
     m_newWindowRequestedToken(),
@@ -175,6 +178,9 @@ BrowserProxyModule::~BrowserProxyModule()
         m_voiceTrainerProxy->Close();
         m_voiceTrainerProxy.Release();
     }
+
+    if (m_settingsRequestHandler != nullptr)
+        m_settingsRequestHandler.Release();
 }
 
 HRESULT STDMETHODCALLTYPE BrowserProxyModule::QueryInterface(REFIID riid, void **object)
@@ -839,7 +845,7 @@ HRESULT STDMETHODCALLTYPE BrowserProxyModule::Invoke(HRESULT errorCode, ICoreWeb
         }
     ).Get(), &m_downloadStartingToken);
 
-    GetDefaultPage();
+    GetStartPage();
     ProcessDeferral();
 
     if (FAILED(Navigate()))
@@ -896,6 +902,9 @@ HRESULT BrowserProxyModule::OnNavigationStarting(ICoreWebView2 *sender,  ICoreWe
         m_voiceTrainerProxy.Release();
     }
 
+    if (m_settingsRequestHandler != nullptr)
+        m_settingsRequestHandler.Release();
+
     if (vcancel != VARIANT_FALSE)
     {
         args->put_Cancel(true);
@@ -908,6 +917,16 @@ HRESULT BrowserProxyModule::OnNavigationStarting(ICoreWebView2 *sender,  ICoreWe
         if (voiceTrainerProxy != nullptr && SUCCEEDED(voiceTrainerProxy->Init(m_wnd, sender)))
         {
             m_voiceTrainerProxy = voiceTrainerProxy;
+            settings->put_IsWebMessageEnabled(true);
+        }
+    }
+
+    if (SettingsRequestHandler::Validate(m_url))
+    {
+        CComPtr<SettingsRequestHandler> settingsRequestHandler(new SettingsRequestHandler(m_environment));
+        if (settingsRequestHandler != nullptr)
+        {
+            m_settingsRequestHandler = settingsRequestHandler;
             settings->put_IsWebMessageEnabled(true);
         }
     }
@@ -1147,6 +1166,9 @@ HRESULT BrowserProxyModule::OnWebResourceRequested(ICoreWebView2 *sender, ICoreW
         }
     }
 
+    if (m_settingsRequestHandler != nullptr && SettingsRequestHandler::Validate(burl))
+        return m_settingsRequestHandler->HandleRequest(burl, args);
+
     return S_OK;
 }
 
@@ -1203,6 +1225,9 @@ HRESULT BrowserProxyModule::OnWebMessageReceived(ICoreWebView2 *sender, ICoreWeb
 
     if (m_voiceTrainerProxy != nullptr && VoiceTrainerProxy::Validate(burl) && _wcsicmp(bcommand, L"voicetrainer") == 0)
         m_voiceTrainerProxy->ProcessMessage(bpath, bquery);
+
+    if (m_settingsRequestHandler != nullptr && SettingsRequestHandler::Validate(burl) && _wcsicmp(bcommand, L"settings") == 0)
+        m_settingsRequestHandler->ProcessMessage(bpath, bquery);
 
     return S_OK;
 }
@@ -1460,7 +1485,7 @@ HRESULT BrowserProxyModule::ApplyScript(ICoreWebView2 *view, LONG id)
     if (resource == nullptr)
         return E_FAIL;
 
-    const CHAR *data = static_cast<char*>(LockResource(resource));
+    const CHAR *data = static_cast<CHAR*>(LockResource(resource));
     if (data == nullptr)
         return E_FAIL;
 
@@ -1631,27 +1656,27 @@ HRESULT BrowserProxyModule::ProcessDeferral()
     return S_OK;
 }
 
-HRESULT BrowserProxyModule::GetDefaultPage(WCHAR *path)
+HRESULT BrowserProxyModule::GetStartPage(const WCHAR *path)
 {
     if (m_url.Length() > 0 || m_newWindowDeferral != nullptr)
         return S_OK;
 
     if (path == nullptr)
     {
-        if (GetDefaultPage(L"Software\\There.com\\There\\Edge\\") == S_OK)
+        if (GetStartPage(L"Software\\There.com\\There\\Edge\\") == S_OK)
             return S_OK;
 
-        if (GetDefaultPage(L"Software\\Microsoft\\Internet Explorer\\Main\\") == S_OK)
+        if (GetStartPage(L"Software\\Microsoft\\Internet Explorer\\Main\\") == S_OK)
             return S_OK;
 
         return S_FALSE;
     }
 
     WCHAR url[INTERNET_MAX_URL_LENGTH];
-    DWORD length = _countof(url);
-    if (RegGetValue(HKEY_CURRENT_USER, path, L"Start Page", RRF_RT_REG_SZ, nullptr, &url, &length) == ERROR_SUCCESS)
+    DWORD size = _countof(url);
+    if (RegGetValue(HKEY_CURRENT_USER, path, L"Start Page", RRF_RT_REG_SZ, nullptr, &url, &size) == ERROR_SUCCESS)
     {
-        if (length > 0 && wcscmp(url, L"about:blank") != 0)
+        if (size > 0 && wcscmp(url, L"about:blank") != 0)
             m_url = url;
 
         return S_OK;
