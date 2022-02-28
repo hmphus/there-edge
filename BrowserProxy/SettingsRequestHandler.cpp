@@ -18,14 +18,17 @@
 #include "WebView2.h"
 #include "SettingsRequestHandler.h"
 
+#define WM_FLASHPROXY_GET_ABOUT          (WM_USER + 5)
+
 extern HINSTANCE g_Instance;
 
-SettingsRequestHandler::SettingsRequestHandler(ICoreWebView2Environment *environment):
+SettingsRequestHandler::SettingsRequestHandler(ICoreWebView2Environment *environment, const WCHAR *proxyVersion):
     m_refCount(1),
     m_statusCode(500),
     m_reasonPhrase(),
     m_contentType(),
     m_location(),
+    m_proxyVersion(proxyVersion),
     m_environment(environment),
     m_content()
 {
@@ -84,7 +87,7 @@ ULONG STDMETHODCALLTYPE SettingsRequestHandler::Release()
     return refCount;
 }
 
-HRESULT SettingsRequestHandler::HandleRequest(const WCHAR *url, ICoreWebView2WebResourceRequestedEventArgs *args)
+HRESULT SettingsRequestHandler::HandleRequest(const WCHAR *url, ICoreWebView2WebResourceRequestedEventArgs *args, HWND wnd)
 {
     WCHAR path[1000] = {0};
     URL_COMPONENTS components;
@@ -113,7 +116,7 @@ HRESULT SettingsRequestHandler::HandleRequest(const WCHAR *url, ICoreWebView2Web
     if (wcscmp(suffix, L"/") == 0 && FAILED(HandleRedirect(L"/edge")))
         return E_FAIL;
 
-    if (wcscmp(suffix, L"") == 0 && FAILED(HandleSettings()))
+    if (wcscmp(suffix, L"") == 0 && FAILED(HandleSettings(wnd)))
         return E_FAIL;
 
     CComPtr<ICoreWebView2WebResourceResponse> response;
@@ -145,7 +148,7 @@ HRESULT SettingsRequestHandler::HandleRedirect(const WCHAR *location)
     return S_OK;
 }
 
-HRESULT SettingsRequestHandler::HandleSettings()
+HRESULT SettingsRequestHandler::HandleSettings(HWND wnd)
 {
     HRSRC source = FindResource(g_Instance, MAKEINTRESOURCE(IDR_SETTINGS), MAKEINTRESOURCE(TEXTFILE));
     if (source == nullptr)
@@ -194,9 +197,13 @@ HRESULT SettingsRequestHandler::HandleSettings()
 
         if (strncmp(token1, "@home@", size) == 0)
         {
-            CComSafeArray<BYTE> url;
-            if (GetStartPage(url) == S_OK && url.m_psa != nullptr)
-                m_content->Write(url.m_psa->pvData, url.GetCount(), nullptr);
+            WriteHome();
+            continue;
+        }
+
+        if (strncmp(token1, "@about@", size) == 0)
+        {
+            WriteAbout(wnd);
             continue;
         }
     }
@@ -237,30 +244,115 @@ HRESULT SettingsRequestHandler::ProcessMessage(const WCHAR *path, const WCHAR *q
     return E_FAIL;
 }
 
-HRESULT SettingsRequestHandler::GetStartPage(CComSafeArray<BYTE> &mburl, const WCHAR *path)
+HRESULT SettingsRequestHandler::WriteHome()
+{
+    CHAR mburl[INTERNET_MAX_URL_LENGTH];
+    DWORD mblength;
+    if (GetStartPage(mburl, mblength) == S_OK && mblength > 0)
+        m_content->Write(mburl, mblength, nullptr);
+
+    return S_OK;
+}
+
+HRESULT SettingsRequestHandler::WriteAbout(HWND wnd)
+{
+    CComSafeArray<BSTR> entries;
+    EnumThreadWindows(GetWindowThreadProcessId(wnd, nullptr), InspectThreadWindow, (LPARAM)&entries);
+
+    for (LONG i = 0; i < (LONG)entries.GetCount(); ++i)
+    {
+        CComBSTR btitle;
+        CComBSTR bversion;
+        CComBSTR bauthor;
+        CComBSTR btype;
+        DWORD type = 0;
+
+        WCHAR *query = entries.GetAt(i);
+        while (query != nullptr && query[0] != 0)
+        {
+            WCHAR key[INTERNET_MAX_URL_LENGTH] = {0};
+            WCHAR *amp = wcschr(query, L'&');
+            if (amp != nullptr)
+            {
+                wcsncat_s(key, query, amp - query);
+                query = amp + 1;
+            }
+            else
+            {
+                wcscpy_s(key, query);
+                query = nullptr;
+            }
+
+            WCHAR *value;
+            WCHAR *equal = wcschr(key, L'=');
+            if (equal != nullptr)
+            {
+                *equal = 0;
+                value = equal + 1;
+            }
+            else
+            {
+                value = L"";
+            }
+
+            if (FAILED(UrlUnescapeSpacesInPlace(value)))
+                continue;
+
+            if (FAILED(UrlUnescapeInPlace(value, 0)))
+                continue;
+
+            if (wcscmp(key, L"title") == 0)
+                btitle = value;
+            else if (wcscmp(key, L"version") == 0)
+                bversion = value;
+            else if (wcscmp(key, L"author") == 0)
+                bauthor = value;
+            else if (wcscmp(key, L"type") == 0)
+                type = _wtoi(value);
+        }
+
+        if (type == 2)
+            btype = L"Legacy";
+        else if (type == 1)
+            btype = L"Custom";
+        else
+        {
+            bversion = m_proxyVersion;
+            bauthor = L"Hmph!";
+            btype = L"Standard";
+        }
+
+        // FIXME: Add HTML encoding to the following.
+        CHAR output[1000];
+        _snprintf_s(output, _countof(output), "<tr><td>%S</td><td>%S</td><td>%S</td><td>%S</td></tr>\n", (WCHAR*)btitle, (WCHAR*)btype, (WCHAR*)bversion, (WCHAR*)bauthor);
+        m_content->Write(output, strlen(output), nullptr);
+    }
+
+    return S_OK;
+}
+
+HRESULT SettingsRequestHandler::GetStartPage(CHAR *mburl, DWORD &mblength, const WCHAR *path)
 {
     if (path == nullptr)
     {
-        if (GetStartPage(mburl, L"Software\\There.com\\There\\Edge\\") == S_OK)
+        if (GetStartPage(mburl, mblength, L"Software\\There.com\\There\\Edge\\") == S_OK)
             return S_OK;
 
-        if (GetStartPage(mburl, L"Software\\Microsoft\\Internet Explorer\\Main\\") == S_OK)
+        if (GetStartPage(mburl, mblength, L"Software\\Microsoft\\Internet Explorer\\Main\\") == S_OK)
             return S_OK;
 
         return S_FALSE;
     }
 
     WCHAR url[INTERNET_MAX_URL_LENGTH];
-    DWORD size = _countof(url);
-    if (RegGetValue(HKEY_CURRENT_USER, path, L"Start Page", RRF_RT_REG_SZ, nullptr, &url, &size) == ERROR_SUCCESS)
+    DWORD length = _countof(url);
+    if (RegGetValue(HKEY_CURRENT_USER, path, L"Start Page", RRF_RT_REG_SZ, nullptr, &url, &length) == ERROR_SUCCESS)
     {
-        size = (size - 1) / sizeof(WCHAR);
-        if (size > 0 && wcscmp(url, L"about:blank") != 0 && wcschr(url, L'"') == nullptr)
-        {
-            DWORD mbsize = WideCharToMultiByte(CP_UTF8, WC_ERR_INVALID_CHARS, url, size, nullptr, 0, nullptr, nullptr);
-            if (mbsize > 0 && SUCCEEDED(mburl.Create(mbsize)))
-                WideCharToMultiByte(CP_UTF8, 0, url, size, (CHAR*)mburl.m_psa->pvData, mbsize, nullptr, nullptr);
-        }
+        length = (length - 1) / sizeof(WCHAR);
+        if (length > 0 && wcscmp(url, L"about:blank") != 0 && wcschr(url, L'"') == nullptr)
+            mblength = WideCharToMultiByte(CP_UTF8, 0, url, length, mburl, mblength, nullptr, nullptr);
+        else
+            mblength = 0;
 
         return S_OK;
     }
@@ -275,10 +367,55 @@ HRESULT SettingsRequestHandler::SettingsRequestHandler::SetStartPage(WCHAR *url)
     HKEY key;
     if (RegOpenKeyEx(HKEY_CURRENT_USER, L"Software\\There.com\\There", 0, KEY_WRITE, &key) == ERROR_SUCCESS)
     {
-        DWORD size = (wcslen(url) + 1) * sizeof(WCHAR);
-        result = RegSetKeyValue(key, L"Edge\\", L"Start Page", REG_SZ, (BYTE*)url, size);
+        DWORD length = (wcslen(url) + 1) * sizeof(WCHAR);
+        result = RegSetKeyValue(key, L"Edge\\", L"Start Page", REG_SZ, (BYTE*)url, length);
         RegCloseKey(key);
     }
 
     return result;
+}
+
+BOOL CALLBACK SettingsRequestHandler::InspectThreadWindow(HWND wnd, LPARAM lParam)
+{
+    WCHAR name[100];
+    if (GetClassName(wnd, name, _countof(name)) > 0)
+    {
+        if (wcscmp(name, L"ThereTopLevelMdiWindowClass") == 0)
+        {
+            EnumChildWindows(wnd, InspectChildWindow, lParam);
+            return false;
+        }
+    }
+
+    return true;
+}
+
+BOOL CALLBACK SettingsRequestHandler::InspectChildWindow(HWND wnd, LPARAM lParam)
+{
+    WCHAR name[100];
+    if (GetClassName(wnd, name, _countof(name)) > 0)
+    {
+        if (wcscmp(name, L"ThereEdgeFlashProxy") == 0)
+        {
+            WCHAR query[INTERNET_MAX_URL_LENGTH];
+            if (SendMessage(wnd, WM_FLASHPROXY_GET_ABOUT, _countof(query), (LPARAM)query) > 0)
+            {
+                CComSafeArray<BSTR> &entries = *static_cast<CComSafeArray<BSTR>*>((void*)lParam);
+                entries.Add(query);
+            }
+        }
+    }
+
+    return true;
+}
+
+HRESULT SettingsRequestHandler::UrlUnescapeSpacesInPlace(WCHAR *text)
+{
+    for (DWORD i = 0; text[i] != 0;i++)
+    {
+        if (text[i] == L'+')
+            text[i] = L' ';
+    }
+
+    return S_OK;
 }

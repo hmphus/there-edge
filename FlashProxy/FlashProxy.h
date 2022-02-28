@@ -242,6 +242,7 @@ protected:
     UINT32                                   m_visibilityMask;
     CComBSTR                                 m_url;
     CComBSTR                                 m_userDataFolder;
+    CComBSTR                                 m_aboutQuery;
     CComSafeArray<BSTR>                      m_variables;
     CComPtr<IThereEdgeShockwaveFlashEvents>  m_flashEvents;
     CComPtr<IUnknown>                        m_unknownContext;

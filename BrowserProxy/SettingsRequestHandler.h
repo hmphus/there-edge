@@ -7,7 +7,7 @@ void Log(const WCHAR *format, ...);
 class SettingsRequestHandler: public IUnknown
 {
 public:
-    SettingsRequestHandler(ICoreWebView2Environment *environment);
+    SettingsRequestHandler(ICoreWebView2Environment *environment, const WCHAR *proxyVersion);
     virtual ~SettingsRequestHandler();
 
     static BOOL Validate(const WCHAR *url);
@@ -17,14 +17,21 @@ public:
     virtual ULONG STDMETHODCALLTYPE Release() override;
 
 public:
-    HRESULT HandleRequest(const WCHAR *url, ICoreWebView2WebResourceRequestedEventArgs *args);
+    HRESULT HandleRequest(const WCHAR *url, ICoreWebView2WebResourceRequestedEventArgs *args, HWND wnd);
     HRESULT ProcessMessage(const WCHAR *path, const WCHAR *query);
 
 protected:
     HRESULT HandleRedirect(const WCHAR *location);
-    HRESULT HandleSettings();
-    HRESULT GetStartPage(CComSafeArray<BYTE> &mburl, const WCHAR *path = nullptr);
+    HRESULT HandleSettings(HWND wnd);
+    HRESULT WriteHome();
+    HRESULT WriteAbout(HWND wnd);
+    HRESULT GetStartPage(CHAR *mburl, DWORD &mblength, const WCHAR *path = nullptr);
     HRESULT SetStartPage(WCHAR *url);
+
+protected:
+    static BOOL CALLBACK InspectThreadWindow(HWND wnd, LPARAM lParam);
+    static BOOL CALLBACK InspectChildWindow(HWND wnd, LPARAM lParam);
+    static HRESULT UrlUnescapeSpacesInPlace(WCHAR *text);
 
 protected:
     ULONG                                                m_refCount;
@@ -32,6 +39,7 @@ protected:
     CComBSTR                                             m_reasonPhrase;
     CComBSTR                                             m_contentType;
     CComBSTR                                             m_location;
+    CComBSTR                                             m_proxyVersion;
     CComPtr<ICoreWebView2Environment>                    m_environment;
     CComPtr<IStream>                                     m_content;
 };

@@ -28,6 +28,7 @@
 #define WM_FLASHPROXY_REQUEST_VISIBILITY (WM_USER + 2)
 #define WM_FLASHPROXY_SET_TELEPORTING    (WM_USER + 3)
 #define WM_FLASHPROXY_GET_IDENTITY       (WM_USER + 4)
+#define WM_FLASHPROXY_GET_ABOUT          (WM_USER + 5)
 
 FlashProxyModule g_AtlModule;
 HINSTANCE g_Instance;
@@ -127,6 +128,7 @@ FlashProxyModule::FlashProxyModule():
     m_visibilityMask(0),
     m_url(),
     m_userDataFolder(),
+    m_aboutQuery(),
     m_variables(),
     m_flashEvents(),
     m_unknownContext(),
@@ -894,12 +896,20 @@ HRESULT FlashProxyModule::OnWebMessageReceived(ICoreWebView2 *sender, ICoreWebVi
 
     if (_wcsicmp(bcommand, L"setMask") == 0)
     {
-        if (FAILED(UrlUnescapeInPlace(bquery, 0)))
+        CComBSTR bvalue = _wcsnicmp(bquery, L"rects=", 6) == 0 ? bquery + 6 : L"";
+
+        if (FAILED(UrlUnescapeInPlace(bvalue, 0)))
             return E_FAIL;
 
-        if (FAILED(SetMaskRects(_wcsnicmp(bquery, L"rects=", 6) == 0 ? bquery + 6 : L"")))
+        if (FAILED(SetMaskRects(bvalue)))
             return E_FAIL;
 
+        return S_OK;
+    }
+
+    if (_wcsicmp(bcommand, L"setAbout") == 0)
+    {
+        m_aboutQuery = bquery;
         return S_OK;
     }
 
@@ -1395,6 +1405,25 @@ LRESULT APIENTRY FlashProxyModule::ChildWndProc(HWND hWnd, UINT Msg, WPARAM wPar
                 return (LRESULT)flashProxy->m_identity;
 
             return 0;
+        }
+
+        case WM_FLASHPROXY_GET_ABOUT:
+        {
+            LONG length = 0;
+
+            if (flashProxy != nullptr && flashProxy->m_aboutQuery.Length() > 0)
+            {
+                if (lParam != 0 && wParam > 0)
+                {
+                    WCHAR *buff = (WCHAR*)lParam;
+                    if (wcscpy_s(buff, wParam / sizeof(WCHAR), flashProxy->m_aboutQuery) == 0)
+                        length = wcslen(buff);
+                }
+                else
+                    length = flashProxy->m_aboutQuery.Length();
+            }
+
+            return length;
         }
 
         case WM_MOUSEMOVE:

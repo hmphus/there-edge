@@ -923,7 +923,7 @@ HRESULT BrowserProxyModule::OnNavigationStarting(ICoreWebView2 *sender,  ICoreWe
 
     if (SettingsRequestHandler::Validate(m_url))
     {
-        CComPtr<SettingsRequestHandler> settingsRequestHandler(new SettingsRequestHandler(m_environment));
+        CComPtr<SettingsRequestHandler> settingsRequestHandler(new SettingsRequestHandler(m_environment, m_proxyVersion));
         if (settingsRequestHandler != nullptr)
         {
             m_settingsRequestHandler = settingsRequestHandler;
@@ -1167,7 +1167,7 @@ HRESULT BrowserProxyModule::OnWebResourceRequested(ICoreWebView2 *sender, ICoreW
     }
 
     if (m_settingsRequestHandler != nullptr && SettingsRequestHandler::Validate(burl))
-        return m_settingsRequestHandler->HandleRequest(burl, args);
+        return m_settingsRequestHandler->HandleRequest(burl, args, m_wnd);
 
     return S_OK;
 }
@@ -1673,10 +1673,10 @@ HRESULT BrowserProxyModule::GetStartPage(const WCHAR *path)
     }
 
     WCHAR url[INTERNET_MAX_URL_LENGTH];
-    DWORD size = _countof(url);
-    if (RegGetValue(HKEY_CURRENT_USER, path, L"Start Page", RRF_RT_REG_SZ, nullptr, &url, &size) == ERROR_SUCCESS)
+    DWORD length = _countof(url);
+    if (RegGetValue(HKEY_CURRENT_USER, path, L"Start Page", RRF_RT_REG_SZ, nullptr, &url, &length) == ERROR_SUCCESS)
     {
-        if (size > 0 && wcscmp(url, L"about:blank") != 0)
+        if (length > 0 && wcscmp(url, L"about:blank") != 0)
             m_url = url;
 
         return S_OK;

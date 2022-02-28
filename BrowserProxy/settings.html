@@ -118,6 +118,30 @@ input[type="submit"][disabled] {
 #home input[name="home"] {
   width:600px;
 }
+
+#version table {
+  width:400px;
+  border-collapse:collapse;
+  margin-top:8px;
+}
+
+#version tr:first-child td {
+  height:20px;
+  background-color:#efefef;
+  font-weight:bold;
+}
+
+#version tr:not(:first-child) {
+  border-bottom:1px dashed #999;
+}
+
+#version tr:not(:first-child) td:not(:first-child) {
+  border-left:2px solid transparent;
+}
+
+#version td {
+  padding:5px;
+}
 </style>
 <script src="https://code.jquery.com/jquery-3.5.1.min.js" integrity="sha384-ZvpUoO/+PpLXR1lu4jmpXWu80pZlYUAfxl5NsBMWOEPSjUn/6Z/hRTt8+pR6L4N2" crossorigin="anonymous"></script>
 <script>
@@ -169,6 +193,12 @@ $(document).ready(function() {
 <input type="text" name="home" value="@home@">
 <input type="submit" value="Save">
 </div>
+</div>
+<div id="version">
+<div class="title">UI Details</div>
+<table cellpadding="0" cellspacing="0">
+<tr><td>Name</td><td>Type</td><td>Version</td><td>Author</td></tr>
+@about@</table>
 </div>
 </body>
 </html>

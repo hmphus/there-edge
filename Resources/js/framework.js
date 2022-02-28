@@ -41,6 +41,7 @@ There.init = function(settings) {
     There.private.isReady = true;
     There.onReady();
     There.processQueue();
+    There.setAbout();
   });
 };
 
@@ -58,6 +59,42 @@ There.processVariable = function(name, value) {
   There.keys[lowercaseName] = name;
   There.variables[lowercaseName] = value;
   There.onVariable(lowercaseName, value);
+};
+
+There.setAbout = function() {
+  const standardPaths = [
+    '/resources/changeme/changeme_network.html',
+    '/resources/changeme/flashdialog.html',
+    '/resources/communicator/communicator.html',
+    '/resources/compass/compass.html',
+    '/resources/emotionsbar/emotionsbar.html',
+    '/resources/funfinder/funfinder.html',
+    '/resources/guiman/teleporthints.html',
+    '/resources/guiman/teleportslideshow.html',
+    '/resources/messagebar/messagebar.html',
+    '/resources/sg/ak_cracked_hud.html',
+    '/resources/sg/ak_gin_hud.html',
+    '/resources/sg/ak_hearts_hud.html',
+    '/resources/sg/ak_motumotu_hud.html',
+    '/resources/sg/ak_spades_hud.html',
+    '/resources/sg/ak_texasholdem_hud.html',
+    '/resources/shortcutbar/shortcutbar.html',
+    '/resources/trade/trade.html',
+    '/resources/volumecontrol/volume_controls.html',
+  ];
+  let type = 0;
+  if (!standardPaths.includes(window.location.pathname.toLowerCase())) {
+    type = 1;
+    if ($('body[data-swf]').length > 0) {
+      type = 2;
+    }
+  }
+  There.fsCommand('setAbout', {
+    title: $('title').text() ?? '',
+    version: $('meta[name="version"]').attr('content') ?? '',
+    author: $('meta[name="author"]').attr('content') ?? '',
+    type: type,
+  });
 };
 
 There.fsCommand = function(command, query) {
