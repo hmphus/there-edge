@@ -322,10 +322,15 @@ HRESULT SettingsRequestHandler::WriteAbout(HWND wnd)
             btype = L"Standard";
         }
 
-        // FIXME: Add HTML encoding to the following.
-        CHAR output[1000];
-        _snprintf_s(output, _countof(output), "<tr><td>%S</td><td>%S</td><td>%S</td><td>%S</td></tr>\n", (WCHAR*)btitle, (WCHAR*)btype, (WCHAR*)bversion, (WCHAR*)bauthor);
-        m_content->Write(output, strlen(output), nullptr);
+        m_content->Write("<tr><td>", 8, nullptr);
+        WriteEscapedContent(btitle);
+        m_content->Write("</td><td>", 9, nullptr);
+        WriteEscapedContent(btype);
+        m_content->Write("</td><td>", 9, nullptr);
+        WriteEscapedContent(bversion);
+        m_content->Write("</td><td>", 9, nullptr);
+        WriteEscapedContent(bauthor);
+        m_content->Write("</td></tr>\n", 11, nullptr);
     }
 
     return S_OK;
@@ -360,7 +365,7 @@ HRESULT SettingsRequestHandler::GetStartPage(CHAR *mburl, DWORD &mblength, const
     return S_FALSE;
 }
 
-HRESULT SettingsRequestHandler::SettingsRequestHandler::SetStartPage(WCHAR *url)
+HRESULT SettingsRequestHandler::SettingsRequestHandler::SetStartPage(const WCHAR *url)
 {
     HRESULT result = E_FAIL;
 
@@ -373,6 +378,73 @@ HRESULT SettingsRequestHandler::SettingsRequestHandler::SetStartPage(WCHAR *url)
     }
 
     return result;
+}
+
+HRESULT SettingsRequestHandler::UrlUnescapeSpacesInPlace(WCHAR *text)
+{
+    for (DWORD i = 0; text[i] != 0;i++)
+    {
+        if (text[i] == L'+')
+            text[i] = L' ';
+    }
+
+    return S_OK;
+}
+
+HRESULT SettingsRequestHandler::WriteEscapedContent(const WCHAR *text)
+{
+    WCHAR etext[250];
+    DWORD elength = _countof(etext);
+    {
+        DWORD t, e;
+        for (t = 0, e = 0; text[t] != 0 && e < elength; t++, e++)
+        {
+            if (text[t] == L'&')
+            {
+                if (e + 5 > elength)
+                    break;
+
+                etext[e++] = L'&';
+                etext[e++] = L'a';
+                etext[e++] = L'm';
+                etext[e++] = L'p';
+                etext[e] = L';';
+                continue;
+            }
+
+            if (text[t] == L'<')
+            {
+                if (e + 4 > elength)
+                    break;
+
+                etext[e++] = L'&';
+                etext[e++] = L'l';
+                etext[e++] = L't';
+                etext[e] = L';';
+                continue;
+            }
+
+            if (text[t] == L'>')
+            {
+                if (e + 4 > elength)
+                    break;
+
+                etext[e++] = L'&';
+                etext[e++] = L'g';
+                etext[e++] = L't';
+                etext[e] = L';';
+                continue;
+            }
+
+            etext[e] = text[t];
+        }
+        elength = e;
+    }
+
+    CHAR mbtext[250];
+    DWORD mblength = WideCharToMultiByte(CP_UTF8, 0, etext, elength, mbtext, _countof(mbtext), nullptr, nullptr);
+
+    return m_content->Write(mbtext, mblength, nullptr);
 }
 
 BOOL CALLBACK SettingsRequestHandler::InspectThreadWindow(HWND wnd, LPARAM lParam)
@@ -407,15 +479,4 @@ BOOL CALLBACK SettingsRequestHandler::InspectChildWindow(HWND wnd, LPARAM lParam
     }
 
     return true;
-}
-
-HRESULT SettingsRequestHandler::UrlUnescapeSpacesInPlace(WCHAR *text)
-{
-    for (DWORD i = 0; text[i] != 0;i++)
-    {
-        if (text[i] == L'+')
-            text[i] = L' ';
-    }
-
-    return S_OK;
 }

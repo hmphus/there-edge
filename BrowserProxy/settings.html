@@ -119,33 +119,47 @@ input[type="submit"][disabled] {
   width:600px;
 }
 
-#version table {
-  width:400px;
+#about[data-count="0"] {
+  display:none;
+}
+
+#about table {
+  min-width:400px;
   border-collapse:collapse;
   margin-top:8px;
 }
 
-#version tr:first-child td {
+#about tr:first-child td {
   height:20px;
   background-color:#efefef;
   font-weight:bold;
 }
 
-#version tr:not(:first-child) {
+#about tr:not(:first-child) {
   border-bottom:1px dashed #999;
 }
 
-#version tr:not(:first-child) td:not(:first-child) {
+#about tr:not(:first-child) td:not(:first-child) {
   border-left:2px solid transparent;
 }
 
-#version td {
+#about td {
   padding:5px;
+  white-space:nowrap;
 }
 </style>
 <script src="https://code.jquery.com/jquery-3.5.1.min.js" integrity="sha384-ZvpUoO/+PpLXR1lu4jmpXWu80pZlYUAfxl5NsBMWOEPSjUn/6Z/hRTt8+pR6L4N2" crossorigin="anonymous"></script>
 <script>
 $(document).ready(function() {
+  let rows = $('#about table tr:not(:eq(0))').detach();
+  rows.sort(function(row0, row1) {
+    let text0 = $(row0).find('td:eq(0)').text();
+    let text1 = $(row1).find('td:eq(0)').text();
+    return text0.localeCompare(text1);
+  });
+  $('#about table').append(rows);
+  $('#about').attr('data-count', rows.length);
+
   $('#home input[name="home"]').on('keypress', function(event) {
     if(event.which == 13) {
       $('#home input[type="submit"]').trigger('click');
@@ -194,7 +208,7 @@ $(document).ready(function() {
 <input type="submit" value="Save">
 </div>
 </div>
-<div id="version">
+<div id="about" data-count="0">
 <div class="title">UI Details</div>
 <table cellpadding="0" cellspacing="0">
 <tr><td>Name</td><td>Type</td><td>Version</td><td>Author</td></tr>
