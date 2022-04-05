@@ -96,14 +96,17 @@ if __name__ == '__main__':
                 file.Save(os.path.join(shell.SHGetFolderPath(0, shellcon.CSIDL_PROGRAMS, 0, 0), 'There', 'There (Edge).lnk'), 0)
                 count += 1
             if args.desktop:
-                file.Save(os.path.join(shell.SHGetFolderPath(0, shellcon.CSIDL_DESKTOP, 0, 0), 'There (Edge).lnk'), 0)
-                count += 1
+                try:
+                    file.Save(os.path.join(shell.SHGetFolderPath(0, shellcon.CSIDL_DESKTOP, 0, 0), 'There (Edge).lnk'), 0)
+                    count += 1
+                except Exception as error:
+                    print(error)
             if count == 1:
                 print('The shortcut was created successfully.')
             elif count > 1:
                 print('The shortcuts were created successfully.')
-    except RuntimeError as e:
-        print(e)
+    except Exception as error:
+        print(error)
         if args.pause:
             input('Press Enter to continue.\n')
         sys.exit(1)

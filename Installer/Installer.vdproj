@@ -21,6 +21,12 @@
         }
         "Entry"
         {
+        "MsmKey" = "8:_07751E7C963D4559AB77281FF5D22CF7"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_07B64349B95344DB8E5D813EE0D4EBDD"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
@@ -63,6 +69,12 @@
         }
         "Entry"
         {
+        "MsmKey" = "8:_12C0498C49B347B4AB18369A7FB6D2C5"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_16D5A4539FEA487EB7E1E5C3124C998D"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
@@ -82,6 +94,12 @@
         "Entry"
         {
         "MsmKey" = "8:_1C5AF236F41D4E3995B4383838383F69"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_1EFABE1F20B541BB83675105216B9E16"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -195,6 +213,12 @@
         }
         "Entry"
         {
+        "MsmKey" = "8:_48F4893840144CBDA7AC379150C79E16"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_4A98159EE46C438B82BC32A94584A4D2"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
@@ -202,6 +226,12 @@
         "Entry"
         {
         "MsmKey" = "8:_4AC798AACCF549B68DAB803C028450AE"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_4B6111CB702441D2B64B62B54BDB1854"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -273,6 +303,12 @@
         }
         "Entry"
         {
+        "MsmKey" = "8:_7361C25C8AC142858837F80D3D894CF6"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_73AD945B92DC48E19EC471586367CF61"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
@@ -286,6 +322,12 @@
         "Entry"
         {
         "MsmKey" = "8:_8B89DC2A55084E7E9B9452E074E09900"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_8B968612F0334289A67D07747AA126C4"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -406,6 +448,12 @@
         "Entry"
         {
         "MsmKey" = "8:_B6C4A22ECEBD4D7E8557A33C8650E3CF"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_B72DFFCAAC2344F1A234AC141359CA29"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -672,6 +720,26 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_07751E7C963D4559AB77281FF5D22CF7"
+            {
+            "SourcePath" = "8:..\\Extras\\minimap\\compass\\compass2.css"
+            "TargetName" = "8:compass2.css"
+            "Tag" = "8:"
+            "Folder" = "8:_5F66F0521FF742248DF81F5FF8FEFFF7"
+            "Condition" = "8:CHECKBOXMINIMAP=1"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_07B64349B95344DB8E5D813EE0D4EBDD"
             {
             "SourcePath" = "8:..\\Resources\\sg\\ak_motumotu_hud.html"
@@ -812,6 +880,26 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_12C0498C49B347B4AB18369A7FB6D2C5"
+            {
+            "SourcePath" = "8:..\\Extras\\minimap\\compass\\compass2.png"
+            "TargetName" = "8:compass2.png"
+            "Tag" = "8:"
+            "Folder" = "8:_5F66F0521FF742248DF81F5FF8FEFFF7"
+            "Condition" = "8:CHECKBOXMINIMAP=1"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_16D5A4539FEA487EB7E1E5C3124C998D"
             {
             "SourcePath" = "8:..\\Resources\\emotionsbar\\emotionsbar.js"
@@ -879,6 +967,26 @@
             "Tag" = "8:"
             "Folder" = "8:_262A02DA39E04A6BBA77DBB9A7177CB5"
             "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_1EFABE1F20B541BB83675105216B9E16"
+            {
+            "SourcePath" = "8:..\\Extras\\commandbar\\shortcutbar\\shortcutbar2.css"
+            "TargetName" = "8:shortcutbar2.css"
+            "Tag" = "8:"
+            "Folder" = "8:_6A725FFB4EFC4B6995556C9FBFC7F965"
+            "Condition" = "8:CHECKBOXCOMMANDBAR=1"
             "Transitive" = "11:FALSE"
             "Vital" = "11:TRUE"
             "ReadOnly" = "11:FALSE"
@@ -1252,6 +1360,26 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_48F4893840144CBDA7AC379150C79E16"
+            {
+            "SourcePath" = "8:..\\Extras\\commandbar\\shortcutbar\\shortcutbar2.js"
+            "TargetName" = "8:shortcutbar2.js"
+            "Tag" = "8:"
+            "Folder" = "8:_6A725FFB4EFC4B6995556C9FBFC7F965"
+            "Condition" = "8:CHECKBOXCOMMANDBAR=1"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_4A98159EE46C438B82BC32A94584A4D2"
             {
             "SourcePath" = "8:..\\Resources\\sg\\logo_holdem.png"
@@ -1279,6 +1407,26 @@
             "Tag" = "8:"
             "Folder" = "8:_6A725FFB4EFC4B6995556C9FBFC7F965"
             "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_4B6111CB702441D2B64B62B54BDB1854"
+            {
+            "SourcePath" = "8:..\\Extras\\commandbar\\shortcutbar\\shortcutbar2.html"
+            "TargetName" = "8:shortcutbar2.html"
+            "Tag" = "8:"
+            "Folder" = "8:_6A725FFB4EFC4B6995556C9FBFC7F965"
+            "Condition" = "8:CHECKBOXCOMMANDBAR=1"
             "Transitive" = "11:FALSE"
             "Vital" = "11:TRUE"
             "ReadOnly" = "11:FALSE"
@@ -1512,6 +1660,26 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_7361C25C8AC142858837F80D3D894CF6"
+            {
+            "SourcePath" = "8:..\\Extras\\minimap\\compass\\compass2.html"
+            "TargetName" = "8:compass2.html"
+            "Tag" = "8:"
+            "Folder" = "8:_5F66F0521FF742248DF81F5FF8FEFFF7"
+            "Condition" = "8:CHECKBOXMINIMAP=1"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_73AD945B92DC48E19EC471586367CF61"
             {
             "SourcePath" = "8:..\\Resources\\sg\\hud.css"
@@ -1559,6 +1727,26 @@
             "Tag" = "8:"
             "Folder" = "8:_8393A55240A54CF387A14713A1D2FB8D"
             "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_8B968612F0334289A67D07747AA126C4"
+            {
+            "SourcePath" = "8:..\\Extras\\minimap\\compass\\compass2.js"
+            "TargetName" = "8:compass2.js"
+            "Tag" = "8:"
+            "Folder" = "8:_5F66F0521FF742248DF81F5FF8FEFFF7"
+            "Condition" = "8:CHECKBOXMINIMAP=1"
             "Transitive" = "11:FALSE"
             "Vital" = "11:TRUE"
             "ReadOnly" = "11:FALSE"
@@ -1919,6 +2107,26 @@
             "Tag" = "8:"
             "Folder" = "8:_55BFBC9E4EE243618ADB38C710A4164E"
             "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_B72DFFCAAC2344F1A234AC141359CA29"
+            {
+            "SourcePath" = "8:..\\Extras\\commandbar\\shortcutbar\\shortcutbar2.json"
+            "TargetName" = "8:shortcutbar2.json"
+            "Tag" = "8:"
+            "Folder" = "8:_6A725FFB4EFC4B6995556C9FBFC7F965"
+            "Condition" = "8:CHECKBOXCOMMANDBAR=1"
             "Transitive" = "11:FALSE"
             "Vital" = "11:TRUE"
             "ReadOnly" = "11:FALSE"
@@ -2647,15 +2855,15 @@
         {
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:ThereEdge"
-        "ProductCode" = "8:{B950A7BC-63B4-49D0-B5F1-6D50B58531FA}"
-        "PackageCode" = "8:{CC1A3443-6DC3-40D3-B0C7-421066F33BEB}"
+        "ProductCode" = "8:{F61D955D-21C1-4019-A2C2-12769EE4BDBB}"
+        "PackageCode" = "8:{C2DD93F1-8D6C-4E16-A716-BC95F4905F7B}"
         "UpgradeCode" = "8:{887059E3-E645-44A2-AE95-E602E27BD74F}"
         "AspNetVersion" = "8:2.0.50727.0"
         "RestartWWWService" = "11:FALSE"
         "RemovePreviousVersions" = "11:TRUE"
         "DetectNewerInstalledVersion" = "11:TRUE"
         "InstallAllUsers" = "11:TRUE"
-        "ProductVersion" = "8:1.0.6"
+        "ProductVersion" = "8:1.0.7"
         "Manufacturer" = "8:Hmph!"
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:"
@@ -3265,8 +3473,8 @@
                             "Type" = "3:3"
                             "ContextData" = "8:"
                             "Attributes" = "3:0"
-                            "Setting" = "3:1"
-                            "Value" = "8:#1235"
+                            "Setting" = "3:2"
+                            "Value" = "8:Install MiniMap extension"
                             "DefaultValue" = "8:#1235"
                             "UsePlugInResources" = "11:TRUE"
                             }
@@ -3279,7 +3487,7 @@
                             "ContextData" = "8:Public"
                             "Attributes" = "3:2"
                             "Setting" = "3:2"
-                            "Value" = "8:CHECKBOXA2"
+                            "Value" = "8:CHECKBOXMINIMAP"
                             "DefaultValue" = "8:CHECKBOXA2"
                             "UsePlugInResources" = "11:TRUE"
                             }
@@ -3305,7 +3513,7 @@
                             "ContextData" = "8:1;True=1;False=0"
                             "Attributes" = "3:0"
                             "Setting" = "3:0"
-                            "Value" = "3:0"
+                            "Value" = "3:1"
                             "DefaultValue" = "3:1"
                             "UsePlugInResources" = "11:TRUE"
                             }
@@ -3317,8 +3525,8 @@
                             "Type" = "3:3"
                             "ContextData" = "8:"
                             "Attributes" = "3:0"
-                            "Setting" = "3:1"
-                            "Value" = "8:#1236"
+                            "Setting" = "3:2"
+                            "Value" = "8:Install Command Bar extension"
                             "DefaultValue" = "8:#1236"
                             "UsePlugInResources" = "11:TRUE"
                             }
@@ -3331,7 +3539,7 @@
                             "ContextData" = "8:Public"
                             "Attributes" = "3:2"
                             "Setting" = "3:2"
-                            "Value" = "8:CHECKBOXA3"
+                            "Value" = "8:CHECKBOXCOMMANDBAR"
                             "DefaultValue" = "8:CHECKBOXA3"
                             "UsePlugInResources" = "11:TRUE"
                             }
@@ -3357,7 +3565,7 @@
                             "ContextData" = "8:1;True=1;False=0"
                             "Attributes" = "3:0"
                             "Setting" = "3:0"
-                            "Value" = "3:0"
+                            "Value" = "3:1"
                             "DefaultValue" = "3:1"
                             "UsePlugInResources" = "11:TRUE"
                             }
