@@ -240,6 +240,7 @@ protected:
     WCHAR                                    m_encodeBuffer[10000];
     Identity                                 m_identity;
     UINT32                                   m_visibilityMask;
+    INTERNET_PORT                            m_port;
     CComBSTR                                 m_url;
     CComBSTR                                 m_userDataFolder;
     CComBSTR                                 m_aboutQuery;

@@ -126,6 +126,7 @@ FlashProxyModule::FlashProxyModule():
     m_encodeBuffer(),
     m_identity(Identity::Unknown),
     m_visibilityMask(0),
+    m_port(9999),
     m_url(),
     m_userDataFolder(),
     m_aboutQuery(),
@@ -703,6 +704,27 @@ HRESULT STDMETHODCALLTYPE FlashProxyModule::put_Movie(BSTR pVal)
     if (FAILED(burl.Append(pVal, length)))
         return E_FAIL;
 
+    WCHAR scheme[10] = {0};
+    WCHAR host[40] = {0};
+    WCHAR path[1000] = {0};
+    URL_COMPONENTS components;
+    ZeroMemory(&components, sizeof(components));
+    components.dwStructSize = sizeof(components);
+    components.lpszScheme = scheme;
+    components.dwSchemeLength = _countof(scheme);
+    components.lpszHostName = host;
+    components.dwHostNameLength = _countof(host);
+    components.lpszUrlPath = path;
+    components.dwUrlPathLength = _countof(path);
+
+    if (!InternetCrackUrl(burl, 0, ICU_DECODE, &components))
+        return E_FAIL;
+
+    if (_wcsicmp(scheme, L"http") != 0 || components.nPort < 1024)
+        return E_FAIL;
+
+    m_port = components.nPort;
+
     WCHAR *name = wcsrchr(burl, L'/');
     if (name != nullptr)
     {
@@ -719,16 +741,19 @@ HRESULT STDMETHODCALLTYPE FlashProxyModule::put_Movie(BSTR pVal)
             m_identity = Identity::MessageBar;
     }
 
-    if (_wcsnicmp(burl, L"http://127.0.0.1:9999/", 22) == 0 || _wcsnicmp(burl, L"http://localhost:9999/", 22) == 0)
+    if (_wcsicmp(host, L"127.0.0.1") == 0 || _wcsicmp(host, L"localhost") == 0)
     {
-        CComBSTR burl2 = burl + 22;
-        if (FAILED(burl2.Append(L"2.html")))
-            return E_FAIL;
-
-        if (GetFileAttributes(burl2) != INVALID_FILE_ATTRIBUTES)
+        if (path[0] == L'/')
         {
-            if (FAILED(burl.Append(L"2")))
+            CComBSTR bpath = path + 1;
+            if (FAILED(bpath.Append(L"2.html")))
                 return E_FAIL;
+
+            if (GetFileAttributes(bpath) != INVALID_FILE_ATTRIBUTES)
+            {
+                if (FAILED(burl.Append(L"2")))
+                    return E_FAIL;
+            }
         }
     }
 
@@ -827,8 +852,11 @@ HRESULT STDMETHODCALLTYPE FlashProxyModule::Invoke(HRESULT errorCode, ICoreWebVi
     hostObject.pdispVal = static_cast<IDispatch*>(this);
     m_view->AddHostObjectToScript(L"client", &hostObject);
 
-    m_view->AddWebResourceRequestedFilter(L"http://127.0.0.1:9999/*", COREWEBVIEW2_WEB_RESOURCE_CONTEXT_ALL);
-    m_view->AddWebResourceRequestedFilter(L"http://localhost:9999/*", COREWEBVIEW2_WEB_RESOURCE_CONTEXT_ALL);
+    WCHAR filterHost[40] = {0};
+    _snwprintf_s(filterHost, _countof(filterHost), L"http://127.0.0.1:%u/*", m_port);
+    m_view->AddWebResourceRequestedFilter(filterHost, COREWEBVIEW2_WEB_RESOURCE_CONTEXT_ALL);
+    _snwprintf_s(filterHost, _countof(filterHost), L"http://localhost:%u/*", m_port);
+    m_view->AddWebResourceRequestedFilter(filterHost, COREWEBVIEW2_WEB_RESOURCE_CONTEXT_ALL);
 
     m_view->add_WebMessageReceived(Callback<ICoreWebView2WebMessageReceivedEventHandler>(
         [this](ICoreWebView2 *sender, ICoreWebView2WebMessageReceivedEventArgs *args) -> HRESULT
@@ -955,10 +983,29 @@ HRESULT FlashProxyModule::OnWebResourceRequested(ICoreWebView2 *sender, ICoreWeb
         CoTaskMemFree(url);
     }
 
-    if (_wcsnicmp(burl, L"http://127.0.0.1:9999/", 22) != 0 && _wcsnicmp(burl, L"http://localhost:9999/", 22) != 0)
+    WCHAR scheme[10] = {0};
+    WCHAR host[40] = {0};
+    WCHAR path[1000] = {0};
+    URL_COMPONENTS components;
+    ZeroMemory(&components, sizeof(components));
+    components.dwStructSize = sizeof(components);
+    components.lpszScheme = scheme;
+    components.dwSchemeLength = _countof(scheme);
+    components.lpszHostName = host;
+    components.dwHostNameLength = _countof(host);
+    components.lpszUrlPath = path;
+    components.dwUrlPathLength = _countof(path);
+
+    if (!InternetCrackUrl(burl, 0, ICU_DECODE, &components))
+        return E_FAIL;
+
+    if (_wcsicmp(scheme, L"http") != 0 || components.nPort != m_port)
         return S_FALSE;
 
-    if (wcscmp(burl + 22, L"favicon.ico") == 0)
+    if (_wcsicmp(host, L"127.0.0.1") != 0 && _wcsicmp(host, L"localhost") != 0)
+        return S_FALSE;
+
+    if (wcscmp(path, L"/favicon.ico") == 0)
     {
         CComPtr<ICoreWebView2WebResourceResponse> response;
         if (FAILED(m_environment->CreateWebResourceResponse(nullptr, 404, L"Not Found", L"", &response)) || response == nullptr)
