@@ -1160,9 +1160,12 @@ HRESULT BrowserProxyModule::OnWebResourceRequested(ICoreWebView2 *sender, ICoreW
             static WCHAR *domain = L".prod.there.com";
             static WCHAR *path = L"/";
 
+            ForwardCookie(cookieManager, burl, L"av", domain, path);
+            ForwardCookie(cookieManager, burl, L"doid", domain, path);
             ForwardCookie(cookieManager, burl, L"ticket", domain, path);
             ForwardCookie(cookieManager, burl, L"ticketssl", domain, path);
             ForwardCookie(cookieManager, burl, L"ticketwlt", domain, path);
+            ForwardCookie(cookieManager, burl, L"tv", domain, path);
         }
     }
 
