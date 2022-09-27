@@ -108,11 +108,15 @@ if __name__ == '__main__':
                 print('The shortcuts were created successfully.')
         if args.clean:
             count = 0
-            paths = [
-                os.path.join(os.path.abspath(args.path), 'ThereEdge.exe'),
-                os.path.join(shell.SHGetFolderPath(0, shellcon.CSIDL_PROGRAMS, 0, 0), 'There', 'There (Edge).lnk'),
-                os.path.join(shell.SHGetFolderPath(0, shellcon.CSIDL_DESKTOP, 0, 0), 'There (Edge).lnk'),
-            ]
+            paths = [os.path.join(os.path.abspath(args.path), 'ThereEdge.exe')]
+            try:
+                paths.append(os.path.join(shell.SHGetFolderPath(0, shellcon.CSIDL_PROGRAMS, 0, 0), 'There', 'There (Edge).lnk'))
+            except Exception:
+                pass
+            try:
+                paths.append(os.path.join(shell.SHGetFolderPath(0, shellcon.CSIDL_DESKTOP, 0, 0), 'There (Edge).lnk'))
+            except Exception:
+                pass
             for path in paths:
                 if os.path.isfile(path):
                     os.remove(path)
