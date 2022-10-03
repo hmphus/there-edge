@@ -102,6 +102,7 @@ class Game {
     if (self.state == 'play') {
       window.requestAnimationFrame(function() {
         There.fsCommand('getKeyboardFocus');
+        $('.middle .section:nth-of-type(1) input[type="text"]:visible').focus();
       });
     }
   }

@@ -35,6 +35,7 @@ There.init({
       There.updateButtonState();
       There.updateButtonActions();
       There.fsCommand('getKeyboardFocus');
+      $('.panel input[type="text"]:visible').focus();
     }
 
     if (name == 'looksettoupdate') {
