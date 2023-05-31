@@ -886,6 +886,9 @@ HRESULT STDMETHODCALLTYPE FlashProxyModule::Invoke(HRESULT errorCode, ICoreWebVi
     COREWEBVIEW2_COLOR color = {0, 0, 0, 0};
     m_controller->put_DefaultBackgroundColor(color);
 
+    m_controller->put_ShouldDetectMonitorScaleChanges(false);
+    m_controller->put_RasterizationScale(1.0);
+
     VARIANT hostObject = {};
     hostObject.vt = VT_DISPATCH;
     hostObject.pdispVal = static_cast<IDispatch*>(this);

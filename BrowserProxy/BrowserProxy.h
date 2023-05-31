@@ -194,7 +194,7 @@ protected:
     CComPtr<IUnknown>                                  m_unknownSite;
     CComPtr<IOleClientSite>                            m_clientSite;
     CComPtr<ICoreWebView2Environment>                  m_environment;
-    CComPtr<ICoreWebView2Controller2>                  m_controller;
+    CComPtr<ICoreWebView2Controller3>                  m_controller;
     CComPtr<ICoreWebView2_4>                           m_view;
     CComPtr<ICoreWebView2Deferral>                     m_newWindowDeferral;
     CComPtr<ICoreWebView2NewWindowRequestedEventArgs>  m_newWindowArgs;

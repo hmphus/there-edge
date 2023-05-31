@@ -764,6 +764,8 @@ HRESULT STDMETHODCALLTYPE BrowserProxyModule::Invoke(HRESULT errorCode, ICoreWeb
     GetClientRect(m_wnd, &bounds);
     m_controller->put_Bounds(bounds);
 
+    m_controller->put_ShouldDetectMonitorScaleChanges(false);
+    m_controller->put_RasterizationScale(1.0);
     m_controller->put_IsVisible(m_visible);
 
     m_view->AddWebResourceRequestedFilter(L"https://webapps.prod.there.com/*", COREWEBVIEW2_WEB_RESOURCE_CONTEXT_DOCUMENT);

@@ -251,7 +251,7 @@ protected:
     CComPtr<IServiceProvider>                m_serviceProvider;
     CComPtr<IOleInPlaceSiteWindowless>       m_inplaceSite;
     CComPtr<ICoreWebView2Environment>        m_environment;
-    CComPtr<ICoreWebView2Controller2>        m_controller;
+    CComPtr<ICoreWebView2Controller3>        m_controller;
     CComPtr<ICoreWebView2>                   m_view;
     EventRegistrationToken                   m_webMessageReceivedToken;
     EventRegistrationToken                   m_webResourceRequestedToken;

@@ -277,13 +277,13 @@ There.init({
 
   onReady: function() {
     There.fsCommand('setStageWidthHeight', {
-      width: $('.hud').outerWidth(),
-      height: $('.hud').outerHeight(),
+      width: 800,
+      height: Math.max(89, Math.ceil($('.hud').outerHeight())),
     });
 
     There.fsCommand('setWidthHeight', {
-      width: $('.hud').outerWidth(),
-      height: $('.hud').outerHeight(),
+      width: 800,
+      height: Math.max(89, Math.ceil($('.hud').outerHeight())),
     });
 
     There.fsCommand('setTextureBitDepth', {
