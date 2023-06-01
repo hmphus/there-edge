@@ -301,7 +301,7 @@ body {
 .contextmenu {
   display:none;
   position:absolute;
-  left:110px;
+  left:105px;
   top:74px;
   box-shadow:2px 2px 3px #0006;
   z-index:5;
@@ -313,11 +313,13 @@ body {
 
 .contextmenu .item {
   margin-top:-1px;
-  width:68px;
+  width:88px;
   height:14px;
   background-color:#fff;
   font-size:11px;
   border:1px solid #666;
+  white-space:nowrap;
+  overflow:hidden;
 }
 
 .contextmenu .item:first-of-type {

@@ -113,7 +113,7 @@ There.init({
                 text: 'View Profile',
                 action: 'profile',
               }, {
-                text: 'Remove',
+                text: 'Remove Buddy',
                 action: 'removeBuddy',
               }];
               break;
@@ -129,7 +129,7 @@ There.init({
                 text: 'Email',
                 action: 'email',
               }, {
-                text: 'Add to Buddies',
+                text: 'Add Buddy',
                 action: 'addBuddy',
               }, {
                 text: 'View Profile',

@@ -1383,6 +1383,8 @@ body {
   background-color:#fff;
   font-size:11px;
   border:1px solid #666;
+  white-space:nowrap;
+  overflow:hidden;
 }
 
 .contextmenu .item:first-of-type {

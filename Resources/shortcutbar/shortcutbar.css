@@ -165,11 +165,12 @@ body {
   display:inline-block;
   margin-left:6px;
   margin-right:5px;
-  width:1px;
+  width:3px;
   height:23px;
   background-color:#62848c;
   border:1px solid #62848c;
   border-right-color:#fff;
+  box-sizing:border-box;
 }
 
 .shortcutbar .buttons.big .window {
