@@ -150,8 +150,8 @@ There.init({
     new ResizeObserver(function(entries) {
       const rect = entries[0].contentRect;
       There.fsCommand('setWidthHeight', {
-        width: rect.width,
-        height: rect.height,
+        width: Math.ceil(rect.width),
+        height: Math.ceil(rect.height),
       });
     }).observe($('.changeme')[0]);
 
