@@ -146,6 +146,8 @@ FlashProxyModule::FlashProxyModule():
     m_visible(false),
     m_hidden(false)
 {
+    SetEnvironmentVariable(L"WEBVIEW2_DEFAULT_BACKGROUND_COLOR", L"0x00000000");
+
     WNDCLASSEX childClass = {0};
     childClass.cbSize = sizeof(WNDCLASSEX);
     childClass.style = CS_HREDRAW | CS_VREDRAW | CS_DBLCLKS;
