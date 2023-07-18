@@ -8,13 +8,13 @@ The [Microsoft Edge WebView2 Runtime](https://developer.microsoft.com/en-us/micr
 
 ### Visual Studio
 
-Install [Visual Studio 2019](https://visualstudio.microsoft.com/vs/) with the following:
+Install [Visual Studio 2022](https://visualstudio.microsoft.com/vs/) with the following:
 * Workloads
   * Desktop development with C++
   * Python development
 * Individual components
   * Windows 10 SDK (10.0.19041.0)
   * Python language support
-  * Python 3 32-bit (3.7.8)
+  * Python 3 64-bit (3.9.13)
 
 ![Screenshot](https://media.fotki.com/2v2aKZw88x3JhYT.png)

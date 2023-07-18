@@ -67,8 +67,10 @@
     <None Include="coupling.js">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="packages.config" />
     <None Include="settings.html">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="packages.config">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>

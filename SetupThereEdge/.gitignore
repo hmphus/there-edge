@@ -4,3 +4,4 @@ dist/
 obj/
 bin/
 *.spec
+*.txt

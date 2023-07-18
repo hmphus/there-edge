@@ -58,7 +58,9 @@
     <None Include="FlashProxy.def">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="packages.config" />
+    <None Include="packages.config">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Midl Include="FlashProxy.idl">

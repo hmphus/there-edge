@@ -6,6 +6,7 @@
   </PropertyGroup>
   <PropertyGroup>
     <ProjectGuid>{7467bc47-b250-4225-9d2d-7fbcfb8d9688}</ProjectGuid>
+    <IsWindowsApplication>False</IsWindowsApplication>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="SetupThereEdge.py" />
