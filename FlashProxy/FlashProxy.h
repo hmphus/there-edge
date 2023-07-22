@@ -231,8 +231,10 @@ protected:
     ULONG                                    m_refCount;
     QACONTAINER                              m_qaContainer;
     QACONTROL                                m_qaControl;
-    SIZE                                     m_pos;
+    POINT                                    m_pos;
     SIZE                                     m_size;
+    POINT                                    m_dragPos;
+    POINT                                    m_dragOffset;
     HWND                                     m_proxyWnd;
     HWND                                     m_clientWnd;
     RECT                                     m_maskRects[10];
@@ -259,4 +261,5 @@ protected:
     BOOL                                     m_ready;
     BOOL                                     m_visible;
     BOOL                                     m_hidden;
+    BOOL                                     m_outside;
 };

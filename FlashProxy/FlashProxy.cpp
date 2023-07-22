@@ -43,8 +43,8 @@ void Log(const WCHAR *format, ...)
     WCHAR buff[1000];
     _vsnwprintf_s(buff, _countof(buff), format, args);
 
-    FILE *file = nullptr;
-    if (fopen_s(&file, "Debug.log", "a") == 0)
+    FILE *file = _fsopen("Debug.log", "a", _SH_DENYWR);
+    if (file != nullptr)
     {
         vfwprintf_s(file, format, args);
         fflush(file);
@@ -119,6 +119,8 @@ FlashProxyModule::FlashProxyModule():
     m_qaControl(),
     m_pos(),
     m_size(),
+    m_dragPos(),
+    m_dragOffset(),
     m_proxyWnd(nullptr),
     m_clientWnd(nullptr),
     m_maskRects(),
@@ -144,7 +146,8 @@ FlashProxyModule::FlashProxyModule():
     m_navigationCompletedToken(),
     m_ready(false),
     m_visible(false),
-    m_hidden(false)
+    m_hidden(false),
+    m_outside(false)
 {
     SetEnvironmentVariable(L"WEBVIEW2_DEFAULT_BACKGROUND_COLOR", L"0x00000000");
 
@@ -484,7 +487,7 @@ HRESULT STDMETHODCALLTYPE FlashProxyModule::DoVerb(LONG iVerb, LPMSG lpmsg, IOle
             {
                 m_proxyWnd = CreateWindowEx(IsWindows8OrGreater() ? WS_EX_TRANSPARENT : 0, g_WindowClassName, L"",
                                             WS_CHILD | WS_CLIPCHILDREN | WS_CLIPSIBLINGS,
-                                            m_pos.cx, m_pos.cy, max(1, m_size.cx), max(1, m_size.cy),
+                                            m_pos.x, m_pos.y, max(1, m_size.cx), max(1, m_size.cy),
                                             m_clientWnd, nullptr, GetModuleHandle(nullptr), nullptr);
                 if (m_proxyWnd == nullptr)
                     return E_FAIL;
@@ -560,8 +563,8 @@ HRESULT STDMETHODCALLTYPE FlashProxyModule::QueryHitPoint(DWORD dwAspect, LPCREC
         return E_INVALIDARG;
 
     POINT point;
-    point.x = ptlLoc.x - m_pos.cx;
-    point.y = ptlLoc.y - m_pos.cy;
+    point.x = ptlLoc.x - m_pos.x;
+    point.y = ptlLoc.y - m_pos.y;
 
     if (point.x < 0 || point.y < 0 || point.x >= m_size.cx || point.y >= m_size.cy)
     {
@@ -629,30 +632,47 @@ HRESULT STDMETHODCALLTYPE FlashProxyModule::Invoke(DISPID dispIdMember, REFIID r
         {
             if (m_proxyWnd != nullptr)
             {
-                POINT point;
-                GetCursorPos(&point);
-                ScreenToClient(m_clientWnd, &point);
-
-                SetCapture(m_proxyWnd);
-                SendMessage(m_clientWnd, WM_LBUTTONDOWN, 0, MAKELPARAM(point.x, point.y));
+                GetCursorPos(&m_dragOffset);
+                ScreenToClient(m_proxyWnd, &m_dragOffset);
+                Log(L"Drag offset %d %d\n", m_dragOffset.x, m_dragOffset.y);
             }
 
-            CComBSTR bcommand = L"beginDragWindow";
-            CComBSTR bquery = L"";
+            if (!m_outside)
+            {
+                m_dragPos = m_pos;
 
-            VARIANTARG vargs[2];
-            vargs[0].vt = VT_BSTR;
-            vargs[0].bstrVal = bquery;
-            vargs[1].vt = VT_BSTR;
-            vargs[1].bstrVal = bcommand;
+                if (m_proxyWnd != nullptr)
+                {
+                    POINT point;
+                    GetCursorPos(&point);
+                    ScreenToClient(m_clientWnd, &point);
 
-            DISPPARAMS params;
-            params.rgvarg = vargs;
-            params.cArgs = _countof(vargs);
-            params.cNamedArgs = 0;
+                    SetCapture(m_proxyWnd);
+                    SendMessage(m_clientWnd, WM_LBUTTONDOWN, 0, MAKELPARAM(point.x, point.y));
+                }
 
-            if (FAILED(InvokeFlashEvent(L"FSCommand", params)))
-                return E_FAIL;
+                CComBSTR bcommand = L"beginDragWindow";
+                CComBSTR bquery = L"";
+
+                VARIANTARG vargs[2];
+                vargs[0].vt = VT_BSTR;
+                vargs[0].bstrVal = bquery;
+                vargs[1].vt = VT_BSTR;
+                vargs[1].bstrVal = bcommand;
+
+                DISPPARAMS params;
+                params.rgvarg = vargs;
+                params.cArgs = _countof(vargs);
+                params.cNamedArgs = 0;
+
+                if (FAILED(InvokeFlashEvent(L"FSCommand", params)))
+                    return E_FAIL;
+            }
+            else
+            {
+                if (m_proxyWnd != nullptr)
+                    SetCapture(m_proxyWnd);
+            }
 
             return S_OK;
         }
@@ -1179,8 +1199,8 @@ HRESULT FlashProxyModule::InvokeFlashEvent(const WCHAR *cmd, DISPPARAMS &params,
 HRESULT FlashProxyModule::SetSize(const SIZE &size)
 {
     RECT rect;
-    rect.left = m_pos.cx;
-    rect.top = m_pos.cy;
+    rect.left = m_pos.x;
+    rect.top = m_pos.y;
     rect.right = rect.left + size.cx;
     rect.bottom = rect.top + size.cy;
 
@@ -1191,7 +1211,7 @@ HRESULT FlashProxyModule::SetRect(const RECT &rect)
 {
     UINT flags = 0;
 
-    if (rect.left == m_pos.cx && rect.top == m_pos.cy)
+    if ((rect.left == m_pos.x && rect.top == m_pos.y) || m_outside)
         flags |= SWP_NOMOVE;
 
     LONG width = rect.right - rect.left;
@@ -1203,8 +1223,8 @@ HRESULT FlashProxyModule::SetRect(const RECT &rect)
     if (flags == (SWP_NOMOVE | SWP_NOSIZE))
         return S_OK;
 
-    m_pos.cx = rect.left;
-    m_pos.cy = rect.top;
+    m_pos.x = rect.left;
+    m_pos.y = rect.top;
 
     m_size.cx = width;
     m_size.cy = height;
@@ -1212,7 +1232,7 @@ HRESULT FlashProxyModule::SetRect(const RECT &rect)
     if (m_proxyWnd == nullptr)
         return S_OK;
 
-    SetWindowPos(m_proxyWnd, nullptr, m_pos.cx, m_pos.cy, max(1, m_size.cx), max(1, m_size.cy), flags | SWP_NOZORDER | SWP_NOACTIVATE);
+    SetWindowPos(m_proxyWnd, nullptr, m_pos.x, m_pos.y, max(1, m_size.cx), max(1, m_size.cy), flags | SWP_NOZORDER | SWP_NOACTIVATE);
     SetVisibility(m_visibilityMask);
     GuessToolbarVisibility();
 
@@ -1270,7 +1290,7 @@ void FlashProxyModule::GuessToolbarVisibility()
     RECT bounds;
     GetClientRect(m_clientWnd, &bounds);
 
-    LONG y = bounds.bottom - m_pos.cy - 56;
+    LONG y = bounds.bottom - m_pos.y - 56;
     UINT32 visibilityMask = 0;
 
     if (m_ready)
@@ -1521,13 +1541,70 @@ LRESULT APIENTRY FlashProxyModule::ChildWndProc(HWND hWnd, UINT Msg, WPARAM wPar
         {
             if (flashProxy != nullptr && GetCapture() == hWnd)
             {
-                HWND clientWnd = flashProxy->m_clientWnd;
+                RECT bounds;
+                GetClientRect(flashProxy->m_clientWnd, &bounds);
 
-                POINT point = {GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam)};
-                ClientToScreen(hWnd, &point);
-                ScreenToClient(clientWnd, &point);
+                bounds.right -= bounds.left;
+                bounds.bottom -= bounds.top;
 
-                SendMessage(clientWnd, WM_MOUSEMOVE, 0, MAKELPARAM(point.x, point.y));
+                POINT point1 = {GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam)};
+                ClientToScreen(hWnd, &point1);
+
+                POINT point2 = point1;
+                ScreenToClient(flashProxy->m_clientWnd, &point2);
+
+                BOOL outside = (point2.x < 0 || point2.y < 0 || point2.x >= bounds.right || point2.y >= bounds.bottom);
+
+                if (!flashProxy->m_outside)
+                {
+                    SendMessage(flashProxy->m_clientWnd, WM_MOUSEMOVE, 0, MAKELPARAM(point2.x, point2.y));
+
+                    if (outside && IsWindows8OrGreater())
+                    {
+                        flashProxy->m_outside = true;
+
+                        SendMessage(flashProxy->m_clientWnd, WM_LBUTTONUP, 0, MAKELPARAM(flashProxy->m_dragPos.x, flashProxy->m_dragPos.y));
+
+                        SetWindowLong(hWnd, GWL_STYLE, WS_OVERLAPPED | WS_VISIBLE);
+                        SetParent(hWnd, nullptr);
+
+                        POINT point3 = {flashProxy->m_pos.x - flashProxy->m_dragOffset.x, flashProxy->m_pos.y - flashProxy->m_dragOffset.y};
+                        ClientToScreen(flashProxy->m_clientWnd, &point3);
+                        SetWindowPos(hWnd, nullptr, point3.x, point3.y, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
+                    }
+                }
+                else
+                {
+                    POINT point3 = {point1.x - flashProxy->m_dragOffset.x, point1.y - flashProxy->m_dragOffset.y};
+                    SetWindowPos(hWnd, nullptr, point3.x, point3.y, 0, 0, SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE);
+
+                    if (!outside)
+                    {
+                        flashProxy->m_outside = false;
+
+                        SetWindowLong(hWnd, GWL_STYLE, WS_CHILD | WS_CLIPCHILDREN | WS_CLIPSIBLINGS | WS_VISIBLE);
+                        SetParent(hWnd, flashProxy->m_clientWnd);
+
+                        SendMessage(flashProxy->m_clientWnd, WM_LBUTTONDOWN, 0, MAKELPARAM(point2.x, point2.y));
+
+                        CComBSTR bcommand = L"beginDragWindow";
+                        CComBSTR bquery = L"";
+
+                        VARIANTARG vargs[2];
+                        vargs[0].vt = VT_BSTR;
+                        vargs[0].bstrVal = bquery;
+                        vargs[1].vt = VT_BSTR;
+                        vargs[1].bstrVal = bcommand;
+
+                        DISPPARAMS params;
+                        params.rgvarg = vargs;
+                        params.cArgs = _countof(vargs);
+                        params.cNamedArgs = 0;
+
+                        flashProxy->InvokeFlashEvent(L"FSCommand", params);
+
+                    }
+                }
 
                 return 0;
             }
@@ -1540,11 +1617,19 @@ LRESULT APIENTRY FlashProxyModule::ChildWndProc(HWND hWnd, UINT Msg, WPARAM wPar
                 HWND clientWnd = flashProxy->m_clientWnd;
 
                 POINT point = {GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam)};
-                ClientToScreen(hWnd, &point);
-                ScreenToClient(clientWnd, &point);
 
-                ReleaseCapture();
-                SendMessage(clientWnd, WM_LBUTTONUP, 0, MAKELPARAM(point.x, point.y));
+                if (!flashProxy->m_outside)
+                {
+                    ClientToScreen(hWnd, &point);
+                    ScreenToClient(clientWnd, &point);
+
+                    ReleaseCapture();
+                    SendMessage(clientWnd, WM_LBUTTONUP, 0, MAKELPARAM(point.x, point.y));
+                }
+                else
+                {
+                    ReleaseCapture();
+                }
 
                 return 0;
             }
