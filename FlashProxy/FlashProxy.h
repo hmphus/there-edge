@@ -215,6 +215,7 @@ protected:
     HRESULT Navigate();
     HRESULT SendVariables();
     HRESULT InvokeFlashEvent(const WCHAR *cmd, DISPPARAMS &args, VARIANT *result = nullptr);
+    HRESULT SetPos(const POINT &pos);
     HRESULT SetSize(const SIZE &size);
     HRESULT SetRect(const RECT &rect);
     HRESULT SetMaskRects(WCHAR *text);
@@ -233,7 +234,6 @@ protected:
     QACONTROL                                m_qaControl;
     POINT                                    m_pos;
     SIZE                                     m_size;
-    POINT                                    m_dragPos;
     POINT                                    m_dragOffset;
     HWND                                     m_proxyWnd;
     HWND                                     m_clientWnd;

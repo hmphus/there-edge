@@ -119,7 +119,6 @@ FlashProxyModule::FlashProxyModule():
     m_qaControl(),
     m_pos(),
     m_size(),
-    m_dragPos(),
     m_dragOffset(),
     m_proxyWnd(nullptr),
     m_clientWnd(nullptr),
@@ -630,48 +629,12 @@ HRESULT STDMETHODCALLTYPE FlashProxyModule::Invoke(DISPID dispIdMember, REFIID r
     {
         case 1:
         {
-            if (m_proxyWnd != nullptr)
+            if (m_proxyWnd != nullptr && GetCapture() != m_proxyWnd)
             {
                 GetCursorPos(&m_dragOffset);
                 ScreenToClient(m_proxyWnd, &m_dragOffset);
-                Log(L"Drag offset %d %d\n", m_dragOffset.x, m_dragOffset.y);
-            }
 
-            if (!m_outside)
-            {
-                m_dragPos = m_pos;
-
-                if (m_proxyWnd != nullptr)
-                {
-                    POINT point;
-                    GetCursorPos(&point);
-                    ScreenToClient(m_clientWnd, &point);
-
-                    SetCapture(m_proxyWnd);
-                    SendMessage(m_clientWnd, WM_LBUTTONDOWN, 0, MAKELPARAM(point.x, point.y));
-                }
-
-                CComBSTR bcommand = L"beginDragWindow";
-                CComBSTR bquery = L"";
-
-                VARIANTARG vargs[2];
-                vargs[0].vt = VT_BSTR;
-                vargs[0].bstrVal = bquery;
-                vargs[1].vt = VT_BSTR;
-                vargs[1].bstrVal = bcommand;
-
-                DISPPARAMS params;
-                params.rgvarg = vargs;
-                params.cArgs = _countof(vargs);
-                params.cNamedArgs = 0;
-
-                if (FAILED(InvokeFlashEvent(L"FSCommand", params)))
-                    return E_FAIL;
-            }
-            else
-            {
-                if (m_proxyWnd != nullptr)
-                    SetCapture(m_proxyWnd);
+                SetCapture(m_proxyWnd);
             }
 
             return S_OK;
@@ -1196,6 +1159,17 @@ HRESULT FlashProxyModule::InvokeFlashEvent(const WCHAR *cmd, DISPPARAMS &params,
     return S_OK;
 }
 
+HRESULT FlashProxyModule::SetPos(const POINT &point)
+{
+    RECT rect;
+    rect.left = point.x;
+    rect.top = point.y;
+    rect.right = rect.left + m_size.cx;
+    rect.bottom = rect.top + m_size.cy;
+
+    return SetRect(rect);
+}
+
 HRESULT FlashProxyModule::SetSize(const SIZE &size)
 {
     RECT rect;
@@ -1547,92 +1521,94 @@ LRESULT APIENTRY FlashProxyModule::ChildWndProc(HWND hWnd, UINT Msg, WPARAM wPar
                 bounds.right -= bounds.left;
                 bounds.bottom -= bounds.top;
 
-                POINT point1 = {GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam)};
+                POINT point1 = {GET_X_LPARAM(lParam) - flashProxy->m_dragOffset.x, GET_Y_LPARAM(lParam) - flashProxy->m_dragOffset.y};
                 ClientToScreen(hWnd, &point1);
 
                 POINT point2 = point1;
                 ScreenToClient(flashProxy->m_clientWnd, &point2);
 
-                BOOL outside = (point2.x < 0 || point2.y < 0 || point2.x >= bounds.right || point2.y >= bounds.bottom);
+                POINT point3 = {point2.x + flashProxy->m_size.cx, point2.y + flashProxy->m_size.cy};
+
+                BOOL outside = (point2.x < 0 || point2.y < 0 || point3.x >= bounds.right || point3.y >= bounds.bottom);
 
                 if (!flashProxy->m_outside)
                 {
-                    SendMessage(flashProxy->m_clientWnd, WM_MOUSEMOVE, 0, MAKELPARAM(point2.x, point2.y));
+                    SetWindowPos(hWnd, nullptr, point2.x, point2.y, 0, 0, SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE);
 
                     if (outside && IsWindows8OrGreater())
                     {
                         flashProxy->m_outside = true;
 
-                        SendMessage(flashProxy->m_clientWnd, WM_LBUTTONUP, 0, MAKELPARAM(flashProxy->m_dragPos.x, flashProxy->m_dragPos.y));
-
+                        ShowWindow(hWnd, SW_HIDE);
                         SetWindowLong(hWnd, GWL_STYLE, WS_OVERLAPPED | WS_VISIBLE);
                         SetParent(hWnd, nullptr);
-
-                        POINT point3 = {flashProxy->m_pos.x - flashProxy->m_dragOffset.x, flashProxy->m_pos.y - flashProxy->m_dragOffset.y};
-                        ClientToScreen(flashProxy->m_clientWnd, &point3);
-                        SetWindowPos(hWnd, nullptr, point3.x, point3.y, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
+                        ShowWindow(hWnd, SW_SHOWNA);
                     }
                 }
                 else
                 {
-                    POINT point3 = {point1.x - flashProxy->m_dragOffset.x, point1.y - flashProxy->m_dragOffset.y};
-                    SetWindowPos(hWnd, nullptr, point3.x, point3.y, 0, 0, SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE);
+                    SetWindowPos(hWnd, nullptr, point1.x, point1.y, 0, 0, SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE);
 
                     if (!outside)
                     {
                         flashProxy->m_outside = false;
 
+                        ShowWindow(hWnd, SW_HIDE);
                         SetWindowLong(hWnd, GWL_STYLE, WS_CHILD | WS_CLIPCHILDREN | WS_CLIPSIBLINGS | WS_VISIBLE);
                         SetParent(hWnd, flashProxy->m_clientWnd);
+                        ShowWindow(hWnd, SW_SHOWNA);
 
                         SendMessage(flashProxy->m_clientWnd, WM_LBUTTONDOWN, 0, MAKELPARAM(point2.x, point2.y));
-
-                        CComBSTR bcommand = L"beginDragWindow";
-                        CComBSTR bquery = L"";
-
-                        VARIANTARG vargs[2];
-                        vargs[0].vt = VT_BSTR;
-                        vargs[0].bstrVal = bquery;
-                        vargs[1].vt = VT_BSTR;
-                        vargs[1].bstrVal = bcommand;
-
-                        DISPPARAMS params;
-                        params.rgvarg = vargs;
-                        params.cArgs = _countof(vargs);
-                        params.cNamedArgs = 0;
-
-                        flashProxy->InvokeFlashEvent(L"FSCommand", params);
-
+                        SendMessage(flashProxy->m_clientWnd, WM_LBUTTONUP, 0, MAKELPARAM(point2.x, point2.y));
                     }
                 }
 
                 return 0;
             }
+
+            break;
         }
 
         case WM_LBUTTONUP:
         {
             if (flashProxy != nullptr && GetCapture() == hWnd)
             {
-                HWND clientWnd = flashProxy->m_clientWnd;
-
-                POINT point = {GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam)};
-
                 if (!flashProxy->m_outside)
                 {
+                    POINT point = {GET_X_LPARAM(lParam) - flashProxy->m_dragOffset.x, GET_Y_LPARAM(lParam) - flashProxy->m_dragOffset.y};
                     ClientToScreen(hWnd, &point);
-                    ScreenToClient(clientWnd, &point);
+                    ScreenToClient(flashProxy->m_clientWnd, &point);
 
-                    ReleaseCapture();
-                    SendMessage(clientWnd, WM_LBUTTONUP, 0, MAKELPARAM(point.x, point.y));
+                    flashProxy->SetPos(point);
+
+                    SendMessage(flashProxy->m_clientWnd, WM_LBUTTONDOWN, 0, MAKELPARAM(point.x, point.y));
+
+                    CComBSTR bcommand = L"beginDragWindow";
+                    CComBSTR bquery = L"";
+
+                    VARIANTARG vargs[2];
+                    vargs[0].vt = VT_BSTR;
+                    vargs[0].bstrVal = bquery;
+                    vargs[1].vt = VT_BSTR;
+                    vargs[1].bstrVal = bcommand;
+
+                    DISPPARAMS params;
+                    params.rgvarg = vargs;
+                    params.cArgs = _countof(vargs);
+                    params.cNamedArgs = 0;
+
+                    flashProxy->InvokeFlashEvent(L"FSCommand", params);
+
+                    SendMessage(flashProxy->m_clientWnd, WM_MOUSEMOVE, 0, MAKELPARAM(point.x, point.y));
+                    SendMessage(flashProxy->m_clientWnd, WM_LBUTTONUP, 0, MAKELPARAM(point.x, point.y));
                 }
-                else
-                {
-                    ReleaseCapture();
-                }
+
+                ReleaseCapture();
 
                 return 0;
             }
+
+            break;
         }
 
         case WM_CAPTURECHANGED:
