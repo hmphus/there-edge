@@ -119,6 +119,7 @@ FlashProxyModule::FlashProxyModule():
     m_qaControl(),
     m_pos(),
     m_size(),
+    m_dragPos(),
     m_dragOffset(),
     m_proxyWnd(nullptr),
     m_clientWnd(nullptr),
@@ -146,7 +147,7 @@ FlashProxyModule::FlashProxyModule():
     m_ready(false),
     m_visible(false),
     m_hidden(false),
-    m_outside(false)
+    m_detached(false)
 {
     SetEnvironmentVariable(L"WEBVIEW2_DEFAULT_BACKGROUND_COLOR", L"0x00000000");
 
@@ -629,29 +630,20 @@ HRESULT STDMETHODCALLTYPE FlashProxyModule::Invoke(DISPID dispIdMember, REFIID r
     {
         case 1:
         {
-            if (m_proxyWnd != nullptr && GetCapture() != m_proxyWnd)
+            if (m_proxyWnd == nullptr || GetCapture() == m_proxyWnd)
+                return E_FAIL;
+
+            GetCursorPos(&m_dragOffset);
+            ScreenToClient(m_proxyWnd, &m_dragOffset);
+
+            SetCapture(m_proxyWnd);
+
+            if (!m_detached)
             {
-                GetCursorPos(&m_dragOffset);
-                ScreenToClient(m_proxyWnd, &m_dragOffset);
+                GetCursorPos(&m_dragPos);
+                ScreenToClient(m_clientWnd, &m_dragPos);
 
-                SetCapture(m_proxyWnd);
-            }
-
-            return S_OK;
-        }
-
-        case 2:
-        {
-#if 1
-            // Fake a window drag event to workaround the textbox focus issue.
-            if (m_proxyWnd != nullptr)
-            {
-                POINT point = {0, 0};
-                ClientToScreen(m_proxyWnd, &point);
-                ScreenToClient(m_clientWnd, &point);
-
-                SetCapture(m_proxyWnd);
-                SendMessage(m_clientWnd, WM_LBUTTONDOWN, 0, MAKELPARAM(point.x, point.y));
+                SendMessage(m_clientWnd, WM_LBUTTONDOWN, 0, MAKELPARAM(m_dragPos.x, m_dragPos.y));
 
                 CComBSTR bcommand = L"beginDragWindow";
                 CComBSTR bquery = L"";
@@ -669,10 +661,44 @@ HRESULT STDMETHODCALLTYPE FlashProxyModule::Invoke(DISPID dispIdMember, REFIID r
 
                 if (FAILED(InvokeFlashEvent(L"FSCommand", params)))
                     return E_FAIL;
-
-                SendMessage(m_proxyWnd, WM_MOUSEMOVE, 0, MAKELPARAM(0, 0));
-                SendMessage(m_proxyWnd, WM_LBUTTONUP, 0, MAKELPARAM(0, 0));
             }
+
+            return S_OK;
+        }
+
+        case 2:
+        {
+#if 1
+            // Fake a window drag event to workaround the textbox focus issue.
+            if (m_proxyWnd == nullptr)
+                return E_FAIL;
+
+            POINT point = {0, 0};
+            ClientToScreen(m_proxyWnd, &point);
+            ScreenToClient(m_clientWnd, &point);
+
+            SetCapture(m_proxyWnd);
+            SendMessage(m_clientWnd, WM_LBUTTONDOWN, 0, MAKELPARAM(point.x, point.y));
+
+            CComBSTR bcommand = L"beginDragWindow";
+            CComBSTR bquery = L"";
+
+            VARIANTARG vargs[2];
+            vargs[0].vt = VT_BSTR;
+            vargs[0].bstrVal = bquery;
+            vargs[1].vt = VT_BSTR;
+            vargs[1].bstrVal = bcommand;
+
+            DISPPARAMS params;
+            params.rgvarg = vargs;
+            params.cArgs = _countof(vargs);
+            params.cNamedArgs = 0;
+
+            if (FAILED(InvokeFlashEvent(L"FSCommand", params)))
+                return E_FAIL;
+
+            SendMessage(m_proxyWnd, WM_MOUSEMOVE, 0, MAKELPARAM(0, 0));
+            SendMessage(m_proxyWnd, WM_LBUTTONUP, 0, MAKELPARAM(0, 0));
 
             if (m_inplaceSite != nullptr)
                 m_inplaceSite->SetFocus(true);
@@ -1185,11 +1211,14 @@ HRESULT FlashProxyModule::SetRect(const RECT &rect)
 {
     UINT flags = 0;
 
-    if ((rect.left == m_pos.x && rect.top == m_pos.y) || m_outside)
-        flags |= SWP_NOMOVE;
+    LONG x = m_detached ? m_pos.x : rect.left;
+    LONG y = m_detached ? m_pos.y : rect.top;
 
     LONG width = rect.right - rect.left;
     LONG height = rect.bottom - rect.top;
+
+    if (x == m_pos.x && y == m_pos.y)
+        flags |= SWP_NOMOVE;
 
     if (width == m_size.cx && height == m_size.cy)
         flags |= SWP_NOSIZE;
@@ -1197,8 +1226,8 @@ HRESULT FlashProxyModule::SetRect(const RECT &rect)
     if (flags == (SWP_NOMOVE | SWP_NOSIZE))
         return S_OK;
 
-    m_pos.x = rect.left;
-    m_pos.y = rect.top;
+    m_pos.x = x;
+    m_pos.y = y;
 
     m_size.cx = width;
     m_size.cy = height;
@@ -1531,16 +1560,16 @@ LRESULT APIENTRY FlashProxyModule::ChildWndProc(HWND hWnd, UINT Msg, WPARAM wPar
 
                 BOOL outside = (point2.x < 0 || point2.y < 0 || point3.x >= bounds.right || point3.y >= bounds.bottom);
 
-                if (!flashProxy->m_outside)
+                if (!flashProxy->m_detached)
                 {
                     SetWindowPos(hWnd, nullptr, point2.x, point2.y, 0, 0, SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE);
 
                     if (outside && IsWindows8OrGreater())
                     {
-                        flashProxy->m_outside = true;
+                        flashProxy->m_detached = true;
 
                         ShowWindow(hWnd, SW_HIDE);
-                        SetWindowLong(hWnd, GWL_STYLE, WS_OVERLAPPED | WS_VISIBLE);
+                        SetWindowLong(hWnd, GWL_STYLE, WS_OVERLAPPED);
                         SetParent(hWnd, nullptr);
                         ShowWindow(hWnd, SW_SHOWNA);
                     }
@@ -1551,15 +1580,12 @@ LRESULT APIENTRY FlashProxyModule::ChildWndProc(HWND hWnd, UINT Msg, WPARAM wPar
 
                     if (!outside)
                     {
-                        flashProxy->m_outside = false;
+                        flashProxy->m_detached = false;
 
                         ShowWindow(hWnd, SW_HIDE);
-                        SetWindowLong(hWnd, GWL_STYLE, WS_CHILD | WS_CLIPCHILDREN | WS_CLIPSIBLINGS | WS_VISIBLE);
+                        SetWindowLong(hWnd, GWL_STYLE, WS_CHILD | WS_CLIPCHILDREN | WS_CLIPSIBLINGS);
                         SetParent(hWnd, flashProxy->m_clientWnd);
-                        ShowWindow(hWnd, SW_SHOWNA);
-
-                        SendMessage(flashProxy->m_clientWnd, WM_LBUTTONDOWN, 0, MAKELPARAM(point2.x, point2.y));
-                        SendMessage(flashProxy->m_clientWnd, WM_LBUTTONUP, 0, MAKELPARAM(point2.x, point2.y));
+                        ShowWindow(hWnd, SW_SHOW);
                     }
                 }
 
@@ -1573,35 +1599,17 @@ LRESULT APIENTRY FlashProxyModule::ChildWndProc(HWND hWnd, UINT Msg, WPARAM wPar
         {
             if (flashProxy != nullptr && GetCapture() == hWnd)
             {
-                if (!flashProxy->m_outside)
+                if (!flashProxy->m_detached)
                 {
-                    POINT point = {GET_X_LPARAM(lParam) - flashProxy->m_dragOffset.x, GET_Y_LPARAM(lParam) - flashProxy->m_dragOffset.y};
+                    POINT point = {GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam)};
                     ClientToScreen(hWnd, &point);
                     ScreenToClient(flashProxy->m_clientWnd, &point);
-
-                    flashProxy->SetPos(point);
-
-                    SendMessage(flashProxy->m_clientWnd, WM_LBUTTONDOWN, 0, MAKELPARAM(point.x, point.y));
-
-                    CComBSTR bcommand = L"beginDragWindow";
-                    CComBSTR bquery = L"";
-
-                    VARIANTARG vargs[2];
-                    vargs[0].vt = VT_BSTR;
-                    vargs[0].bstrVal = bquery;
-                    vargs[1].vt = VT_BSTR;
-                    vargs[1].bstrVal = bcommand;
-
-                    DISPPARAMS params;
-                    params.rgvarg = vargs;
-                    params.cArgs = _countof(vargs);
-                    params.cNamedArgs = 0;
-
-                    flashProxy->InvokeFlashEvent(L"FSCommand", params);
 
                     SendMessage(flashProxy->m_clientWnd, WM_MOUSEMOVE, 0, MAKELPARAM(point.x, point.y));
                     SendMessage(flashProxy->m_clientWnd, WM_LBUTTONUP, 0, MAKELPARAM(point.x, point.y));
                 }
+                else
+                    SendMessage(flashProxy->m_clientWnd, WM_LBUTTONUP, 0, MAKELPARAM(flashProxy->m_dragPos.x, flashProxy->m_dragPos.y));
 
                 ReleaseCapture();
 

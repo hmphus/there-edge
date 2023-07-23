@@ -234,6 +234,7 @@ protected:
     QACONTROL                                m_qaControl;
     POINT                                    m_pos;
     SIZE                                     m_size;
+    POINT                                    m_dragPos;
     POINT                                    m_dragOffset;
     HWND                                     m_proxyWnd;
     HWND                                     m_clientWnd;
@@ -261,5 +262,5 @@ protected:
     BOOL                                     m_ready;
     BOOL                                     m_visible;
     BOOL                                     m_hidden;
-    BOOL                                     m_outside;
+    BOOL                                     m_detached;
 };
