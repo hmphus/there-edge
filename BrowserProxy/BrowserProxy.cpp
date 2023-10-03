@@ -151,6 +151,7 @@ BrowserProxyModule::BrowserProxyModule():
     m_ready(false),
     m_visible(true)
 {
+    SetEnvironmentVariable(L"WEBVIEW2_DEFAULT_BACKGROUND_COLOR", L"0xFFFFFFFF");
 }
 
 BrowserProxyModule::~BrowserProxyModule()

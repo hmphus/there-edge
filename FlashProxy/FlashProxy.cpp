@@ -1531,6 +1531,8 @@ LRESULT APIENTRY FlashProxyModule::ChildWndProc(HWND hWnd, UINT Msg, WPARAM wPar
 
                 return 0;
             }
+
+            break;
         }
 
         case WM_LBUTTONUP:
@@ -1548,6 +1550,8 @@ LRESULT APIENTRY FlashProxyModule::ChildWndProc(HWND hWnd, UINT Msg, WPARAM wPar
 
                 return 0;
             }
+
+            break;
         }
 
         case WM_CAPTURECHANGED:
