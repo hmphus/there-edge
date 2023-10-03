@@ -499,7 +499,7 @@ HRESULT STDMETHODCALLTYPE FlashProxyModule::DoVerb(LONG iVerb, LPMSG lpmsg, IOle
                     if (PathAppend(userDataFolder, L"There"))
                     {
                         CreateDirectory(userDataFolder, nullptr);
-                        if (PathAppend(userDataFolder, L"Edge"))
+                        if (PathAppend(userDataFolder, L"EdgeFlash"))
                         {
                             CreateDirectory(userDataFolder, nullptr);
                             m_userDataFolder = userDataFolder;
@@ -871,15 +871,20 @@ HRESULT STDMETHODCALLTYPE FlashProxyModule::Invoke(HRESULT errorCode, ICoreWebVi
     if (FAILED(m_view->get_Settings(&settings)) || settings == nullptr)
         return E_FAIL;
 
-    settings->put_AreDevToolsEnabled(IsDevToolsEnabled());
-    settings->put_AreDefaultContextMenusEnabled(false);
-    settings->put_AreDefaultScriptDialogsEnabled(false);
-    settings->put_IsBuiltInErrorPageEnabled(false);
-    settings->put_IsStatusBarEnabled(false);
-    settings->put_IsZoomControlEnabled(false);
-    settings->put_AreHostObjectsAllowed(true);
-    settings->put_IsScriptEnabled(true);
-    settings->put_IsWebMessageEnabled(true);
+    CComPtr<ICoreWebView2Settings8> settings8;
+    if (FAILED(settings->QueryInterface(&settings8)) || settings8 == nullptr)
+        return E_FAIL;
+
+    settings8->put_AreDevToolsEnabled(IsDevToolsEnabled());
+    settings8->put_AreDefaultContextMenusEnabled(false);
+    settings8->put_AreDefaultScriptDialogsEnabled(false);
+    settings8->put_IsBuiltInErrorPageEnabled(false);
+    settings8->put_IsStatusBarEnabled(false);
+    settings8->put_IsZoomControlEnabled(false);
+    settings8->put_AreHostObjectsAllowed(true);
+    settings8->put_IsScriptEnabled(true);
+    settings8->put_IsWebMessageEnabled(true);
+    settings8->put_IsReputationCheckingRequired(false);
 
     RECT bounds;
     GetClientRect(m_proxyWnd, &bounds);
