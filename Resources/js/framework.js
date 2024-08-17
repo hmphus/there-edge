@@ -16,28 +16,34 @@ There.init = function(settings) {
   if (settings != undefined) {
     Object.assign(There, settings);
   }
-  if (window.chrome.webview != undefined) {
-    window.chrome.webview.addEventListener('message', function(message) {
-      const url = new URL(message.data, 'http://host/');
-      if (url.pathname == '/setVariable') {
-        const name = url.searchParams.get('name');
-        const value = url.searchParams.get('value');
-        if (There.private.isReady) {
-          There.processVariable(name, value);
-        } else {
-          There.private.queue.push({
-            type: 'variable',
-            name: name,
-            value: value,
-          });
-        }
+  window.chrome?.webview?.addEventListener('message', function(message) {
+    const url = new URL(message.data, 'http://host/');
+    if (url.pathname == '/setVariable') {
+      const name = url.searchParams.get('name');
+      const value = url.searchParams.get('value');
+      if (There.private.isReady) {
+        There.processVariable(name, value);
+      } else {
+        There.private.queue.push({
+          type: 'variable',
+          name: name,
+          value: value,
+        });
       }
-    });
-  }
+    }
+  });
   $(document).ready(function() {
     $('body').on('contextmenu', function(event) {
       return false;
     });
+    if (window.chrome?.webview != undefined) {
+      // Windows Edge WebView2
+      There.variables.there_resourcesprotocol = 'http';
+    }
+    if (window.webkit?.messageHandlers.there != undefined) {
+      // macOS WKWebView
+      There.variables.there_resourcesprotocol = 'there';
+    }
     There.private.isReady = true;
     There.onReady();
     There.processQueue();
@@ -107,21 +113,21 @@ There.fsCommand = function(command, query) {
   }
   if (command == 'beginDragWindow') {
     try {
-      window.chrome.webview.hostObjects.sync.client.onBeginDragWindow();
+      window.chrome?.webview?.hostObjects.sync.client.onBeginDragWindow();
+      // FIXME: How is this done for the macOS client?
     } catch (error) {
     }
     return;
   }
   if (command == 'getKeyboardFocus') {
     try {
-      window.chrome.webview.hostObjects.sync.client.onKeyboardFocus();
+      window.chrome?.webview?.hostObjects.sync.client.onKeyboardFocus();
     } catch (error) {
     }
     return;
   }
-  if (window.chrome.webview != undefined) {
-    window.chrome.webview.postMessage(message);
-  }
+  window.chrome?.webview?.postMessage(message);
+  window.webkit?.messageHandlers.there?.postMessage(message);
 };
 
 There.guiCommand = function(query) {
@@ -145,7 +151,7 @@ There.log = function(level, message) {
 There.fetch = function(settings) {
   const query = new URLSearchParams(settings.query).toString();
   $.ajax({
-    url: `http://${There.variables.there_resourceshost}${settings.path}?${query}`,
+    url: `${There.variables.there_resourcesprotocol}://${There.variables.there_resourceshost}${settings.path}?${query}`,
     dataType: settings.dataType != undefined ? settings.dataType : 'xml',
     success: settings.success,
     error: settings.error,
