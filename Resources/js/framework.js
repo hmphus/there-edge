@@ -5,10 +5,12 @@ let There = {
   onReady: function() {},
   onVariable: function(name, value) {},
   private: {
+    os: 'unknown',
     queue: [],
     timers: {},
     intervals: {},
     isReady: false,
+    isDragging: false,
   },
 };
 
@@ -38,11 +40,26 @@ There.init = function(settings) {
     });
     if (window.chrome?.webview != undefined) {
       // Windows Edge WebView2
+      There.private.os = 'windows';
       There.variables.there_resourcesprotocol = 'http';
     }
     if (window.webkit?.messageHandlers.there != undefined) {
       // macOS WKWebView
+      There.private.os = 'macos';
       There.variables.there_resourcesprotocol = 'there';
+      $('body').on('mousemove', function(event) {
+        if (event.which == 1 && There.private.isDragging) {
+          There.fsCommand('dragWindow');
+          event.preventDefault();
+          event.stopPropagation();
+        }
+      });
+      $('body').on('mouseup', function(event) {
+        if (event.which == 1 && There.private.isDragging) {
+          There.fsCommand('endDragWindow');
+          There.private.isDragging = false;
+        }
+      });
     }
     There.private.isReady = true;
     There.onReady();
@@ -111,23 +128,29 @@ There.fsCommand = function(command, query) {
     }
     message += '?' + query;
   }
-  if (command == 'beginDragWindow') {
-    try {
-      window.chrome?.webview?.hostObjects.sync.client.onBeginDragWindow();
-      // FIXME: How is this done for the macOS client?
-    } catch (error) {
+  if (There.private.os == 'windows') {
+    if (command == 'beginDragWindow') {
+      try {
+        window.chrome.webview.hostObjects.sync.client.onBeginDragWindow();
+      } catch (error) {
+      }
+      return;
     }
-    return;
-  }
-  if (command == 'getKeyboardFocus') {
-    try {
-      window.chrome?.webview?.hostObjects.sync.client.onKeyboardFocus();
-    } catch (error) {
+    if (command == 'getKeyboardFocus') {
+      try {
+        window.chrome.webview.hostObjects.sync.client.onKeyboardFocus();
+      } catch (error) {
+      }
+      return;
     }
-    return;
+    window.chrome.webview.postMessage(message);
   }
-  window.chrome?.webview?.postMessage(message);
-  window.webkit?.messageHandlers.there?.postMessage(message);
+  if (There.private.os == 'macos') {
+    if (command == 'beginDragWindow') {
+      There.private.isDragging = true;
+    }
+    window.webkit.messageHandlers.there.postMessage(message);
+  }
 };
 
 There.guiCommand = function(query) {
