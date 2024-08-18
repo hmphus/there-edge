@@ -13,10 +13,6 @@ There.init({
     There.fsCommand('setTextureBitDepth', {
       depth: 32,
     });
-
-    $(document).on('mouseup', function(event) {
-      $('.emotionsbar[data-voicetoggle="1"][data-voiceisspeaking="1"] .button[data-id="talk"]').trigger(event);
-    });
   },
 
   onVariable: function(name, value) {
@@ -166,7 +162,8 @@ There.init({
             action: 'voiceTalk',
             toggle: '1',
           });
-        }).on('mouseup', function() {
+        });
+        $(document).on('mouseup', function(event) {
           There.playSound('control up');
           There.guiCommand({
             action: 'voiceTalk',
@@ -232,11 +229,18 @@ There.init({
         break;
       }
       case 'voicetrainer': {
-        There.guiCommand({
-          action: 'outThereWindow',
-          urlTag: 'VoiceTrainerUrl',
-          targetName: 'There_Central',
-        });
+        if (There.isWindows()) {
+          There.guiCommand({
+            action: 'outThereWindow',
+            urlTag: 'VoiceTrainerUrl',
+            targetName: 'There_Central',
+          });
+        }
+        if (There.isMacOS()) {
+          There.guiCommand({
+            action: 'voiceTrainer',
+          });
+        }
         break;
       }
     }

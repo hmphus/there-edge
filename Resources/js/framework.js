@@ -35,7 +35,7 @@ There.init = function(settings) {
     }
   });
   $(document).ready(function() {
-    $('body').on('contextmenu', function(event) {
+    $(document).on('contextmenu', function(event) {
       return false;
     });
     if (window.chrome?.webview != undefined) {
@@ -47,14 +47,14 @@ There.init = function(settings) {
       // macOS WKWebView
       There.private.os = 'macos';
       There.variables.there_resourcesprotocol = 'there';
-      $('body').on('mousemove', function(event) {
+      $(document).on('mousemove', function(event) {
         if (event.which == 1 && There.private.isDragging) {
           There.fsCommand('dragWindow');
           event.preventDefault();
           event.stopPropagation();
         }
       });
-      $('body').on('mouseup', function(event) {
+      $(document).on('mouseup', function(event) {
         if (event.which == 1 && There.private.isDragging) {
           There.fsCommand('endDragWindow');
           There.private.isDragging = false;
@@ -128,7 +128,7 @@ There.fsCommand = function(command, query) {
     }
     message += '?' + query;
   }
-  if (There.private.os == 'windows') {
+  if (There.isWindows()) {
     if (command == 'beginDragWindow') {
       try {
         window.chrome.webview.hostObjects.sync.client.onBeginDragWindow();
@@ -145,7 +145,7 @@ There.fsCommand = function(command, query) {
     }
     window.chrome.webview.postMessage(message);
   }
-  if (There.private.os == 'macos') {
+  if (There.isMacOS()) {
     if (command == 'beginDragWindow') {
       There.private.isDragging = true;
     }
@@ -267,4 +267,12 @@ There.clearNamedInterval = function(name) {
     clearInterval(interval);
     delete There.private.intervals[name];
   }
+};
+
+There.isWindows = function() {
+  return There.private.os == 'windows';
+};
+
+There.isMacOS = function() {
+  return There.private.os == 'macos';
 };

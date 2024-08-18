@@ -871,7 +871,7 @@ There.init({
     }
     There.fsCommand('newChildPluginWindow', Object.assign({}, {
       id: id,
-      url: `http://${There.variables.there_resourceshost}/Resources/ChangeMe/flashDialog.swf`,
+      url: `${There.variables.there_resourcesprotocol}://${There.variables.there_resourceshost}/Resources/ChangeMe/flashDialog.swf`,
       type: type,
     }, query ?? {}));
   },
