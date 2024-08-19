@@ -3,6 +3,7 @@ body {
   font-family:tahoma, sans-serif;
   font-size:16px;
   color:#000;
+  cursor:default;
   user-select:none;
   -webkit-user-select:none;
   text-size-adjust:none;
