@@ -34,6 +34,22 @@ There.init({
           },
         });
       }
+      if (There.isWindows()) {
+        $('.teleport').attr('data-ready', '1');
+      }
+    }
+    if (There.isMacOS()) {
+      if (name == 'viewportclientareawidth' || name == 'viewportclientareaheight') {
+        const width = Number(There.variables.viewportclientareawidth ?? 0);
+        const height = Number(There.variables.viewportclientareaheight ?? 0);
+        if (width > 0 && height > 0) {
+          There.fsCommand('setWidthHeight', {
+            width: width,
+            height: height,
+          });
+          $('.teleport').attr('data-ready', '1');
+        }
+      }
     }
   },
 });

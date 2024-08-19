@@ -11,10 +11,14 @@ body {
 
 .teleport {
   position:absolute;
-  left:0px;
+  left:calc((100vw - 800px) / 2);
   top:0px;
-  width:200px;
-  height:354px;
+  width:800px;
+  height:600px;
+}
+
+.teleport:not([data-ready="1"]) {
+  display:none;
 }
 
 .teleport svg.logo {
