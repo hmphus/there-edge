@@ -40,6 +40,7 @@ There.init({
     There.fetch({
       path: '/VersionedXmlSvc/tradeVerCommand',
       query: query,
+      throttle: 60,
       dataType: 'text',
       success: function(text) {
         // The trade XML contains elements with numeric names, which is invalid.

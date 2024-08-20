@@ -9,6 +9,7 @@ let There = {
     queue: [],
     timers: {},
     intervals: {},
+    fetches: {},
     isReady: false,
     isDragging: false,
   },
@@ -173,12 +174,39 @@ There.log = function(level, message) {
 
 There.fetch = function(settings) {
   const query = new URLSearchParams(settings.query).toString();
+  if (settings.throttle != undefined) {
+    const fetch = There.private.fetches[settings.path] ?? {
+      query: null,
+      seconds: 0,
+    };
+    if (fetch.query != query) {
+      const now = Number(new Date()) / 1000;
+      const timeout = Math.max(0, settings.throttle - now - fetch.seconds);
+      if (timeout > 0) {
+        setTimeout(function() {
+          There.fetch(settings);
+        }, timeout);
+        return;
+      }
+    }
+  }
   $.ajax({
     url: `${There.variables.there_resourcesprotocol}://${There.variables.there_resourceshost}${settings.path}?${query}`,
     dataType: settings.dataType != undefined ? settings.dataType : 'xml',
     success: settings.success,
     error: settings.error,
-    complete: settings.complete,
+    complete: function(xhr, status) {
+      if (settings.throttle != undefined) {
+        const now = Number(new Date()) / 1000;
+        There.private.fetches[settings.path] = {
+          query: query,
+          seconds: now,
+        };
+      }
+      if (settings.complete != undefined) {
+        settings.complete(xhr, status);
+      }
+    },
   });
 };
 

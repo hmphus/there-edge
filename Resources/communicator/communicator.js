@@ -40,6 +40,7 @@ There.init({
     There.fetch({
       path: '/VersionedXmlSvc/communicatorData',
       query: query,
+      throttle: 60,
       dataType: 'xml',
       success: function(xml) {
         There.onCommunicatorXml(xml);

@@ -81,6 +81,7 @@ There.init({
     There.fetch({
       path: '/VersionedXmlSvc/messageBarData',
       query: query,
+      throttle: 60,
       dataType: 'xml',
       success: There.onMessagesXml,
       complete: function() {

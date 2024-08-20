@@ -269,6 +269,7 @@ There.init({
     await There.fetchAsync({
       path: `/VersionedXmlSvc/avatarLooks`,
       query: query,
+      throttle: 60,
       dataType: 'xml',
       success: function(xml) {
         There.onAvatarLooksXml(xml, key);
@@ -446,6 +447,7 @@ There.init({
     await There.fetchAsync({
       path: `/VersionedXmlSvc/${area.charAt(0).toUpperCase()}${area.slice(1)}Contents`,
       query: query,
+      throttle: 60,
       dataType: 'xml',
       success: function(xml) {
         promises = There.onWardrobeContentsXml(xml, key, section, area);
@@ -549,6 +551,7 @@ There.init({
     await There.fetchAsync({
       path: `/VersionedXmlSvc/${area.charAt(0).toUpperCase()}${area.slice(1)}Wearset`,
       query: query,
+      throttle: 60,
       dataType: 'xml',
       success: function(xml) {
         There.onWardrobeWearsetXml(xml, key, area);

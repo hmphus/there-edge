@@ -49,6 +49,7 @@ There.init({
     There.fetch({
       path: '/VersionedXmlSvc/emotionBarData',
       query: query,
+      throttle: 60,
       dataType: 'xml',
       success: There.onEmotionsXml,
       complete: function() {
