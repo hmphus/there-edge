@@ -1460,7 +1460,7 @@ HRESULT BrowserProxyModule::ForwardCookie(ICoreWebView2CookieManager *cookieMana
 
     const WCHAR *value = nullptr;
     {
-        DWORD skip = wcslen(name) + 1; // name=
+        DWORD skip = (DWORD)wcslen(name) + 1; // name=
         if (size < skip)
             return E_FAIL;
 

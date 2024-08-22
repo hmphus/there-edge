@@ -179,7 +179,7 @@ HRESULT SettingsRequestHandler::HandleSettings(HWND wnd)
             break;
         }
 
-        DWORD size = token1 - data;
+        DWORD size = (DWORD)(token1 - data);
         if (size > 0)
             m_content->Write(data, size, nullptr);
 
@@ -192,7 +192,7 @@ HRESULT SettingsRequestHandler::HandleSettings(HWND wnd)
             break;
 
         data = token2 + 1;
-        size = token2 - token1 + 1;
+        size = (DWORD)(token2 - token1 + 1);
         dsize -= size;
 
         if (strncmp(token1, "@home@", size) == 0)
@@ -372,7 +372,7 @@ HRESULT SettingsRequestHandler::SettingsRequestHandler::SetStartPage(const WCHAR
     HKEY key;
     if (RegOpenKeyEx(HKEY_CURRENT_USER, L"Software\\There.com\\There", 0, KEY_WRITE, &key) == ERROR_SUCCESS)
     {
-        DWORD length = (wcslen(url) + 1) * sizeof(WCHAR);
+        DWORD length = (DWORD)((wcslen(url) + 1) * sizeof(WCHAR));
         result = RegSetKeyValue(key, L"Edge\\", L"Start Page", REG_SZ, (BYTE*)url, length);
         RegCloseKey(key);
     }

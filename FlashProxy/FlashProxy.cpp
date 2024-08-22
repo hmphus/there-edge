@@ -404,7 +404,7 @@ HRESULT STDMETHODCALLTYPE FlashProxyModule::Close(DWORD dwSaveOption)
         BroadcastMessage(WM_FLASHPROXY_SET_TELEPORTING, 0, 0);
 
     if (m_proxyWnd != nullptr)
-        SetWindowLongPtr(m_proxyWnd, GWL_USERDATA, 0);
+        SetWindowLongPtr(m_proxyWnd, GWLP_USERDATA, 0);
 
     if (m_controller != nullptr)
         m_controller->Close();
@@ -489,7 +489,7 @@ HRESULT STDMETHODCALLTYPE FlashProxyModule::DoVerb(LONG iVerb, LPMSG lpmsg, IOle
                 if (m_proxyWnd == nullptr)
                     return E_FAIL;
 
-                SetWindowLongPtr(m_proxyWnd, GWL_USERDATA, (LPARAM)this);
+                SetWindowLongPtr(m_proxyWnd, GWLP_USERDATA, (LPARAM)this);
             }
 
             {
@@ -1467,7 +1467,7 @@ LRESULT FlashProxyModule::BroadcastMessage(UINT Msg, WPARAM wParam, LPARAM lPara
 
 LRESULT APIENTRY FlashProxyModule::ChildWndProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 {
-    FlashProxyModule *flashProxy = reinterpret_cast<FlashProxyModule*>(GetWindowLongPtr(hWnd, GWL_USERDATA));
+    FlashProxyModule *flashProxy = reinterpret_cast<FlashProxyModule*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
 
     switch (Msg)
     {
@@ -1513,10 +1513,10 @@ LRESULT APIENTRY FlashProxyModule::ChildWndProc(HWND hWnd, UINT Msg, WPARAM wPar
                 {
                     WCHAR *buff = (WCHAR*)lParam;
                     if (wcscpy_s(buff, wParam / sizeof(WCHAR), flashProxy->m_aboutQuery) == 0)
-                        length = wcslen(buff);
+                        length = (LONG)wcslen(buff);
                 }
                 else
-                    length = flashProxy->m_aboutQuery.Length();
+                    length = (LONG)flashProxy->m_aboutQuery.Length();
             }
 
             return length;
