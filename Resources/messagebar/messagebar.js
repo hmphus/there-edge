@@ -12,7 +12,7 @@ There.init({
 
     There.fsCommand('setWidthHeight', {
       width: 1,
-      height: 1,
+      height: There.isWindows() ? 1 : 0,
     });
 
     There.fsCommand('setTextureBitDepth', {
@@ -383,7 +383,7 @@ There.init({
       There.setNamedTimer('animator', 500, function() {
         There.fsCommand('setWidthHeight', {
           width: 1,
-          height: 1,
+          height: There.isWindows() ? 1 : 0,
         });
       });
     }
