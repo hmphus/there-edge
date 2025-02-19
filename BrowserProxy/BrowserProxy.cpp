@@ -37,7 +37,7 @@ void Log(const WCHAR *format, ...)
     _vsnwprintf_s(buff, _countof(buff), format, args);
 
     FILE *file = nullptr;
-    if (fopen_s(&file, "Debug.log", "a") == 0)
+    if (file = _fsopen("Debug.log", "a", _SH_DENYWR))
     {
         vfwprintf_s(file, format, args);
         fflush(file);
@@ -151,7 +151,6 @@ BrowserProxyModule::BrowserProxyModule():
     m_ready(false),
     m_visible(true)
 {
-    SetEnvironmentVariable(L"WEBVIEW2_DEFAULT_BACKGROUND_COLOR", L"0xFFFFFFFF");
 }
 
 BrowserProxyModule::~BrowserProxyModule()

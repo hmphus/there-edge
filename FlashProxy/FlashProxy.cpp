@@ -44,7 +44,7 @@ void Log(const WCHAR *format, ...)
     _vsnwprintf_s(buff, _countof(buff), format, args);
 
     FILE *file = nullptr;
-    if (fopen_s(&file, "Debug.log", "a") == 0)
+    if (file = _fsopen("Debug.log", "a", _SH_DENYWR))
     {
         vfwprintf_s(file, format, args);
         fflush(file);
@@ -146,8 +146,6 @@ FlashProxyModule::FlashProxyModule():
     m_visible(false),
     m_hidden(false)
 {
-    SetEnvironmentVariable(L"WEBVIEW2_DEFAULT_BACKGROUND_COLOR", L"0x00000000");
-
     WNDCLASSEX childClass = {0};
     childClass.cbSize = sizeof(WNDCLASSEX);
     childClass.style = CS_HREDRAW | CS_VREDRAW | CS_DBLCLKS;
