@@ -11,8 +11,8 @@ There.init({
     });
 
     There.fsCommand('setWidthHeight', {
-      width: 1,
-      height: There.isWindows() ? 1 : 0,
+      width: 0,
+      height: 0,
     });
 
     There.fsCommand('setTextureBitDepth', {
@@ -382,8 +382,8 @@ There.init({
       $('.messagebar').attr('data-msgbaropened', '0');
       There.setNamedTimer('animator', 500, function() {
         There.fsCommand('setWidthHeight', {
-          width: 1,
-          height: There.isWindows() ? 1 : 0,
+          width: 0,
+          height: 0,
         });
       });
     }

@@ -242,6 +242,8 @@ protected:
     UINT32                                   m_visibilityMask;
     INTERNET_PORT                            m_port;
     CComBSTR                                 m_url;
+    CComBSTR                                 m_appFolder;
+    CComBSTR                                 m_webView2Folder;
     CComBSTR                                 m_userDataFolder;
     CComBSTR                                 m_aboutQuery;
     CComSafeArray<BSTR>                      m_variables;

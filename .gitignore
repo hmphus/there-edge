@@ -9,3 +9,4 @@ packages/
 *_i.h
 /*.bat
 /Resources/changeme/iconspng/
+/WebView2/

@@ -189,6 +189,7 @@ protected:
     CComBSTR                                           m_url;
     CComBSTR                                           m_proxyVersion;
     CComBSTR                                           m_browserVersion;
+    CComBSTR                                           m_webView2Folder;
     CComBSTR                                           m_userDataFolder;
     CComPtr<IThereEdgeWebBrowserEvents2>               m_browserEvents;
     CComPtr<IUnknown>                                  m_unknownSite;

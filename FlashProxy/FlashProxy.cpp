@@ -128,6 +128,7 @@ FlashProxyModule::FlashProxyModule():
     m_visibilityMask(0),
     m_port(9999),
     m_url(),
+    m_webView2Folder(),
     m_userDataFolder(),
     m_aboutQuery(),
     m_variables(),
@@ -491,6 +492,12 @@ HRESULT STDMETHODCALLTYPE FlashProxyModule::DoVerb(LONG iVerb, LPMSG lpmsg, IOle
             }
 
             {
+                WCHAR webView2Folder[MAX_PATH] = L"WebView2";
+                if (PathFileExists(webView2Folder))
+                    m_webView2Folder = webView2Folder;
+            }
+
+            {
                 WCHAR userDataFolder[MAX_PATH] = {0};
                 if (SUCCEEDED(SHGetFolderPath(nullptr, CSIDL_LOCAL_APPDATA, nullptr, SHGFP_TYPE_CURRENT, userDataFolder)) && userDataFolder[0] != 0)
                 {
@@ -506,7 +513,7 @@ HRESULT STDMETHODCALLTYPE FlashProxyModule::DoVerb(LONG iVerb, LPMSG lpmsg, IOle
                 }
             }
 
-            if (FAILED(CreateCoreWebView2EnvironmentWithOptions(nullptr, m_userDataFolder, nullptr, this)))
+            if (FAILED(CreateCoreWebView2EnvironmentWithOptions(m_webView2Folder, m_userDataFolder, nullptr, this)))
                 return E_FAIL;
 
             return S_OK;
@@ -869,20 +876,15 @@ HRESULT STDMETHODCALLTYPE FlashProxyModule::Invoke(HRESULT errorCode, ICoreWebVi
     if (FAILED(m_view->get_Settings(&settings)) || settings == nullptr)
         return E_FAIL;
 
-    CComPtr<ICoreWebView2Settings8> settings8;
-    if (FAILED(settings->QueryInterface(&settings8)) || settings8 == nullptr)
-        return E_FAIL;
-
-    settings8->put_AreDevToolsEnabled(IsDevToolsEnabled());
-    settings8->put_AreDefaultContextMenusEnabled(false);
-    settings8->put_AreDefaultScriptDialogsEnabled(false);
-    settings8->put_IsBuiltInErrorPageEnabled(false);
-    settings8->put_IsStatusBarEnabled(false);
-    settings8->put_IsZoomControlEnabled(false);
-    settings8->put_AreHostObjectsAllowed(true);
-    settings8->put_IsScriptEnabled(true);
-    settings8->put_IsWebMessageEnabled(true);
-    settings8->put_IsReputationCheckingRequired(false);
+    settings->put_AreDevToolsEnabled(IsDevToolsEnabled());
+    settings->put_AreDefaultContextMenusEnabled(false);
+    settings->put_AreDefaultScriptDialogsEnabled(false);
+    settings->put_IsBuiltInErrorPageEnabled(false);
+    settings->put_IsStatusBarEnabled(false);
+    settings->put_IsZoomControlEnabled(false);
+    settings->put_AreHostObjectsAllowed(true);
+    settings->put_IsScriptEnabled(true);
+    settings->put_IsWebMessageEnabled(true);
 
     RECT bounds;
     GetClientRect(m_proxyWnd, &bounds);

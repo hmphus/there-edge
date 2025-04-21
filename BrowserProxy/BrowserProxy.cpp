@@ -126,6 +126,7 @@ BrowserProxyModule::BrowserProxyModule():
     m_url(),
     m_proxyVersion(),
     m_browserVersion(),
+    m_webView2Folder(),
     m_userDataFolder(),
     m_browserEvents(),
     m_unknownSite(),
@@ -409,6 +410,12 @@ HRESULT STDMETHODCALLTYPE BrowserProxyModule::DoVerb(LONG iVerb, LPMSG lpmsg, IO
             }
 
             {
+                WCHAR webView2Folder[MAX_PATH] = L"WebView2";
+                if (PathFileExists(webView2Folder))
+                    m_webView2Folder = webView2Folder;
+            }
+
+            {
                 WCHAR userDataFolder[MAX_PATH] = {0};
                 if (SUCCEEDED(SHGetFolderPath(nullptr, CSIDL_LOCAL_APPDATA, nullptr, SHGFP_TYPE_CURRENT, userDataFolder)) && userDataFolder[0] != 0)
                 {
@@ -424,7 +431,7 @@ HRESULT STDMETHODCALLTYPE BrowserProxyModule::DoVerb(LONG iVerb, LPMSG lpmsg, IO
                 }
             }
 
-            HRESULT rc = CreateCoreWebView2EnvironmentWithOptions(nullptr, m_userDataFolder, nullptr, this);
+            HRESULT rc = CreateCoreWebView2EnvironmentWithOptions(m_webView2Folder, m_userDataFolder, nullptr, this);
             if (FAILED(rc))
             {
                 switch (rc)
