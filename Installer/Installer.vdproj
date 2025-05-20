@@ -3104,7 +3104,7 @@
             }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_2C2A7AC351F64D8EAB77F111A4F195AC"
             {
-            "SourcePath" = "8:..\\Resources\\nametag\\staff_flag.png"
+            "SourcePath" = "8:..\\Extras\\nametag\\staff_flag.png"
             "TargetName" = "8:staff_flag.png"
             "Tag" = "8:"
             "Folder" = "8:_23E33E08F94940B4A1F102A8BEFE04CB"
@@ -3344,7 +3344,7 @@
             }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_35D2E930B6E245E8B8BD4B1BEEA34C29"
             {
-            "SourcePath" = "8:..\\Resources\\nametag\\annotation_flag.png"
+            "SourcePath" = "8:..\\Extras\\nametag\\annotation_flag.png"
             "TargetName" = "8:annotation_flag.png"
             "Tag" = "8:"
             "Folder" = "8:_23E33E08F94940B4A1F102A8BEFE04CB"
@@ -6724,7 +6724,7 @@
             }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_D33C5E2C5C064975A20E5333ACB61DDA"
             {
-            "SourcePath" = "8:..\\Resources\\nametag\\greeter_flag.png"
+            "SourcePath" = "8:..\\Extras\\nametag\\greeter_flag.png"
             "TargetName" = "8:greeter_flag.png"
             "Tag" = "8:"
             "Folder" = "8:_23E33E08F94940B4A1F102A8BEFE04CB"
@@ -7464,7 +7464,7 @@
             }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_F96F51CADA184A6E9396445AD16B51A6"
             {
-            "SourcePath" = "8:..\\Resources\\nametag\\npc_flag.png"
+            "SourcePath" = "8:..\\Extras\\nametag\\npc_flag.png"
             "TargetName" = "8:npc_flag.png"
             "Tag" = "8:"
             "Folder" = "8:_23E33E08F94940B4A1F102A8BEFE04CB"
@@ -7484,7 +7484,7 @@
             }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_FA67C0EFBC9E4B3C82A41B5992FFB60C"
             {
-            "SourcePath" = "8:..\\Resources\\nametag\\silent_flag.png"
+            "SourcePath" = "8:..\\Extras\\nametag\\silent_flag.png"
             "TargetName" = "8:silent_flag.png"
             "Tag" = "8:"
             "Folder" = "8:_23E33E08F94940B4A1F102A8BEFE04CB"
@@ -8675,7 +8675,7 @@
                             "ContextData" = "8:"
                             "Attributes" = "3:0"
                             "Setting" = "3:2"
-                            "Value" = "8:Install dark nametag icons"
+                            "Value" = "8:Install high contrast nametag icons"
                             "DefaultValue" = "8:#1236"
                             "UsePlugInResources" = "11:TRUE"
                             }
