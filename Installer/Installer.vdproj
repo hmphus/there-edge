@@ -687,12 +687,6 @@
         }
         "Entry"
         {
-        "MsmKey" = "8:_6170A494E6F84A0486FB436D118F2EC2"
-        "OwnerKey" = "8:_UNDEFINED"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
         "MsmKey" = "8:_619161C4506544B684D751EF1007820B"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
@@ -4007,26 +4001,6 @@
             "Tag" = "8:"
             "Folder" = "8:_3214122F950D43BCAEB9BA0DC20C5536"
             "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:FALSE"
-            "IsolateTo" = "8:"
-            }
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_6170A494E6F84A0486FB436D118F2EC2"
-            {
-            "SourcePath" = "8:..\\Extras\\picturesurface\\gamekit\\actionkit\\s00012ak_flickrsign.ts"
-            "TargetName" = "8:s00012ak_flickrsign.ts"
-            "Tag" = "8:"
-            "Folder" = "8:_16A1BB3BBB47443C9C558045BAB36C6F"
-            "Condition" = "8:CHECKBOXPICTURESURFACE=1"
             "Transitive" = "11:FALSE"
             "Vital" = "11:TRUE"
             "ReadOnly" = "11:FALSE"
@@ -7689,28 +7663,6 @@
                         {
                         }
                     }
-                    "{9EF0B969-E518-4E46-987F-47570745A589}:_E8D0998116434A08800479AD9F5D1BE1"
-                    {
-                    "Name" = "8:gamekit"
-                    "AlwaysCreate" = "11:FALSE"
-                    "Condition" = "8:"
-                    "Transitive" = "11:FALSE"
-                    "Property" = "8:_67B62E2ACD6A4E31B1FBCD8B0CF37CDA"
-                        "Folders"
-                        {
-                            "{9EF0B969-E518-4E46-987F-47570745A589}:_16A1BB3BBB47443C9C558045BAB36C6F"
-                            {
-                            "Name" = "8:actionkit"
-                            "AlwaysCreate" = "11:FALSE"
-                            "Condition" = "8:"
-                            "Transitive" = "11:FALSE"
-                            "Property" = "8:_5743F77C36A94BE7A242D128B93B28C9"
-                                "Folders"
-                                {
-                                }
-                            }
-                        }
-                    }
                 }
             }
         }
@@ -7744,15 +7696,15 @@
         {
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:ThereEdge"
-        "ProductCode" = "8:{A9DF0DAD-4FFC-4A19-BC2F-43BBB1C79504}"
-        "PackageCode" = "8:{5272700C-E3B2-4F65-A2DB-C693CFB0F620}"
+        "ProductCode" = "8:{D1825FF8-A691-4EDE-994A-25251E2770B9}"
+        "PackageCode" = "8:{B635B6F5-134F-4850-A170-7890A0039148}"
         "UpgradeCode" = "8:{887059E3-E645-44A2-AE95-E602E27BD74F}"
         "AspNetVersion" = "8:2.0.50727.0"
         "RestartWWWService" = "11:FALSE"
         "RemovePreviousVersions" = "11:TRUE"
         "DetectNewerInstalledVersion" = "11:TRUE"
         "InstallAllUsers" = "11:TRUE"
-        "ProductVersion" = "8:1.1.8"
+        "ProductVersion" = "8:1.1.9"
         "Manufacturer" = "8:Hmph!"
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:"
@@ -8467,7 +8419,7 @@
                             "ContextData" = "8:"
                             "Attributes" = "3:0"
                             "Setting" = "3:2"
-                            "Value" = "8:Install PictureSurface workaround"
+                            "Value" = "8:"
                             "DefaultValue" = "8:#1237"
                             "UsePlugInResources" = "11:TRUE"
                             }
@@ -8480,7 +8432,7 @@
                             "ContextData" = "8:Public"
                             "Attributes" = "3:2"
                             "Setting" = "3:2"
-                            "Value" = "8:CHECKBOXPICTURESURFACE"
+                            "Value" = "8:"
                             "DefaultValue" = "8:CHECKBOXA4"
                             "UsePlugInResources" = "11:TRUE"
                             }
@@ -8506,7 +8458,7 @@
                             "ContextData" = "8:1;True=1;False=0"
                             "Attributes" = "3:0"
                             "Setting" = "3:0"
-                            "Value" = "3:1"
+                            "Value" = "3:0"
                             "DefaultValue" = "3:1"
                             "UsePlugInResources" = "11:TRUE"
                             }
