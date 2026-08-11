@@ -135,7 +135,6 @@ $(document).ready(function() {
     if (event.which == 1) {
       There.fsCommand('beginDragWindow');
     }
-    There.clearContextMenu();
     event.preventDefault();
     event.stopPropagation();
   });
