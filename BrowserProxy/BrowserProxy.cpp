@@ -126,6 +126,9 @@ BrowserProxyModule::BrowserProxyModule():
     m_url(),
     m_proxyVersion(),
     m_browserVersion(),
+    m_clientDomain(),
+    m_webappsHost(),
+    m_webappsUri(),
     m_webView2Folder(),
     m_userDataFolder(),
     m_browserEvents(),
@@ -410,6 +413,34 @@ HRESULT STDMETHODCALLTYPE BrowserProxyModule::DoVerb(LONG iVerb, LPMSG lpmsg, IO
             }
 
             {
+                WCHAR *commandLine = GetCommandLine();
+                if (commandLine != nullptr)
+                {
+                    WCHAR *dashL = wcsstr(commandLine, L" -l ");
+                    if (dashL != nullptr)
+                    {
+                        WCHAR *hostStart = wcschr(dashL, L'.');
+                        if (hostStart != nullptr)
+                        {
+                            WCHAR *hostEnd = wcschr(hostStart, L'/');
+                            if (hostEnd != nullptr)
+                                m_clientDomain.Append(hostStart, hostEnd - hostStart);
+                        }
+                    }
+                }
+
+                if (m_clientDomain.Length() == 0)
+                    m_clientDomain = ".prod.there.com";
+
+                m_webappsHost = L"webapps";
+                m_webappsHost.Append(m_clientDomain);
+
+                m_webappsUri = L"https://";
+                m_webappsUri.Append(m_webappsHost);
+                m_webappsUri.Append(L"/");
+            }
+
+            {
                 WCHAR webView2Folder[MAX_PATH] = L"WebView2";
                 if (PathFileExists(webView2Folder))
                     m_webView2Folder = webView2Folder;
@@ -585,7 +616,8 @@ HRESULT STDMETHODCALLTYPE BrowserProxyModule::GoHome()
     if (m_view == nullptr)
         return E_NOT_VALID_STATE;
 
-    m_url = L"https://webapps.prod.there.com/therecentral/there_central.xml?fromClient=1";
+    m_url = m_webappsUri;
+    m_url.Append(L"therecentral/there_central.xml?fromClient=1");
 
     if (FAILED(Navigate()))
         return E_FAIL;
@@ -775,7 +807,9 @@ HRESULT STDMETHODCALLTYPE BrowserProxyModule::Invoke(HRESULT errorCode, ICoreWeb
     m_controller->put_RasterizationScale(1.0);
     m_controller->put_IsVisible(m_visible);
 
-    m_view->AddWebResourceRequestedFilter(L"https://webapps.prod.there.com/*", COREWEBVIEW2_WEB_RESOURCE_CONTEXT_DOCUMENT);
+    CComBSTR webappsFilter = m_webappsUri;
+    webappsFilter.Append(L"*");
+    m_view->AddWebResourceRequestedFilter(webappsFilter, COREWEBVIEW2_WEB_RESOURCE_CONTEXT_DOCUMENT);
 
     m_view->add_NavigationStarting(Callback<ICoreWebView2NavigationStartingEventHandler>(
         [this](ICoreWebView2 *sender, ICoreWebView2NavigationStartingEventArgs *args) -> HRESULT
@@ -920,7 +954,7 @@ HRESULT BrowserProxyModule::OnNavigationStarting(ICoreWebView2 *sender,  ICoreWe
         return S_OK;
     }
 
-    if (VoiceTrainerProxy::Validate(m_url))
+    if (VoiceTrainerProxy::Validate(m_url, m_webappsHost))
     {
         CComPtr<VoiceTrainerProxy> voiceTrainerProxy(new VoiceTrainerProxy());
         if (voiceTrainerProxy != nullptr && SUCCEEDED(voiceTrainerProxy->Init(m_wnd, sender)))
@@ -930,7 +964,7 @@ HRESULT BrowserProxyModule::OnNavigationStarting(ICoreWebView2 *sender,  ICoreWe
         }
     }
 
-    if (SettingsRequestHandler::Validate(m_url))
+    if (SettingsRequestHandler::Validate(m_url, m_webappsHost))
     {
         CComPtr<SettingsRequestHandler> settingsRequestHandler(new SettingsRequestHandler(m_environment, m_proxyVersion));
         if (settingsRequestHandler != nullptr)
@@ -1151,7 +1185,7 @@ HRESULT BrowserProxyModule::OnWebResourceRequested(ICoreWebView2 *sender, ICoreW
         CoTaskMemFree(url);
     }
 
-    WCHAR host[40] = {0};
+    WCHAR host[INTERNET_MAX_HOST_NAME_LENGTH] = {0};
     URL_COMPONENTS components;
     ZeroMemory(&components, sizeof(components));
     components.dwStructSize = sizeof(components);
@@ -1160,25 +1194,22 @@ HRESULT BrowserProxyModule::OnWebResourceRequested(ICoreWebView2 *sender, ICoreW
 
     if (InternetCrackUrl(burl, 0, ICU_DECODE, &components))
     {
-        if (wcscmp(host, L"webapps.prod.there.com") == 0)
+        if (wcscmp(host, m_webappsHost) == 0)
         {
             CComPtr<ICoreWebView2CookieManager> cookieManager;
             if (FAILED(m_view->get_CookieManager(&cookieManager)) || cookieManager == nullptr)
                 return E_FAIL;
 
-            static WCHAR *domain = L".prod.there.com";
-            static WCHAR *path = L"/";
-
-            ForwardCookie(cookieManager, burl, L"av", domain, path);
-            ForwardCookie(cookieManager, burl, L"doid", domain, path);
-            ForwardCookie(cookieManager, burl, L"ticket", domain, path);
-            ForwardCookie(cookieManager, burl, L"ticketssl", domain, path);
-            ForwardCookie(cookieManager, burl, L"ticketwlt", domain, path);
-            ForwardCookie(cookieManager, burl, L"tv", domain, path);
+            ForwardCookie(cookieManager, burl, L"av", m_clientDomain, L"/");
+            ForwardCookie(cookieManager, burl, L"doid", m_clientDomain, L"/");
+            ForwardCookie(cookieManager, burl, L"ticket", m_clientDomain, L"/");
+            ForwardCookie(cookieManager, burl, L"ticketssl", m_clientDomain, L"/");
+            ForwardCookie(cookieManager, burl, L"ticketwlt", m_clientDomain, L"/");
+            ForwardCookie(cookieManager, burl, L"tv", m_clientDomain, L"/");
         }
     }
 
-    if (m_settingsRequestHandler != nullptr && SettingsRequestHandler::Validate(burl))
+    if (m_settingsRequestHandler != nullptr && SettingsRequestHandler::Validate(burl, m_webappsHost))
         return m_settingsRequestHandler->HandleRequest(burl, args, m_wnd);
 
     return S_OK;
@@ -1235,10 +1266,10 @@ HRESULT BrowserProxyModule::OnWebMessageReceived(ICoreWebView2 *sender, ICoreWeb
         CoTaskMemFree(command);
     }
 
-    if (m_voiceTrainerProxy != nullptr && VoiceTrainerProxy::Validate(burl) && _wcsicmp(bcommand, L"voicetrainer") == 0)
+    if (m_voiceTrainerProxy != nullptr && VoiceTrainerProxy::Validate(burl, m_webappsHost) && _wcsicmp(bcommand, L"voicetrainer") == 0)
         m_voiceTrainerProxy->ProcessMessage(bpath, bquery);
 
-    if (m_settingsRequestHandler != nullptr && SettingsRequestHandler::Validate(burl) && _wcsicmp(bcommand, L"settings") == 0)
+    if (m_settingsRequestHandler != nullptr && SettingsRequestHandler::Validate(burl, m_webappsHost) && _wcsicmp(bcommand, L"settings") == 0)
         m_settingsRequestHandler->ProcessMessage(bpath, bquery);
 
     return S_OK;
@@ -1273,6 +1304,7 @@ HRESULT BrowserProxyModule::OnDOMContentLoaded(ICoreWebView2 *sender, ICoreWebVi
     if (sender == nullptr || args == nullptr)
         return E_INVALIDARG;
 
+#if 0
     CComBSTR burl;
     {
         WCHAR *url = nullptr;
@@ -1283,7 +1315,7 @@ HRESULT BrowserProxyModule::OnDOMContentLoaded(ICoreWebView2 *sender, ICoreWebVi
         CoTaskMemFree(url);
     }
 
-    WCHAR host[40] = {0};
+    WCHAR host[INTERNET_MAX_HOST_NAME_LENGTH] = {0};
     URL_COMPONENTS components;
     ZeroMemory(&components, sizeof(components));
     components.dwStructSize = sizeof(components);
@@ -1292,9 +1324,10 @@ HRESULT BrowserProxyModule::OnDOMContentLoaded(ICoreWebView2 *sender, ICoreWebVi
 
     if (InternetCrackUrl(burl, 0, ICU_DECODE, &components))
     {
-        if (wcscmp(host, L"webapps.prod.there.com") == 0)
+        if (wcscmp(host, m_webappsHost) == 0)
             ApplyScript(sender, IDR_COUPLING);
     }
+#endif
 
     return S_OK;
 }

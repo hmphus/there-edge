@@ -54,10 +54,10 @@ VoiceTrainerProxy::~VoiceTrainerProxy()
         DestroyWindow(m_wnd);
 }
 
-BOOL VoiceTrainerProxy::Validate(const WCHAR *url)
+BOOL VoiceTrainerProxy::Validate(const WCHAR *url, const WCHAR *webappsHost)
 {
-    WCHAR host[40] = {0};
-    WCHAR path[1000] = {0};
+    WCHAR host[INTERNET_MAX_HOST_NAME_LENGTH] = {0};
+    WCHAR path[INTERNET_MAX_PATH_LENGTH] = {0};
     URL_COMPONENTS components;
     ZeroMemory(&components, sizeof(components));
     components.dwStructSize = sizeof(components);
@@ -69,7 +69,7 @@ BOOL VoiceTrainerProxy::Validate(const WCHAR *url)
     if (!InternetCrackUrl(url, 0, ICU_DECODE, &components))
         return false;
 
-    if (wcscmp(host, L"webapps.prod.there.com") != 0)
+    if (wcscmp(host, webappsHost) != 0)
         return false;
 
     WCHAR *query = wcschr(path, L'?');

@@ -40,7 +40,7 @@ public:
     VoiceTrainerProxy();
     virtual ~VoiceTrainerProxy();
 
-    static BOOL Validate(const WCHAR *url);
+    static BOOL Validate(const WCHAR *url, const WCHAR *webappsHost);
 
     HRESULT Init(HWND wnd, ICoreWebView2 *view);
     HRESULT Close();

@@ -751,8 +751,8 @@ HRESULT STDMETHODCALLTYPE FlashProxyModule::put_Movie(BSTR pVal)
         return E_FAIL;
 
     WCHAR scheme[10] = {0};
-    WCHAR host[40] = {0};
-    WCHAR path[1000] = {0};
+    WCHAR host[INTERNET_MAX_HOST_NAME_LENGTH] = {0};
+    WCHAR path[INTERNET_MAX_PATH_LENGTH] = {0};
     URL_COMPONENTS components;
     ZeroMemory(&components, sizeof(components));
     components.dwStructSize = sizeof(components);
@@ -901,7 +901,7 @@ HRESULT STDMETHODCALLTYPE FlashProxyModule::Invoke(HRESULT errorCode, ICoreWebVi
     hostObject.pdispVal = static_cast<IDispatch*>(this);
     m_view->AddHostObjectToScript(L"client", &hostObject);
 
-    WCHAR filterHost[40] = {0};
+    WCHAR filterHost[INTERNET_MAX_HOST_NAME_LENGTH] = {0};
     _snwprintf_s(filterHost, _countof(filterHost), L"http://127.0.0.1:%u/*", m_port);
     m_view->AddWebResourceRequestedFilter(filterHost, COREWEBVIEW2_WEB_RESOURCE_CONTEXT_ALL);
     _snwprintf_s(filterHost, _countof(filterHost), L"http://localhost:%u/*", m_port);
@@ -1033,8 +1033,8 @@ HRESULT FlashProxyModule::OnWebResourceRequested(ICoreWebView2 *sender, ICoreWeb
     }
 
     WCHAR scheme[10] = {0};
-    WCHAR host[40] = {0};
-    WCHAR path[1000] = {0};
+    WCHAR host[INTERNET_MAX_HOST_NAME_LENGTH] = {0};
+    WCHAR path[INTERNET_MAX_PATH_LENGTH] = {0};
     URL_COMPONENTS components;
     ZeroMemory(&components, sizeof(components));
     components.dwStructSize = sizeof(components);

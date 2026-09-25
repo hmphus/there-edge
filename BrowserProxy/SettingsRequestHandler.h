@@ -10,7 +10,7 @@ public:
     SettingsRequestHandler(ICoreWebView2Environment *environment, const WCHAR *proxyVersion);
     virtual ~SettingsRequestHandler();
 
-    static BOOL Validate(const WCHAR *url);
+    static BOOL Validate(const WCHAR *url, const WCHAR *webappsHost);
 
     virtual HRESULT STDMETHODCALLTYPE QueryInterface(REFIID riid, void **object) override;
     virtual ULONG STDMETHODCALLTYPE AddRef() override;

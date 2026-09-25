@@ -189,6 +189,9 @@ protected:
     CComBSTR                                           m_url;
     CComBSTR                                           m_proxyVersion;
     CComBSTR                                           m_browserVersion;
+    CComBSTR                                           m_clientDomain;
+    CComBSTR                                           m_webappsHost;
+    CComBSTR                                           m_webappsUri;
     CComBSTR                                           m_webView2Folder;
     CComBSTR                                           m_userDataFolder;
     CComPtr<IThereEdgeWebBrowserEvents2>               m_browserEvents;
